@@ -1,0 +1,316 @@
+<script type="text/javascript">
+  RED.nodes.registerType('property in',{
+      category: 'Arduino',
+      color: '#00979d',
+      defaults: {
+          connection: {type: "arduino-connection", required: true},
+          thing: {value:""},  
+          property: {value:""},
+          name: {value:""},
+          propid: {value:""}
+      },
+      inputs:0,
+      outputs:1,
+      icon: "arduino.png",
+      label: function() {
+          return this.name||"Property";
+      },
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        $( "#node-input-name" ).val(this.name);
+        $.getJSON('things' , things => {
+          $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+          for (const t of things) {
+            $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
+          }
+          if (this.thing) {
+            console.log("thing_id: " + this.thing);
+            initProperties(this.thing, this.property);
+            $("#node-input-thing").val(this.thing);
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initProperties(thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_name = $("#node-input-property").find('option:selected').text();
+          if (property_name && property_name !== "") {
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+</script>
+<script type="text/x-red" data-template-name="property in">
+  <div class="form-row node-input-connection">
+    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-thing"><i class="icon-tag"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="icon-tag"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property in">
+  <p>This node injects in the flow the changed value of a specific Arduino IoT Cloud property.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('property out',{
+      category: 'Arduino',
+      color: '#00979d',
+      defaults: {
+          connection: {type: "arduino-connection", required: true},
+          thing: {value:""},  
+          property: {value:""},
+          name: {value:""},
+          propid: {value:""}
+      },
+      inputs:1,
+      outputs:0,
+      icon: "arduino.png",
+      label: function() {
+          return this.name||"Property";
+      },
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        $( "#node-input-name" ).val(this.name);
+        $.getJSON('things' , things => {
+          $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+          for (const t of things) {
+            $("<option value='" + t.id + "'> " + t.name + "</option>").appendTo("#node-input-thing");
+          }
+          if (this.thing) {
+            console.log("thing_id: " + this.thing);
+            initProperties(this.thing, this.property);
+            $("#node-input-thing").val(this.thing);
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initProperties(thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_name = $("#node-input-property").find('option:selected').text();
+          if (property_name && property_name !== "") {
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+
+</script>
+<script type="text/x-red" data-template-name="property out">
+  <div class="form-row node-input-connection">
+    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+      <label for="node-input-thing"><i class="icon-tag"></i> Thing</label>
+      <select id="node-input-thing">
+      </select>
+  </div>
+  <div class="form-row">
+        <label for="node-input-property"><i class="icon-tag"></i> Property</label>
+        <select id="node-input-property">
+        </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property out">
+  <p>This node update a specific Arduino IoT Cloud property with the value received in input</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('property in pull',{
+      category: 'Arduino',
+      color: '#00979d',
+      defaults: {
+          connection: {type: "arduino-connection", required: true},
+          thing: {value:""},  
+          property: {value:""},
+          propid: {value:""},
+          name: {value:""},
+          last: {value:true},
+          timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
+          timeWindowUnit: {value: '3600', required:true}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "arduino.png",
+      label: function() {
+          return this.name||"Property";
+      },
+      paletteLabel: "Property",
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        $( "#node-input-name" ).val(this.name);
+        $.getJSON('things' , things => {
+          $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+          for (const t of things) {
+            $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
+          }
+          if (this.thing) {
+            console.log("thing_id: " + this.thing);
+            initProperties(this.thing, this.property);
+            $("#node-input-thing").val(this.thing);
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initProperties(thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_id = $("#node-input-property").val();
+          if (property_id && property_id !== "") {
+            $( "#node-input-propid" ).val(property_id);
+          }
+          const property_name = $("#node-input-property").find('option:selected').text();
+          if (property_name && property_name !== "") {
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+        $("#node-input-last").change(function() {
+          if($("#node-input-last").prop('checked')){
+            $("#time-window-show").hide();
+          } else {
+            $("#time-window-show").show();
+          }
+        })
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+  function initProperties(thing_id, property_id) {
+    console.log("init properties");
+    $("#node-input-property").html("");
+    $.getJSON(`properties?thing_id=${thing_id}` , properties => {
+      $("<option value='" + 0 + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
+      for (const p of properties) {
+        $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
+      }
+      if (property_id) {
+        $("#node-input-property").val(property_id);
+      }
+    });
+  }
+</script>
+
+<script type="text/x-red" data-template-name="property in pull">
+  <div class="form-row node-input-connection">
+    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-thing"><i class="icon-tag"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="icon-tag"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+    <input type="hidden" id="node-input-propid" placeholder="propid">
+  </div>
+  <div class="form-row" id="node-last">
+    <label for="node-input-last">&nbsp;</label>
+    <input type="checkbox" id="node-input-last" style="display:inline-block; width:15px; vertical-align:baseline;">
+    <span">Last value</span>&nbsp;
+  </div>
+  <div class="form-row hidden" id="time-window-show">
+    <label for="node-input-timeWindowCount">Time filter</label>
+    <label for="node-input-timeWindowCount" style="width:auto">last</label>
+    <input type="text" id="node-input-timeWindowCount" style="width:50px;">
+    <select id="node-input-timeWindowUnit" style="width:80px;">
+        <option value="1">seconds</option>
+        <option value="60">minutes</option>
+        <option value="3600">hours</option>
+        <option value="86400">days</option>
+        <option value="604800">weeks</option>
+    </select>
+    <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
+    <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
+</div>
+</script>
+
+<script type="text/x-red" data-help-name="property in pull">
+  <p>This node injects in the flow the last value of an Arduino Cloud Property or a range of values based on the node configuration.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('arduino-connection',{
+      category: 'config',
+      defaults: {
+          applicationname: {value:"",required:true},
+          clientid: {value:"",required:true},
+          clientsecret: {value:"",required:true}
+      },
+      label: function() {
+          return this.applicationname || "";
+      },
+      oneditprepare: function() {
+
+      },
+      oneditsave: function() {
+        console.log("Application Name: " + this.applicationname);
+        console.log("Client ID: " + this.clientid);
+        console.log("Client Secret: " + this.clientsecret);
+        debugger;
+      }
+  });
+</script>
+<script type="text/x-red" data-template-name="arduino-connection">
+  <div class="form-row">
+    <label for="node-config-input-applicationname"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-config-input-applicationname" placeholder="Application name">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-clientid"><i class="icon-tag"></i> Client ID</label>
+    <input type="text" id="node-config-input-clientid" placeholder="Client ID">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-clientsecret"><i class="icon-tag"></i> Client secret</label>
+    <input type="text" id="node-config-input-clientsecret" placeholder="Client secret">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="arduino-connection">
+  <p>Provides configuration options for an Arduino IoT Cloud session.</p>
+</script>
+
