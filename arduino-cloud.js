@@ -1,122 +1,77 @@
 const moment = require("moment");
+const connectionManager = require("./arduino-connection-manager");
 
 module.exports = function(RED) {
   function ArduinoIotInput(config) {
+    const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
-      this.connection = config.connection;
-      this.connectionConfig = RED.nodes.getNode(this.connection);
-      const node = this;
-      const promise = RED.settings.functionGlobalContext.arduinoConnectionManager;
-      promise.then((arduinoConnectionManager) => {
-        const ArduinoCloudMessageClient = arduinoConnectionManager.apiMessage;
-        if (ArduinoCloudMessageClient && arduinoConnectionManager.initialized) {
-          ArduinoCloudMessageClient.onPropertyValue(config.thing, config.name, message => {
-            const timestamp = (new Date()).getTime();
-            node.send(
-              {
-                topic: config.name,
-                payload: message,
-                timestamp: timestamp
-              }            
-            );
-          }).then(() => {
-            node.on('close', function(done) {
-              ArduinoCloudMessageClient.removePropertyValueCallback(config.thing, config.name).then( () => {
-                done();
-              });
-            });
-          }).catch((err) => {
-            console.log(err);
-          });
+      const connectionConfig = RED.nodes.getNode(config.connection);
+      this.lastValue = undefined;
+      try {
+        await connectionManager.connect(connectionConfig);
+        if (config.thing !== "" && config.property !== "") {
+          this.arduinoRestClient = connectionManager.apiRest;
+          this.thing = config.thing;
+          this.propertyId = config.property;
+          this.propertyName = config.name;
+          this.poll();
         }
-      });
+      } catch (err) {
+        console.log(err);
+        throw new Error(err);
+      }
+    }
+    realConstructor.apply(this, [config]);
+  }
+  ArduinoIotInput.prototype = {
+    poll: async function() {
+      try {
+        const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+        if (property.last_value != this.lastValue) {
+          const timestamp = (new Date()).getTime();
+          this.send(
+            {
+              topic: this.propertyName,
+              payload: property.last_value,
+              timestamp: timestamp
+            }            
+          );
+          this.lastValue = property.last_value;
+        }      
+        
+        this.pollTimeout = setTimeout(() => { this.poll()}, 1000);
+      } catch (err) {
+        console.log(err);
+        throw new Error(err);
+      }
+    }
   }
   RED.nodes.registerType("property in", ArduinoIotInput);
 
   function ArduinoIotOutput(config) {
+    const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
-      this.connection = config.connection;
-      this.connectionConfig = RED.nodes.getNode(this.connection);
-      const node = this;
-      const promise = RED.settings.functionGlobalContext.arduinoConnectionManager;
-      promise.then((arduinoConnectionManager) => {
-        const ArduinoCloudMessageClient = arduinoConnectionManager.apiMessage;
-        if (ArduinoCloudMessageClient) {
-          node.on('input', function(msg) {
-            const timestamp =   (new Date()).getTime();
-            ArduinoCloudMessageClient.sendProperty(config.thing, config.name, msg.payload, timestamp).then(() => {
-            });
-        });
+      const connectionConfig = RED.nodes.getNode(config.connection);
+      try {
+        await connectionManager.connect(connectionConfig);
+        if (config.thing !== "" && config.property !== "") {
+          this.arduinoRestClient = connectionManager.apiRest;
+          this.thing = config.thing;
+          this.propertyId = config.property;
+          this.propertyName = config.name;
+          this.on('input', function(msg) {
+            this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+          });
+        }
+      } catch (err) {
+        console.log(err);
+        throw new Error(err);
       }
-    });
+    }
+    realConstructor.apply(this, [config]);
   }
   RED.nodes.registerType("property out", ArduinoIotOutput);
 
-  function ArduinoIotInputPull(config) {
-    RED.nodes.createNode(this, config);
-    this.connection = config.connection;
-    this.connectionConfig = RED.nodes.getNode(this.connection);
-    const node = this;
-    this.last = config.last;
-    this.timeWindowCount = config.timeWindowCount;
-    this.timeWindowUnit = config.timeWindowUnit;
-
-    const promise = RED.settings.functionGlobalContext.arduinoConnectionManager;
-    promise.then((arduinoConnectionManager) => {
-      if(this.last) {
-        const ArduinoRestClient = arduinoConnectionManager.apiRest;
-        if (ArduinoRestClient) {
-          node.on('input', function() {
-            ArduinoRestClient.getProperty(config.thing, config.propid).then( (result) => {
-              const timestamp = (new Date()).getTime();
-              let payload = result.last_value;
-              node.send(
-                {
-                  topic: config.name,
-                  payload: payload,
-                  timestamp: timestamp
-                }  
-              );
-            });
-          });
-        }
-      } else {
-        const ArduinoRestClient = arduinoConnectionManager.apiRest;
-        if (ArduinoRestClient) {
-          node.on('input', function() {
-            const now = moment();
-            const end = now.format();
-            const start = now.subtract(this.timeWindowCount * this.timeWindowUnit, 'second').format();
-
-            ArduinoRestClient.getSeries(config.thing, config.propid, start, end).then( (result) => {
-              const times = result.responses[0].times;
-              const values = result.responses[0].values;
-              let data = [];
-              if(values && times) {
-                values.forEach(function (item, index, array) {
-                  data.push({
-                    x: moment(times[index]).unix() * 1000,
-                    y: values[index]
-                  });
-                });
-              }
-              node.send(
-                {
-                  topic: config.name,
-                  payload: [{
-                    series: [],
-                    data: [data]
-                  }]
-                }  
-              );
-            });
-          });
-        }
-      }
-    });  
-  }
-  RED.nodes.registerType("property in pull", ArduinoIotInputPull);
-  
   function ArduinoConnectionNode(config) {
     RED.nodes.createNode(this,config);
     this.applicationname = config.applicationname;
@@ -125,31 +80,36 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType("arduino-connection",ArduinoConnectionNode);
 
-  RED.httpAdmin.get("/things", RED.auth.needsPermission('Property-in.read'), function(req,res) {
-    const promise = RED.settings.functionGlobalContext.arduinoConnectionManager;
-    promise.then((arduinoConnectionManager) => {
-      const ArduinoRestClient = arduinoConnectionManager.apiRest;
-      ArduinoRestClient.getThings()
-      .then(things => {
-        return res.send(JSON.stringify(things));
-      }).catch(err => {
-        console.log(err);
-      });
-    }); 
+  RED.httpAdmin.get("/things", RED.auth.needsPermission('Property-in.read'), async function(req,res) {
+    try {
+      const connectionConfig = {
+        clientid: req.query.clientid,
+        clientsecret: req.query.clientsecret
+      }
+      await connectionManager.connect(connectionConfig);
+      const arduinoRestClient = connectionManager.apiRest;
+      const things = await arduinoRestClient.getThings();
+      return res.send(JSON.stringify(things));
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
   });
 
-  RED.httpAdmin.get("/properties", RED.auth.needsPermission('Property-in.read'), function(req,res) {
-    const promise = RED.settings.functionGlobalContext.arduinoConnectionManager;
-    promise.then((arduinoConnectionManager) => {
+  RED.httpAdmin.get("/properties", RED.auth.needsPermission('Property-in.read'), async function(req,res) {
+    try {
+      const connectionConfig = {
+        clientid: req.query.clientid,
+        clientsecret: req.query.clientsecret
+      }
+      await connectionManager.connect(connectionConfig);
+      const ArduinoRestClient = connectionManager.apiRest;
       const thing_id = req.query.thing_id;
-      const ArduinoRestClient =  arduinoConnectionManager.apiRest;
-      ArduinoRestClient.getProperties(thing_id)
-      .then(properties => {
-        return res.send(JSON.stringify(properties));
-      })
-      .catch(err => {
-        console.log(err);
-      });
-    });
+      const properties = await ArduinoRestClient.getProperties(thing_id);
+      return res.send(JSON.stringify(properties));
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
   });
 }

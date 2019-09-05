@@ -18,6 +18,11 @@
     }
   },
   "dependencies": {
-    "moment": "^2.24.0"
+    "arduino-iot-js": "^0.4.5",
+    "async-request": "^1.2.0",
+    "babel-polyfill": "^6.26.0",
+    "moment": "^2.24.0",
+    "node-fetch": "^2.6.0",
+    "ws": "^7.1.2"
   }
 }
