@@ -1,5 +1,6 @@
 <script type="text/javascript">
-  RED.nodes.registerType('property in',{
+  function setupNode(nodeName, ins, outs) {
+    RED.nodes.registerType(nodeName,{
       category: 'Arduino',
       color: '#00979d',
       defaults: {
@@ -10,8 +11,8 @@
           propname: {value:""},
           prevconnection: {value:""}
       },
-      inputs:0,
-      outputs:1,
+      inputs: ins,
+      outputs: outs,
       icon: "arduino.png",
       label: function() {
           return this.name||"Property";
@@ -55,7 +56,11 @@
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
       }
-  });
+    });
+  }
+  setupNode("property in", 0, 1);
+  setupNode("property out", 1, 0);
+
 </script>
 <script type="text/x-red" data-template-name="property in">
   <div class="form-row node-input-connection">
@@ -81,66 +86,6 @@
   <p>This node injects in the flow the changed value of a specific Arduino IoT Cloud property.</p>
 </script>
 
-<script type="text/javascript">
-  RED.nodes.registerType('property out',{
-      category: 'Arduino',
-      color: '#00979d',
-      defaults: {
-          connection: {type: "arduino-connection", required: true},
-          thing: {value:""},  
-          property: {value:""},
-          name: {value:""},
-          propname: {value:""},
-          prevconnection: {value:""}
-      },
-      inputs:1,
-      outputs:0,
-      icon: "arduino.png",
-      label: function() {
-          return this.name||"Property";
-      },
-      oneditprepare: function() {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-        if (this.connection)
-          initThings(this.connection, this.thing, this.property);
-        $("select#node-input-connection").change( () => {
-          const connection = $("#node-input-connection").val();
-          if (connection == this.prevconnection) return;
-          this.prevconnection = connection;
-          this.connection = connection;
-          $("select#node-input-thing").empty();
-          $("select#node-input-property").empty();
-          $("#node-input-name").val("");
-          this.thing = "";
-          this.property = "";
-          this.propname = "";
-          this.name = "";
-          if (connection !== "_ADD_") {
-            initThings(this.connection, this.thing, this.property);
-          }
-        });
-        $("#node-input-thing").change( () => {
-          const thing_id = $( "#node-input-thing" ).val();
-          if (thing_id && thing_id !== "0") {
-            initProperties(this.connection, thing_id);
-          }
-        });
-        $("#node-input-property").change( () => {
-          const property_name = $("#node-input-property").find('option:selected').text();
-          if (property_name && property_name !== "") {
-            this.propname = property_name;
-            $( "#node-input-name" ).val(property_name);
-          }
-        });
-      },
-      oneditsave: function () {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-      }
-  });
-
-</script>
 <script type="text/x-red" data-template-name="property out">
   <div class="form-row node-input-connection">
     <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
