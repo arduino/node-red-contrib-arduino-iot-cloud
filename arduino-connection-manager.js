@@ -3,7 +3,7 @@ const request = require("async-request");
 
 var ArduinoRestClient = new arduinCloudRestApi.ArduinoCloudClient();
 
-const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.oniudra.cc/oauth/token';
+const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 
 var expires_token_ts=0;
