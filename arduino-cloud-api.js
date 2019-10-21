@@ -19,7 +19,6 @@
 // Arduino cloud api
 'use strict';
 
-const request = require('request');
 const ArduinoIotClient = require('@arduino/arduino-iot-client');
 const client = ArduinoIotClient.ApiClient.instance;
 //Only for dev
@@ -44,10 +43,6 @@ class ArduinoCloudClient {
   updateToken(token) {
     this.token = token;
     oauth2.accessToken = token;
-  }
-  getUserId() {
-    const url = `${authUrl}/users/byID/me`;
-    return this.genericRequest(url, 'get', '');
   }
   setProperty(thing_id, property_id, value) {
     const body = JSON.stringify({
@@ -77,29 +72,6 @@ class ArduinoCloudClient {
       resp_version: 1
     });
     return apiSeries.seriesV2BatchQueryRaw(body);
-  }
-  genericRequest(url, method, body) {
-    const p = new Promise((resolve, reject) => {
-      const headers = {
-        Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
-      };
-      request(
-        {
-          url: url,
-          method: method,
-          body: body,
-          headers: headers
-        },
-        (err, response, body) => {
-          if (!err && response.statusCode === 200) {
-            if (body) resolve(JSON.parse(body));
-            else resolve();
-          } else reject(err);
-        }
-      );
-    });
-    return p;
   }
 }
 exports.ArduinoCloudClient = ArduinoCloudClient;
