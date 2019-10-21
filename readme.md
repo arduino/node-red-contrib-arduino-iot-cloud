@@ -3,7 +3,7 @@
 This module implements node-red nodes for interacting with [Arduino IoT Cloud](https://create.arduino.cc/iot).
 
 ## Installation
-+ Install node-red-contrib-arduino-cloud: 
++ Install node-red-contrib-arduino-cloud:
 `npm install -g https://github.com/bcmi-labs/node-red-contrib-arduino-cloud.git`
 
 ## Configuration
@@ -11,7 +11,12 @@ This module implements node-red nodes for interacting with [Arduino IoT Cloud](h
 + Connect Arduino property input node to other nodes to consume data coming from a thing property.
 + Send a payload to the Arduino property output node to change the value of a thing property.
 
+## Development
+To use beta version of arduino APIs set the following environment variables
 
++ `API_BASE_PATH=http://api-dev.arduino.cc/iot`
+
++ `NODE_RED_ACCESS_TOKEN_URI=https://login.oniudra.cc/oauth/token`
 
 
 

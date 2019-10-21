@@ -21,24 +21,20 @@
 
 const ArduinoIotClient = require('@arduino/arduino-iot-client');
 const client = ArduinoIotClient.ApiClient.instance;
-//Only for dev
-client.basePath='http://api-dev.arduino.cc/iot';
+
 // Configure OAuth2 access token for authorization: oauth2
 var oauth2 = client.authentications['oauth2'];
 const apiProperties = new ArduinoIotClient.PropertiesV2Api(client);
 const apiSeries = new ArduinoIotClient.SeriesV2Api(client);
 const apiThings = new ArduinoIotClient.ThingsV2Api(client);
 
-const authUrl =
-  process.env.AUTH_API_BASE_URL || 'https://auth-dev.arduino.cc/v1';
-
-function log(title, msg) {
-  console.log(`[${title}] ${msg}`);
-}
 class ArduinoCloudClient {
   constructor(token) {
     this.token = token;
     oauth2.accessToken = token;
+    if(process.env.API_BASE_PATH){
+      client.basePath = process.env.API_BASE_PATH;
+    }
   }
   updateToken(token) {
     this.token = token;
