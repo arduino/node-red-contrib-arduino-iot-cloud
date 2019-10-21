@@ -1,4 +1,3 @@
-const moment = require("moment");
 const connectionManager = require("./arduino-connection-manager");
 
 module.exports = function(RED) {
@@ -14,35 +13,34 @@ module.exports = function(RED) {
           this.thing = config.thing;
           this.propertyId = config.property;
           this.propertyName = config.name;
-          this.poll();
+          this.poll(connectionConfig);
         }
       } catch (err) {
         console.log(err);
-        throw new Error(err);
       }
     }
     realConstructor.apply(this, [config]);
   }
   ArduinoIotInput.prototype = {
-    poll: async function() {
+    poll: async function(connectionConfig) {
       try {
+        await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
-        if (property.last_value != this.lastValue) {
+        if (property.last_value !== this.lastValue) {
           const timestamp = (new Date()).getTime();
-          this.send(
-            {
-              topic: this.propertyName,
-              payload: property.last_value,
-              timestamp: timestamp
-            }            
-          );
+            this.send(
+              {
+                topic: this.propertyName,
+                payload: property.last_value,
+                timestamp: timestamp
+              }
+            );
           this.lastValue = property.last_value;
-        }      
-        
-        this.pollTimeout = setTimeout(() => { this.poll()}, 1000);
+        }
+
+        this.pollTimeout = setTimeout(() => { this.poll(connectionConfig)}, 1000);
       } catch (err) {
         console.log(err);
-        throw new Error(err);
       }
     }
   }
@@ -60,12 +58,15 @@ module.exports = function(RED) {
           this.propertyId = config.property;
           this.propertyName = config.name;
           this.on('input', function(msg) {
-            this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+            try{
+              this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+            } catch(err){
+              console.log(err);
+            }
           });
         }
       } catch (err) {
         console.log(err);
-        throw new Error(err);
       }
     }
     realConstructor.apply(this, [config]);
@@ -92,7 +93,6 @@ module.exports = function(RED) {
       return res.send(JSON.stringify(things));
     } catch (err) {
       console.log(err);
-      throw new Error(err);
     }
   });
 
@@ -109,7 +109,6 @@ module.exports = function(RED) {
       return res.send(JSON.stringify(properties));
     } catch (err) {
       console.log(err);
-      throw new Error(err);
     }
   });
 }
