@@ -4,8 +4,9 @@ const request = require("async-request");
 var ArduinoRestClient = new arduinCloudRestApi.ArduinoCloudClient();
 
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.oniudra.cc/oauth/token';
-const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api.arduino.cc';
+const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 
+var expires_token_ts=0;
 async function connect(connectionConfig) {
   var options = {
     method: 'POST',
@@ -18,12 +19,24 @@ async function connect(connectionConfig) {
     }
   };
   try {
-    const data = JSON.parse((await request(accessTokenUri, options)).body);
-    const access_token = data.access_token;
-    const expires_in = data.expires_in;
-    ArduinoRestClient.updateToken(access_token);	
+    var rawdata;
+    var data;
+    var access_token;
+    var expires_in;
+    var date = new Date();
+    var timestamp = date.getTime();
+    if(timestamp>expires_token_ts){
+      rawdata = await request(accessTokenUri, options);
+      data = JSON.parse(rawdata.body);
+      access_token = data.access_token;
+      expires_in = data.expires_in;
+      if(access_token!==undefined){
+      ArduinoRestClient.updateToken(access_token);
+      expires_token_ts=timestamp+expires_in;
+      }
+    }
   } catch (err) {
-    throw new Error(err);
+    console.log(err);
   }
 }
 

@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "async-request": "^1.2.0",
-    "moment": "^2.24.0"
+    "@arduino/arduino-iot-client": "^1.0.0",
+    "async-request": "^1.2.0"
   }
 }
