@@ -57,8 +57,9 @@ module.exports = function(RED) {
           this.thing = config.thing;
           this.propertyId = config.property;
           this.propertyName = config.name;
-          this.on('input', function(msg) {
+          this.on('input', async function(msg) {
             try{
+              await connectionManager.connect(connectionConfig);
               this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
             } catch(err){
               console.log(err);
