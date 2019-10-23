@@ -1,5 +1,5 @@
 const connectionManager = require("./arduino-connection-manager");
-
+const moment = require("moment");
 module.exports = function(RED) {
   function ArduinoIotInput(config) {
     const realConstructor = async (config) => {
@@ -24,17 +24,17 @@ module.exports = function(RED) {
   ArduinoIotInput.prototype = {
     poll: async function(connectionConfig) {
       try {
-        await connectionManager.connect(connectionConfig);
+		    await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
         if (property.last_value !== this.lastValue) {
           const timestamp = (new Date()).getTime();
-            this.send(
-              {
-                topic: this.propertyName,
-                payload: property.last_value,
-                timestamp: timestamp
-              }
-            );
+          this.send(
+            {
+              topic: this.propertyName,
+              payload: property.last_value,
+              timestamp: timestamp
+            }
+          );
           this.lastValue = property.last_value;
         }
 
@@ -58,7 +58,7 @@ module.exports = function(RED) {
           this.propertyId = config.property;
           this.propertyName = config.name;
           this.on('input', async function(msg) {
-            try{
+			      try{
               await connectionManager.connect(connectionConfig);
               this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
             } catch(err){
@@ -73,6 +73,100 @@ module.exports = function(RED) {
     realConstructor.apply(this, [config]);
   }
   RED.nodes.registerType("property out", ArduinoIotOutput);
+
+  function ArduinoIotInputHist(config) {
+    const realConstructor = async (config) => {
+      RED.nodes.createNode(this, config);
+      const connectionConfig = RED.nodes.getNode(config.connection);
+      const node = this;
+      this.timeWindowCount = config.timeWindowCount;
+      this.timeWindowUnit = config.timeWindowUnit;
+      try{
+        this.arduinoRestClient = connectionManager.apiRest;
+        this.thing = config.thing;
+        this.propertyId = config.property;
+        this.propertyName = config.name;
+        if (config.thing !== "" && config.property !== "") {
+          node.on('input', async function() {
+            const now = moment();
+            const end = now.format();
+            const start = now.subtract(this.timeWindowCount * this.timeWindowUnit, 'second').format();
+            await connectionManager.connect(connectionConfig);
+            const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId,start,end);
+            const times= result.responses[0].times;
+            const values = result.responses[0].values;
+            let data = [];
+              if(values && times) {
+                values.forEach(function (item, index, array) {
+                  data.push({
+                    x: moment(times[index]).unix() * 1000,
+                    y: values[index]
+                  });
+                });
+              }
+            node.send(
+              {
+                topic: config.name,
+                payload: [{
+                  series: [],
+                  data: [data]
+                }]
+              }
+            );
+          });
+        }
+      }catch(err){
+        console.log(err);
+      }
+    }
+    realConstructor.apply(this, [config]);
+  }
+  RED.nodes.registerType("property in hist", ArduinoIotInputHist);
+
+  function ArduinoIotInputPoll(config) {
+    const realConstructor = async (config) => {
+      RED.nodes.createNode(this, config);
+      const connectionConfig = RED.nodes.getNode(config.connection);
+      const node = this;
+
+      this.timeWindowCount = config.timeWindowCount;
+      this.timeWindowUnit = config.timeWindowUnit;
+      try{
+        this.arduinoRestClient = connectionManager.apiRest;
+        this.thing = config.thing;
+        this.propertyId = config.property;
+        this.propertyName = config.name;
+        const pollTime = this.timeWindowCount * this.timeWindowUnit;
+        this.poll(connectionConfig, pollTime);
+      }catch(err){
+        console.log(err);
+      }
+    }
+    realConstructor.apply(this, [config]);
+  }
+  ArduinoIotInputPoll.prototype = {
+    poll: async function(connectionConfig, pollTime) {
+      try {
+        await connectionManager.connect(connectionConfig);
+        const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+        const timestamp = (new Date()).getTime();
+          this.send(
+            {
+              topic: this.propertyName,
+              payload: property.last_value,
+              timestamp: timestamp
+            }
+          );
+
+
+        this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime)}, pollTime*1000);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+  RED.nodes.registerType("property in poll", ArduinoIotInputPoll);
+
 
   function ArduinoConnectionNode(config) {
     RED.nodes.createNode(this,config);
