@@ -5,7 +5,7 @@ Multi Arduino Account are allowed.
 
 ## Installation
 + Install node-red-contrib-arduino-cloud:
-`npm install  -g node-red-contrib-arduino-cloud`
+`npm install -g https://github.com/bcmi-labs/node-red-contrib-arduino-cloud.git`
 ## Nodes
 ### Property In
 This node reads data every second from a configured Arduino Cloud Property
