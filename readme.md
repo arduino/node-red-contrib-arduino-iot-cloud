@@ -11,6 +11,11 @@ Multi Arduino Account are allowed.
 This node reads data every second from a configured Arduino Cloud Property
 ### Property Out
 This node writes a value to a configured Arduino Cloud Property.
+### Property Hist
+This node injects in the flow a set of historical values from an Arduino Cloud Property.
+### Property Poll
+This node reads the value of an Arduino Cloud Property at configured intervals of time.
+
 ## Configuration
 1) Obtain from an Arduino Cloud account the Client ID and Client Secret
 2) Select Arduino nodes from the pallete and drag to a flow
