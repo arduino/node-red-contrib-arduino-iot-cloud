@@ -6,16 +6,6 @@ Multi Arduino Account are allowed.
 ## Installation
 + Install node-red-contrib-arduino-cloud:
 `npm install -g https://github.com/bcmi-labs/node-red-contrib-arduino-cloud.git`
-## Nodes
-### Property In
-This node reads data every second from a configured Arduino Cloud Property
-### Property Out
-This node writes a value to a configured Arduino Cloud Property.
-### Property Hist
-This node injects in the flow a set of historical values from an Arduino Cloud Property.
-### Property Poll
-This node reads the value of an Arduino Cloud Property at configured intervals of time.
-
 ## Configuration
 1) Obtain from an Arduino Cloud account the Client ID and Client Secret
 2) Select Arduino nodes from the pallete and drag to a flow
@@ -31,6 +21,21 @@ This node reads the value of an Arduino Cloud Property at configured intervals o
 4) Connect Arduino property input node to other nodes to consume data coming from a thing property.
 5) Send a payload to the Arduino property output node to change the value of a thing property.
 
+## Nodes
+### Property In
+This node reads data every second from a configured Arduino Cloud Property
+### Property Out
+This node writes a value to a configured Arduino Cloud Property.
+### Property Hist
+This node injects in the flow a set of historical values from an Arduino Cloud Property.
+
+Node parameter:
++ Time Filter: defines time range for historical values
+### Property Poll
+This node reads the value of an Arduino Cloud Property at configured intervals of time.
+
+Node parameter:
++ Poll Every: defines polling time interval (seconds, minutes, hours, days, weeks)
 ## Development
 To use beta version of arduino APIs set the following environment variables
 
