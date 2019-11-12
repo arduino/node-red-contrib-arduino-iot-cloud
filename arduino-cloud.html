@@ -20,8 +20,10 @@
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
-        if (this.connection)
-          initThings(this.connection, this.thing, this.property);
+        if (this.connection) {
+          initThings(this.connection, this.thing);
+          initProperties(this.connection, this.thing, this.property);
+        }
         $("select#node-input-connection").change( () => {
           const connection = $("#node-input-connection").val();
           if (connection == this.prevconnection) return;
@@ -111,7 +113,7 @@
 </script>
 
 <script type="text/javascript">
-  function initThings(connection, thing, property) {
+  function initThings(connection, thing_id) {
     var clientid;
     var clientsecret;
     RED.nodes.eachConfig((c) => {
@@ -123,10 +125,8 @@
           for (const t of things) {
             $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
           }
-          if (thing) {
-            console.log("thing_id: " + thing);
-            initProperties(connection, thing, property);
-            $("#node-input-thing").val(thing);
+          if (thing_id) {
+            $("#node-input-thing").val(thing_id);
           }
         });
       }
