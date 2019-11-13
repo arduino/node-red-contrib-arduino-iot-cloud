@@ -217,8 +217,10 @@
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
-        if (this.connection)
-          initThings(this.connection, this.thing, this.property);
+        if (this.connection) {
+          initThings(this.connection, this.thing);
+          initProperties(this.connection, this.thing, this.property);
+        }
         $("select#node-input-connection").change( () => {
           const connection = $("#node-input-connection").val();
           if (connection == this.prevconnection) return;
@@ -318,8 +320,10 @@
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
-        if (this.connection)
-          initThings(this.connection, this.thing, this.property);
+        if (this.connection) {
+          initThings(this.connection, this.thing);
+          initProperties(this.connection, this.thing, this.property);
+        }
         $("select#node-input-connection").change( () => {
           const connection = $("#node-input-connection").val();
           if (connection == this.prevconnection) return;
