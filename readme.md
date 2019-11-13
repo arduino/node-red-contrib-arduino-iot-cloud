@@ -36,8 +36,8 @@ This node reads the value of an Arduino Cloud Property at configured intervals o
 
 Node parameter:
 + Poll Every: defines polling time interval (seconds, minutes, hours, days, weeks)
-## Development
-To use beta version of arduino APIs set the following environment variables
+## Development environment
+To use development version of arduino APIs set the following environment variables befor starting node-red
 
 + `API_BASE_PATH=http://api-dev.arduino.cc/iot`
 
