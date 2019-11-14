@@ -170,6 +170,41 @@ module.exports = function(RED) {
   RED.nodes.registerType("property in poll", ArduinoIotInputPoll);
 
 
+  function ArduinoIotInputPush(config) {
+    const realConstructor = async (config) => {
+      RED.nodes.createNode(this, config);
+      const connectionConfig = RED.nodes.getNode(config.connection);
+      const node = this;
+      try {
+        await connectionManager.connect(connectionConfig);
+        if (config.thing !== "" && config.property !== "") {
+          this.arduinoRestClient = connectionManager.apiRest;
+          this.thing = config.thing;
+          this.propertyId = config.property;
+          this.propertyName = config.name;
+          node.on('input', async function() {
+            await connectionManager.connect(connectionConfig);
+            const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+            const timestamp = (new Date()).getTime();
+            this.send(
+              {
+                topic: this.propertyName,
+                payload: property.last_value,
+                timestamp: timestamp
+              }
+            );
+
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    realConstructor.apply(this, [config]);
+  }
+
+  RED.nodes.registerType("property in push", ArduinoIotInputPush);
+
   function ArduinoConnectionNode(config) {
     RED.nodes.createNode(this,config);
     this.applicationname = config.applicationname;
@@ -208,4 +243,7 @@ module.exports = function(RED) {
       console.log(err);
     }
   });
+
+
+
 }
