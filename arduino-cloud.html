@@ -276,10 +276,6 @@
       <select id="node-input-property">
       </select>
   </div>
-  <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
-  </div>
   <div class="form-row" id="time-window-show">
     <label for="node-input-timeWindowCount"><i class="fa fa-history"></i> Time filter</label>
     <label for="node-input-timeWindowCount" style="width:auto">last</label>
@@ -294,9 +290,13 @@
     <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
     <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
   </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
 </script>
 <script type="text/x-red" data-help-name="property in hist">
-  <p>This node injects in the flow a range of values of an Arduino Cloud Property based on the node configuration.</p>
+  <p>This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.</p>
 </script>
 
 <script type="text/javascript">
@@ -380,10 +380,6 @@
       <select id="node-input-property">
       </select>
   </div>
-  <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
-  </div>
   <div class="form-row" id="time-window-show">
     <label for="node-input-timeWindowCount"><i class="fa fa-repeat"></i> Poll Every</label>
     <input type="text" id="node-input-timeWindowCount" style="width:50px;">
@@ -396,10 +392,14 @@
     </select>
     <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
     <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
-</div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
 </script>
 <script type="text/x-red" data-help-name="property in poll">
-  <p>This node injects in the flow the last value of an Arduino Cloud Property every time based on the node configuration.</p>
+  <p>This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.</p>
 </script>
 
 <script type="text/javascript">
@@ -486,6 +486,7 @@
     <input type="text" id="node-input-name" placeholder="Name">
   </div>
 </script>
-<script type="text/x-red" data-help-name="property in hist">
-  <p>This node injects in the flow the last value of an Arduino Cloud Property after an input event.</p>
+<script type="text/x-red" data-help-name="property in push">
+  <p>This node injects in the flow the value of an Arduino Cloud Property after receiving an input event.</p>
 </script>
+
