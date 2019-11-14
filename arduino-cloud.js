@@ -83,10 +83,10 @@ module.exports = function(RED) {
       this.timeWindowUnit = config.timeWindowUnit;
       try{
         this.arduinoRestClient = connectionManager.apiRest;
-        this.thing = config.thing;
-        this.propertyId = config.property;
-        this.propertyName = config.name;
         if (config.thing !== "" && config.property !== "") {
+          this.thing = config.thing;
+          this.propertyId = config.property;
+          this.propertyName = config.name;
           node.on('input', async function() {
             const now = moment();
             const end = now.format();
@@ -133,11 +133,13 @@ module.exports = function(RED) {
       this.timeWindowUnit = config.timeWindowUnit;
       try{
         this.arduinoRestClient = connectionManager.apiRest;
+        if (config.thing !== "" && config.property !== "") {
         this.thing = config.thing;
         this.propertyId = config.property;
         this.propertyName = config.name;
         const pollTime = this.timeWindowCount * this.timeWindowUnit;
         this.poll(connectionConfig, pollTime);
+        }
       }catch(err){
         console.log(err);
       }
