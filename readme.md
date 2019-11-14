@@ -23,19 +23,21 @@ Multi Arduino Account are allowed.
 
 ## Nodes
 ### Property In
-This node reads data every second from a configured Arduino Cloud Property
+This node injects in the flow the changed value of a specific Arduino IoT Cloud property.
 ### Property Out
-This node writes a value to a configured Arduino Cloud Property.
+This node update a specific Arduino IoT Cloud property with the value received in input
 ### Property Hist
-This node injects in the flow a set of historical values from an Arduino Cloud Property.
+This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.
 
 Node parameter:
 + Time Filter: defines time range for historical values
 ### Property Poll
-This node reads the value of an Arduino Cloud Property at configured intervals of time.
+This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.
 
 Node parameter:
 + Poll Every: defines polling time interval (seconds, minutes, hours, days, weeks)
+### Property Push
+This node injects in the flow the value of an Arduino Cloud Property after receiving an input event.
 ## Development environment
 To use development version of arduino APIs set the following environment variables befor starting node-red
 
