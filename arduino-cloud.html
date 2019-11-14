@@ -41,6 +41,7 @@
           }
         });
         $("#node-input-thing").change( () => {
+
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
@@ -133,7 +134,6 @@
     });
   }
   function initProperties(connection, thing_id, property_id) {
-    console.log("init properties");
     $("#node-input-property").html("");
     var clientid = "";
     var clientsecret = "";
@@ -192,5 +192,301 @@
 </script>
 <script type="text/x-red" data-help-name="arduino-connection">
   <p>Provides configuration options for an Arduino IoT Cloud session.</p>
+</script>
+
+
+<script type="text/javascript">
+  RED.nodes.registerType('property in hist',{
+      category: 'Arduino',
+      color: '#00979d',
+      defaults: {
+        connection: {type: "arduino-connection", required: true},
+        thing: {value:""},
+        property: {value:""},
+        propid: {value:""},
+        name: {value:""},
+        timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
+        timeWindowUnit: {value: '3600', required:true},
+        prevconnection: {value:""},
+        propname: {value:""}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "arduino.png",
+      label: function() {
+          return this.name||"Property Hist";
+      },
+      paletteLabel: "Property Hist",
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        if (this.connection){
+          initThings(this.connection, this.thing, this.property);
+          initProperties(this.connection, this.thing, this.property);
+        }
+        $("select#node-input-connection").change( () => {
+          const connection = $("#node-input-connection").val();
+          if (connection === this.prevconnection ) return;
+          this.prevconnection = connection;
+          this.connection = connection;
+          $("select#node-input-thing").empty();
+          $("select#node-input-property").empty();
+          $("#node-input-name").val("");
+          this.thing = "";
+          this.property = "";
+          this.propname = "";
+          this.name = "";
+          if (connection !== "_ADD_") {
+            initThings(this.connection, this.thing, this.property);
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initProperties(this.connection, thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_name = $("#node-input-property").find('option:selected').text();
+          if (property_name && property_name !== "") {
+            this.propname = property_name;
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="property in hist">
+  <div class="form-row node-input-connection">
+    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row" id="time-window-show">
+    <label for="node-input-timeWindowCount"><i class="fa fa-history"></i> Time filter</label>
+    <label for="node-input-timeWindowCount" style="width:auto">last</label>
+    <input type="text" id="node-input-timeWindowCount" style="width:50px;">
+    <select id="node-input-timeWindowUnit" style="width:80px;">
+        <option value="1">seconds</option>
+        <option value="60">minutes</option>
+        <option value="3600">hours</option>
+        <option value="86400">days</option>
+        <option value="604800">weeks</option>
+    </select>
+    <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
+    <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property in hist">
+  <p>This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('property in poll',{
+      category: 'Arduino',
+      color: '#00979d',
+      defaults: {
+        connection: {type: "arduino-connection", required: true},
+        thing: {value:""},
+        property: {value:""},
+        propid: {value:""},
+        name: {value:""},
+        timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
+        timeWindowUnit: {value: '3600', required:true},
+        prevconnection: {value:""},
+        propname: {value:""},
+      },
+      inputs:0,
+      outputs:1,
+      icon: "arduino.png",
+      label: function() {
+          return this.name||"Property Poll";
+      },
+      paletteLabel: "Property Poll",
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        if (this.connection){
+          initThings(this.connection, this.thing, this.property);
+          initProperties(this.connection, this.thing, this.property);
+        }
+        $("select#node-input-connection").change( () => {
+          const connection = $("#node-input-connection").val();
+          if (connection === this.prevconnection) return;
+          this.prevconnection = connection;
+          this.connection = connection;
+          $("select#node-input-thing").empty();
+          $("select#node-input-property").empty();
+          $("#node-input-name").val("");
+          this.thing = "";
+          this.property = "";
+          this.propname = "";
+          this.name = "";
+          if (connection !== "_ADD_") {
+            initThings(this.connection, this.thing, this.property);
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initProperties(this.connection, thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_name = $("#node-input-property").find('option:selected').text();
+          if (property_name && property_name !== "") {
+            this.propname = property_name;
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="property in poll">
+  <div class="form-row node-input-connection">
+    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row" id="time-window-show">
+    <label for="node-input-timeWindowCount"><i class="fa fa-repeat"></i> Poll Every</label>
+    <input type="text" id="node-input-timeWindowCount" style="width:50px;">
+    <select id="node-input-timeWindowUnit" style="width:80px;">
+        <option value="1">seconds</option>
+        <option value="60">minutes</option>
+        <option value="3600">hours</option>
+        <option value="86400">days</option>
+        <option value="604800">weeks</option>
+    </select>
+    <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
+    <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property in poll">
+  <p>This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('property in push',{
+      category: 'Arduino',
+      color: '#00979d',
+      defaults: {
+        connection: {type: "arduino-connection", required: true},
+        thing: {value:""},
+        property: {value:""},
+        propid: {value:""},
+        name: {value:""},
+        prevconnection: {value:""},
+        propname: {value:""}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "arduino.png",
+      label: function() {
+          return this.name||"Property In Push";
+      },
+      paletteLabel: "Property Push",
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        if (this.connection){
+          initThings(this.connection, this.thing, this.property);
+          initProperties(this.connection, this.thing, this.property);
+        }
+        $("select#node-input-connection").change( () => {
+          const connection = $("#node-input-connection").val();
+          if (connection === this.prevconnection ) return;
+          this.prevconnection = connection;
+          this.connection = connection;
+          $("select#node-input-thing").empty();
+          $("select#node-input-property").empty();
+          $("#node-input-name").val("");
+          this.thing = "";
+          this.property = "";
+          this.propname = "";
+          this.name = "";
+          if (connection !== "_ADD_") {
+            initThings(this.connection, this.thing, this.property);
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initProperties(this.connection, thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_name = $("#node-input-property").find('option:selected').text();
+          if (property_name && property_name !== "") {
+            this.propname = property_name;
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="property in push">
+  <div class="form-row node-input-connection">
+    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property in push">
+  <p>This node injects in the flow the value of an Arduino Cloud Property after receiving an input event.</p>
 </script>
 
