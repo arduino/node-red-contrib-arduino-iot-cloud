@@ -35,6 +35,11 @@ module.exports = function(RED) {
               timestamp: timestamp
             }
           );
+          if (typeof property.last_value !== "object") {
+            this.status({fill:"grey",shape:"dot",text:property.last_value});
+          } else {
+            this.status({});
+          }
           this.lastValue = property.last_value;
         }
 
@@ -159,7 +164,11 @@ module.exports = function(RED) {
               timestamp: timestamp
             }
           );
-
+          if (typeof property.last_value !== "object") {
+            this.status({fill:"grey",shape:"dot",text:property.last_value});
+          } else {
+            this.status({});
+          }
 
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime)}, pollTime*1000);
       } catch (err) {
@@ -193,7 +202,11 @@ module.exports = function(RED) {
                 timestamp: timestamp
               }
             );
-
+            if (typeof property.last_value !== "object") {
+              this.status({fill:"grey",shape:"dot",text:property.last_value});
+            } else {
+              this.status({});
+            }
           });
         }
       } catch (err) {
