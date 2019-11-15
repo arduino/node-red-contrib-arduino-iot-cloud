@@ -66,6 +66,11 @@ module.exports = function(RED) {
 			      try{
               await connectionManager.connect(connectionConfig);
               this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+              if (typeof msg.payload !== "object") {
+                this.status({fill:"grey",shape:"dot",text:msg.payload});
+              } else {
+                this.status({});
+              }
             } catch(err){
               console.log(err);
             }
