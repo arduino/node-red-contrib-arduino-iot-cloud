@@ -15,7 +15,7 @@
       outputs: outs,
       icon: "arduino.png",
       label: function() {
-          return this.name||"Property";
+          return this.name||nodeName;
       },
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
@@ -214,9 +214,9 @@
       outputs:1,
       icon: "arduino.png",
       label: function() {
-          return this.name||"Property Hist";
+          return this.name||"historic";
       },
-      paletteLabel: "Property Hist",
+      paletteLabel: "historic",
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
@@ -318,9 +318,9 @@
       outputs:1,
       icon: "arduino.png",
       label: function() {
-          return this.name||"Property Poll";
+          return this.name||"periodic";
       },
-      paletteLabel: "Property Poll",
+      paletteLabel: "periodic",
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
@@ -419,9 +419,9 @@
       outputs:1,
       icon: "arduino.png",
       label: function() {
-          return this.name||"Property In Push";
+          return this.name||"inject";
       },
-      paletteLabel: "Property Push",
+      paletteLabel: "inject",
       oneditprepare: function() {
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);

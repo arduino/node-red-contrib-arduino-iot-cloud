@@ -22,21 +22,21 @@ Multi Arduino Account are allowed.
 5) Send a payload to the Arduino property output node to change the value of a thing property.
 
 ## Nodes
-### Property In
+### property In
 This node injects in the flow the changed value of a specific Arduino IoT Cloud property.
-### Property Out
+### property Out
 This node update a specific Arduino IoT Cloud property with the value received in input
-### Property Hist
+### historic
 This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.
 
 Node parameter:
 + Time Filter: defines time range for historical values
-### Property Poll
+### periodic
 This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.
 
 Node parameter:
 + Poll Every: defines polling time interval (seconds, minutes, hours, days, weeks)
-### Property Push
+### inject
 This node injects in the flow the value of an Arduino Cloud Property after receiving an input event.
 ## Development environment
 To use development version of arduino APIs set the following environment variables befor starting node-red
