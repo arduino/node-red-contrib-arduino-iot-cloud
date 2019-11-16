@@ -1,7 +1,7 @@
 <script type="text/javascript">
   function setupNode(nodeName, ins, outs) {
     RED.nodes.registerType(nodeName,{
-      category: 'Arduino',
+      category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
           connection: {type: "arduino-connection", required: true},
@@ -197,7 +197,7 @@
 
 <script type="text/javascript">
   RED.nodes.registerType('property in hist',{
-      category: 'Arduino',
+      category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
         connection: {type: "arduino-connection", required: true},
@@ -301,7 +301,7 @@
 
 <script type="text/javascript">
   RED.nodes.registerType('property in poll',{
-      category: 'Arduino',
+      category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
         connection: {type: "arduino-connection", required: true},
@@ -404,7 +404,7 @@
 
 <script type="text/javascript">
   RED.nodes.registerType('property in push',{
-      category: 'Arduino',
+      category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
         connection: {type: "arduino-connection", required: true},
