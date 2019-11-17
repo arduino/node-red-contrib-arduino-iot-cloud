@@ -27,12 +27,11 @@ module.exports = function(RED) {
 		    await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
         if (property.last_value !== this.lastValue) {
-          const timestamp = (new Date()).getTime();
           this.send(
             {
-              topic: this.propertyName,
+              topic: property.name,
               payload: property.last_value,
-              timestamp: timestamp
+              timestamp: property.value_updated_at
             }
           );
           if (typeof property.last_value !== "object") {
@@ -161,12 +160,11 @@ module.exports = function(RED) {
       try {
         await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
-        const timestamp = (new Date()).getTime();
           this.send(
             {
-              topic: this.propertyName,
+              topic: property.name,
               payload: property.last_value,
-              timestamp: timestamp
+              timestamp: property.value_updated_at
             }
           );
           if (typeof property.last_value !== "object") {
@@ -199,12 +197,11 @@ module.exports = function(RED) {
           node.on('input', async function() {
             await connectionManager.connect(connectionConfig);
             const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
-            const timestamp = (new Date()).getTime();
             this.send(
               {
-                topic: this.propertyName,
+                topic: property.name,
                 payload: property.last_value,
-                timestamp: timestamp
+                timestamp: property.value_updated_at
               }
             );
             if (typeof property.last_value !== "object") {
