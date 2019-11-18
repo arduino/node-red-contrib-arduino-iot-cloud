@@ -45,7 +45,8 @@
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          }
+          } else 
+            $("select#node-input-property").empty();
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
@@ -244,7 +245,8 @@
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          }
+          } else 
+            $("select#node-input-property").empty();
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
@@ -348,7 +350,8 @@
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          }
+          } else 
+            $("select#node-input-property").empty();
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
@@ -449,7 +452,8 @@
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          }
+          } else 
+            $("select#node-input-property").empty();
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
