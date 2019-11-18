@@ -35,7 +35,10 @@ module.exports = function(RED) {
             }
           );
           if (typeof property.last_value !== "object") {
-            this.status({fill:"grey",shape:"dot",text:property.last_value});
+            if (typeof property.last_value === "number")
+              this.status({fill:"grey",shape:"dot",text:property.last_value.toFixed(3)});
+            else
+              this.status({fill:"grey",shape:"dot",text:property.last_value});
           } else {
             this.status({});
           }
@@ -66,11 +69,14 @@ module.exports = function(RED) {
               await connectionManager.connect(connectionConfig);
               this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
               if (typeof msg.payload !== "object") {
-                this.status({fill:"grey",shape:"dot",text:msg.payload});
+                if (typeof msg.payload === "number")
+                  this.status({fill:"grey",shape:"dot",text:msg.payload.toFixed(3)});
+                else
+                  this.status({fill:"grey",shape:"dot",text:msg.payload});
               } else {
                 this.status({});
               }
-            } catch(err){
+                } catch(err){
               console.log(err);
             }
           });
