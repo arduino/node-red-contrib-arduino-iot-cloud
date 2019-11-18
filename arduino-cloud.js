@@ -29,7 +29,7 @@ module.exports = function(RED) {
 		    await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
         if (typeof (property.last_value) !== "object" && property.last_value !== this.lastValue ||
-            typeof (property.last_value) === "object" && _.isEqual(property.last_value, this.lastValue)
+            typeof (property.last_value) === "object" && !_.isEqual(property.last_value, this.lastValue)
         ) {
           this.send(
             {
