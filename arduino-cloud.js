@@ -35,7 +35,7 @@ module.exports = function(RED) {
             }
           );
           if (typeof property.last_value !== "object") {
-            if (typeof property.last_value === "number")
+            if (typeof property.last_value === "number" && !(property.last_value.isInteger()))
               this.status({fill:"grey",shape:"dot",text:property.last_value.toFixed(3)});
             else
               this.status({fill:"grey",shape:"dot",text:property.last_value});
@@ -69,7 +69,7 @@ module.exports = function(RED) {
               await connectionManager.connect(connectionConfig);
               this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
               if (typeof msg.payload !== "object") {
-                if (typeof msg.payload === "number")
+                if (typeof msg.payload === "number" && !(msg.payload.isInteger()))
                   this.status({fill:"grey",shape:"dot",text:msg.payload.toFixed(3)});
                 else
                   this.status({fill:"grey",shape:"dot",text:msg.payload});
