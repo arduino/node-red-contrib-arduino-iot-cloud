@@ -34,14 +34,11 @@ module.exports = function(RED) {
               timestamp: property.value_updated_at
             }
           );
-          if (typeof property.last_value !== "object") {
-            if (typeof property.last_value === "number" && !(property.last_value.isInteger()))
-              this.status({fill:"grey",shape:"dot",text:property.last_value.toFixed(3)});
-            else
-              this.status({fill:"grey",shape:"dot",text:property.last_value});
-          } else {
+          const s = getStatus(property.last_value);
+          if (s)
+              this.status({fill: "grey",shape: "dot",text: s});
+          else
             this.status({});
-          }
           this.lastValue = property.last_value;
         }
 
@@ -68,15 +65,12 @@ module.exports = function(RED) {
 			      try{
               await connectionManager.connect(connectionConfig);
               this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
-              if (typeof msg.payload !== "object") {
-                if (typeof msg.payload === "number" && !(msg.payload.isInteger()))
-                  this.status({fill:"grey",shape:"dot",text:msg.payload.toFixed(3)});
-                else
-                  this.status({fill:"grey",shape:"dot",text:msg.payload});
-              } else {
+              const s = getStatus(msg.payload);
+              if (s)
+                  this.status({fill: "grey",shape: "dot",text: s});
+              else
                 this.status({});
-              }
-                } catch(err){
+            } catch(err){
               console.log(err);
             }
           });
@@ -173,12 +167,11 @@ module.exports = function(RED) {
               timestamp: property.value_updated_at
             }
           );
-          if (typeof property.last_value !== "object") {
-            this.status({fill:"grey",shape:"dot",text:property.last_value});
-          } else {
+          const s = getStatus(property.last_value);
+          if (s)
+              this.status({fill: "grey",shape: "dot",text: s});
+          else
             this.status({});
-          }
-
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime)}, pollTime*1000);
       } catch (err) {
         console.log(err);
@@ -210,12 +203,12 @@ module.exports = function(RED) {
                 timestamp: property.value_updated_at
               }
             );
-            if (typeof property.last_value !== "object") {
-              this.status({fill:"grey",shape:"dot",text:property.last_value});
-            } else {
+            const s = getStatus(property.last_value);
+            if (s)
+                this.status({fill: "grey",shape: "dot",text: s});
+            else
               this.status({});
-            }
-          });
+            });
         }
       } catch (err) {
         console.log(err);
@@ -267,4 +260,14 @@ module.exports = function(RED) {
 
 
 
+}
+
+function getStatus(value) {
+	if (typeof value !== "object") {
+    if (typeof value === "number" && !(Number.isInteger(value)))
+      return value.toFixed(3);
+    else
+      return value;
+  }
+  return;
 }
