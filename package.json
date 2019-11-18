@@ -20,6 +20,7 @@
   "dependencies": {
     "@arduino/arduino-iot-client": "^1.0.1",
     "async-request": "^1.2.0",
+    "lodash": "^4.17.15",
     "moment": "^2.24.0"
   }
 }

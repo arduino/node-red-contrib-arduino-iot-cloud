@@ -1,5 +1,7 @@
 const connectionManager = require("./arduino-connection-manager");
 const moment = require("moment");
+const _ = require('lodash');
+
 module.exports = function(RED) {
   function ArduinoIotInput(config) {
     const realConstructor = async (config) => {
@@ -26,7 +28,9 @@ module.exports = function(RED) {
       try {
 		    await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
-        if (property.last_value !== this.lastValue) {
+        if (typeof (property.last_value) !== "object" && property.last_value !== this.lastValue ||
+            typeof (property.last_value) === "object" && _.isEqual(property.last_value, this.lastValue)
+        ) {
           this.send(
             {
               topic: property.name,
