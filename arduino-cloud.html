@@ -18,12 +18,11 @@
           return this.name||nodeName;
       },
       oneditprepare: function() {
-        debugger;
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
         if (this.connection) {
           initThings(this.connection, this.thing);
-          initProperties(this.connection, this.thing, this.property);
+          initProperties(this.connection, this.thing, this.property,outs);
         }
         $("select#node-input-connection").change( () => {
           const connection = $("#node-input-connection").val();
@@ -45,7 +44,7 @@
 
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
-            initProperties(this.connection, thing_id);
+            initProperties(this.connection, thing_id, undefined, outs);
           } else 
             $("select#node-input-property").empty();
         });
@@ -135,7 +134,7 @@
       }
     });
   }
-  function initProperties(connection, thing_id, property_id) {
+  function initProperties(connection, thing_id, property_id, outs) {
     if (thing_id === "" || thing_id === "0")
       return;
 
@@ -151,7 +150,8 @@
     $.getJSON(`properties?clientid=${clientid}&clientsecret=${clientsecret}&thing_id=${thing_id}` , properties => {
       $("<option value='" + 0 + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
       for (const p of properties) {
-        $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
+        if (outs > 0 || p.permission === "READ_WRITE")
+          $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
       }
       if (property_id) {
         $("#node-input-property").val(property_id);
