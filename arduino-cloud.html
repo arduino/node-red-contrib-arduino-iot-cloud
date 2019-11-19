@@ -5,9 +5,9 @@
       color: '#00979d',
       defaults: {
           connection: {type: "arduino-connection", required: true},
-          thing: {value:""},
-          property: {value:""},
-          name: {value:""},
+          thing: {value:"",required:true},
+          property: {value:"",required:true},
+          name: {value:"",required:true},
           propname: {value:""},
           prevconnection: {value:""}
       },
@@ -18,6 +18,7 @@
           return this.name||nodeName;
       },
       oneditprepare: function() {
+        debugger;
         console.log("thing_id: " + this.thing);
         console.log("property_id: " + this.property);
         if (this.connection) {
@@ -205,10 +206,10 @@
       color: '#00979d',
       defaults: {
         connection: {type: "arduino-connection", required: true},
-        thing: {value:""},
-        property: {value:""},
+        thing: {value:"",required:true},
+        property: {value:"",required:true},
         propid: {value:""},
-        name: {value:""},
+        name: {value:"",required:true},
         timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
         timeWindowUnit: {value: '3600', required:true},
         prevconnection: {value:""},
@@ -310,10 +311,10 @@
       color: '#00979d',
       defaults: {
         connection: {type: "arduino-connection", required: true},
-        thing: {value:""},
-        property: {value:""},
+        thing: {value:"",required:true},
+        property: {value:"",required:true},
         propid: {value:""},
-        name: {value:""},
+        name: {value:"",required:true},
         timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
         timeWindowUnit: {value: '3600', required:true},
         prevconnection: {value:""},
@@ -414,10 +415,10 @@
       color: '#00979d',
       defaults: {
         connection: {type: "arduino-connection", required: true},
-        thing: {value:""},
-        property: {value:""},
+        thing: {value:"",required:true},
+        property: {value:"",required:true},
         propid: {value:""},
-        name: {value:""},
+        name: {value:"",required:true},
         prevconnection: {value:""},
         propname: {value:""}
       },
