@@ -135,6 +135,9 @@
     });
   }
   function initProperties(connection, thing_id, property_id) {
+    if (thing_id === "" || thing_id === "0")
+      return;
+
     $("#node-input-property").html("");
     var clientid = "";
     var clientsecret = "";
