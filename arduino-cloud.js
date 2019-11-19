@@ -39,7 +39,7 @@ module.exports = function (RED) {
             }
           );
           const s = getStatus(property.last_value);
-          if (s)
+          if (s != undefined)
             this.status({ fill: "grey", shape: "dot", text: s });
           else
             this.status({});
@@ -71,7 +71,7 @@ module.exports = function (RED) {
                 await connectionManager.connect(connectionConfig);
                 this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
                 const s = getStatus(msg.payload);
-                if (s)
+                if (s != undefined)
                   this.status({ fill: "grey", shape: "dot", text: s });
                 else
                   this.status({});
@@ -176,7 +176,7 @@ module.exports = function (RED) {
           }
         );
         const s = getStatus(property.last_value);
-        if (s)
+        if (s != undefined)
           this.status({ fill: "grey", shape: "dot", text: s });
         else
           this.status({});
@@ -213,7 +213,7 @@ module.exports = function (RED) {
                 }
               );
               const s = getStatus(property.last_value);
-              if (s)
+              if (s != undefined)
                 this.status({ fill: "grey", shape: "dot", text: s });
               else
                 this.status({});
