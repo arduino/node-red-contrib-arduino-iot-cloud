@@ -116,38 +116,21 @@
 
 <script type="text/javascript">
   function initThings(connection, thing_id) {
-    var clientid;
-    var clientsecret;
-    RED.nodes.eachConfig((c) => {
-      if (c.type === "arduino-connection" && c.id === connection) {
-        clientid = c.clientid;
-        clientsecret = c.clientsecret;
-        $.getJSON(`things?clientid=${clientid}&clientsecret=${clientsecret}` , things => {
-          $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
-          for (const t of things) {
-            $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
-          }
-          if (thing_id) {
-            $("#node-input-thing").val(thing_id);
-          }
-        });
+    $.getJSON(`things?connectionid=${connection}` , things => {
+      $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+      for (const t of things) {
+        $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
+      }
+      if (thing_id) {
+        $("#node-input-thing").val(thing_id);
       }
     });
   }
   function initProperties(connection, thing_id, property_id, outs) {
     if (thing_id === "" || thing_id === "0")
       return;
-
     $("#node-input-property").html("");
-    var clientid = "";
-    var clientsecret = "";
-    RED.nodes.eachConfig((c) => {
-      if (c.type === "arduino-connection" && c.id === connection) {
-        clientid = c.clientid;
-        clientsecret = c.clientsecret;
-      }
-    });
-    $.getJSON(`properties?clientid=${clientid}&clientsecret=${clientsecret}&thing_id=${thing_id}` , properties => {
+    $.getJSON(`properties?connectionid=${connection}&thing_id=${thing_id}` , properties => {
       $("<option value='" + 0 + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
       for (const p of properties) {
         if (outs > 0 || p.permission === "READ_WRITE")
@@ -165,8 +148,10 @@
       category: 'config',
       defaults: {
           applicationname: {value:"",required:true},
-          clientid: {value:"",required:true},
-          clientsecret: {value:"",required:true}
+      },
+      credentials: {
+        clientid: {type: "password"},
+        clientsecret: {type: "password"}
       },
       label: function() {
           return this.applicationname || "";
@@ -176,8 +161,6 @@
       },
       oneditsave: function() {
         console.log("Application Name: " + this.applicationname);
-        console.log("Client ID: " + this.clientid);
-        console.log("Client Secret: " + this.clientsecret);
       }
   });
 </script>
@@ -188,11 +171,11 @@
   </div>
   <div class="form-row">
     <label for="node-config-input-clientid"><i class="icon-tag"></i> Client ID</label>
-    <input type="text" id="node-config-input-clientid" placeholder="Client ID">
+    <input type="password" id="node-config-input-clientid" placeholder="Client ID">
   </div>
   <div class="form-row">
     <label for="node-config-input-clientsecret"><i class="icon-tag"></i> Client secret</label>
-    <input type="text" id="node-config-input-clientsecret" placeholder="Client secret">
+    <input type="password" id="node-config-input-clientsecret" placeholder="Client secret">
   </div>
 </script>
 <script type="text/x-red" data-help-name="arduino-connection">

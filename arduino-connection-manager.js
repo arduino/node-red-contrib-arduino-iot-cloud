@@ -12,7 +12,7 @@ var ids=[];
 async function connect(connectionConfig) {
   var date = new Date();
   var timestamp = date.getTime();
-  var user = findUser(connectionConfig.clientid);
+  var user = findUser(connectionConfig.credentials.clientid);
   var requiretoken=false;
   var token;
   if(user!==-1){
@@ -29,8 +29,8 @@ async function connect(connectionConfig) {
       headers: {'content-type': 'application/x-www-form-urlencoded'},
       data: {
         grant_type: 'client_credentials',
-        client_id: connectionConfig.clientid,
-        client_secret: connectionConfig.clientsecret,
+        client_id: connectionConfig.credentials.clientid,
+        client_secret: connectionConfig.credentials.clientsecret,
         audience: accessTokenAudience
       }
     };
@@ -45,7 +45,7 @@ async function connect(connectionConfig) {
       if(token!==undefined){
         if(user===-1){
           const newIds={
-            clientId: connectionConfig.clientid,
+            clientId: connectionConfig.credentials.clientid,
             token: token,
             expires_token_ts: timestamp+expires_in
           };

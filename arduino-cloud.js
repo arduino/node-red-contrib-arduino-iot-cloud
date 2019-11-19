@@ -235,29 +235,29 @@ module.exports = function (RED) {
     this.clientid = config.clientid;
     this.clientsecret = config.clientsecret;
   }
-  RED.nodes.registerType("arduino-connection", ArduinoConnectionNode);
+  RED.nodes.registerType("arduino-connection", ArduinoConnectionNode, {
+    credentials: {
+      clientid: { type: "password" },
+      clientsecret: { type: "password" }
+    }
+  });
 
   RED.httpAdmin.get("/things", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
+    const connectionConfig = RED.nodes.getNode(req.query.connectionid);
     try {
-      const connectionConfig = {
-        clientid: req.query.clientid,
-        clientsecret: req.query.clientsecret
-      }
       await connectionManager.connect(connectionConfig);
       const arduinoRestClient = connectionManager.apiRest;
       const things = await arduinoRestClient.getThings();
       return res.send(JSON.stringify(things));
     } catch (err) {
       console.log(err);
+      return res.send(JSON.stringify({}));
     }
   });
 
   RED.httpAdmin.get("/properties", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
+    const connectionConfig = RED.nodes.getNode(req.query.connectionid);
     try {
-      const connectionConfig = {
-        clientid: req.query.clientid,
-        clientsecret: req.query.clientsecret
-      }
       await connectionManager.connect(connectionConfig);
       const ArduinoRestClient = connectionManager.apiRest;
       const thing_id = req.query.thing_id;
@@ -265,6 +265,7 @@ module.exports = function (RED) {
       return res.send(JSON.stringify(properties));
     } catch (err) {
       console.log(err);
+      return res.send(JSON.stringify({}));
     }
   });
 
