@@ -1,13 +1,17 @@
 <script type="text/javascript">
+  function validator(v) {
+    debugger;
+    return (v !== null && v !== "" && v !== undefined);
+  }
   function setupNode(nodeName, ins, outs) {
     RED.nodes.registerType(nodeName,{
       category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
-          connection: {type: "arduino-connection", required: true},
-          thing: {value:"",required:true},
-          property: {value:"",required:true},
-          name: {value:"",required:true},
+          connection: {type: "arduino-connection", validate: validator},
+          thing: {value:"", validate: validator},
+          property: {value:"", validate: validator},
+          name: {value:"", validate: validator},
           propname: {value:""},
           prevconnection: {value:""}
       },
@@ -39,21 +43,26 @@
           if (connection !== "_ADD_") {
             initThings(this.connection, this.thing, this.property);
           }
+          $("#node-input-thing").trigger("change");
         });
         $("#node-input-thing").change( () => {
 
           const thing_id = $( "#node-input-thing" ).val();
-          if (thing_id && thing_id !== "0") {
+          if (thing_id) {
             initProperties(this.connection, thing_id, undefined, outs);
-          } else 
+          } else {
             $("select#node-input-property").empty();
+          }
+          $("#node-input-property").trigger("change");
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
-          if (property_name && property_name !== "") {
+          const property_value = $("#node-input-property").find('option:selected').val();
+          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
             this.propname = property_name;
             $( "#node-input-name" ).val(property_name);
           }
+          $("#node-input-name").trigger("change"); 
         });
       },
       oneditsave: function () {
@@ -117,28 +126,33 @@
 <script type="text/javascript">
   function initThings(connection, thing_id) {
     $.getJSON(`things?connectionid=${connection}` , things => {
-      $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+      $("<option value='" + "" + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
       for (const t of things) {
         $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
       }
-      if (thing_id) {
+      if (thing_id !== undefined) {
         $("#node-input-thing").val(thing_id);
+        $("#node-input-property").val("");
       }
+      $("#node-input-property").trigger("change");
     });
   }
   function initProperties(connection, thing_id, property_id, outs) {
     if (thing_id === "" || thing_id === "0")
       return;
     $("#node-input-property").html("");
+
     $.getJSON(`properties?connectionid=${connection}&thing_id=${thing_id}` , properties => {
-      $("<option value='" + 0 + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
+      $("<option value='" + "" + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
+
       for (const p of properties) {
         if (outs > 0 || p.permission === "READ_WRITE")
           $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
       }
-      if (property_id) {
+      if (property_id !== undefined) {
         $("#node-input-property").val(property_id);
       }
+      $("#node-input-name").trigger("change"); 
     });
   }
 </script>
@@ -188,11 +202,11 @@
       category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
-        connection: {type: "arduino-connection", required: true},
-        thing: {value:"",required:true},
-        property: {value:"",required:true},
+        connection: {type: "arduino-connection", validate: validator},
+        thing: {value:"",validate: validator},
+        property: {value:"",validate: validator},
         propid: {value:""},
-        name: {value:"",required:true},
+        name: {value:"",validate: validator},
         timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
         timeWindowUnit: {value: '3600', required:true},
         prevconnection: {value:""},
@@ -227,20 +241,25 @@
           if (connection !== "_ADD_") {
             initThings(this.connection, this.thing, this.property);
           }
+          $("#node-input-thing").trigger("change");
         });
         $("#node-input-thing").change( () => {
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          } else 
+          } else {
             $("select#node-input-property").empty();
+          }
+          $("#node-input-property").trigger("change");
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
-          if (property_name && property_name !== "") {
+          const property_value = $("#node-input-property").find('option:selected').val();
+          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
             this.propname = property_name;
             $( "#node-input-name" ).val(property_name);
           }
+          $("#node-input-name").trigger("change"); 
         });
       },
       oneditsave: function () {
@@ -293,11 +312,11 @@
       category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
-        connection: {type: "arduino-connection", required: true},
-        thing: {value:"",required:true},
-        property: {value:"",required:true},
+        connection: {type: "arduino-connection", validate: validator},
+        thing: {value:"", validate: validator},
+        property: {value:"", validate: validator},
         propid: {value:""},
-        name: {value:"",required:true},
+        name: {value:"", validate: validator},
         timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
         timeWindowUnit: {value: '3600', required:true},
         prevconnection: {value:""},
@@ -332,20 +351,25 @@
           if (connection !== "_ADD_") {
             initThings(this.connection, this.thing, this.property);
           }
+          $("#node-input-thing").trigger("change");
         });
         $("#node-input-thing").change( () => {
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          } else 
+          } else {
             $("select#node-input-property").empty();
+          }
+          $("#node-input-property").trigger("change");
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
-          if (property_name && property_name !== "") {
+          const property_value = $("#node-input-property").find('option:selected').val();
+          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
             this.propname = property_name;
             $( "#node-input-name" ).val(property_name);
           }
+          $("#node-input-name").trigger("change"); 
         });
       },
       oneditsave: function () {
@@ -397,11 +421,11 @@
       category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
-        connection: {type: "arduino-connection", required: true},
-        thing: {value:"",required:true},
-        property: {value:"",required:true},
+        connection: {type: "arduino-connection", validate: validator},
+        thing: {value:"",validate: validator},
+        property: {value:"",validate: validator},
         propid: {value:""},
-        name: {value:"",required:true},
+        name: {value:"",validate: validator},
         prevconnection: {value:""},
         propname: {value:""}
       },
@@ -434,20 +458,25 @@
           if (connection !== "_ADD_") {
             initThings(this.connection, this.thing, this.property);
           }
+          $("#node-input-thing").trigger("change");
         });
         $("#node-input-thing").change( () => {
           const thing_id = $( "#node-input-thing" ).val();
           if (thing_id && thing_id !== "0") {
             initProperties(this.connection, thing_id);
-          } else 
+          } else {
             $("select#node-input-property").empty();
+          }
+          $("#node-input-property").trigger("change");
         });
         $("#node-input-property").change( () => {
           const property_name = $("#node-input-property").find('option:selected').text();
-          if (property_name && property_name !== "") {
+          const property_value = $("#node-input-property").find('option:selected').val();
+          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
             this.propname = property_name;
             $( "#node-input-name" ).val(property_name);
           }
+          $("#node-input-name").trigger("change"); 
         });
       },
       oneditsave: function () {
