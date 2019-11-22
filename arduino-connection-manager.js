@@ -10,6 +10,9 @@ const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https
 var ids=[];
 
 async function connect(connectionConfig) {
+  if (!connectionConfig.credentials) {
+    throw new Error("Cannot find credentials.");
+  }
   var date = new Date();
   var timestamp = date.getTime();
   var user = findUser(connectionConfig.credentials.clientid);
