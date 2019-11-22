@@ -10,8 +10,8 @@ const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https
 var ids=[];
 
 async function connect(connectionConfig) {
-  if (!connectionConfig.credentials) {
-    throw new Error("Cannot find credentials.");
+  if (!connectionConfig || !connectionConfig.credentials) {
+    throw new Error("Cannot find cooonection config or credentials.");
   }
   var date = new Date();
   var timestamp = date.getTime();
