@@ -8,7 +8,7 @@ module.exports = function (RED) {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
       this.lastValue = undefined;
-      if (config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
+      if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           await connectionManager.connect(connectionConfig);
           this.arduinoRestClient = connectionManager.apiRest;
@@ -48,6 +48,7 @@ module.exports = function (RED) {
 
         this.pollTimeout = setTimeout(() => { this.poll(connectionConfig) }, 1000);
       } catch (err) {
+        this.status({ fill: "red", shape: "dot", text: "Error getting value" });
         console.log(err);
       }
     }
@@ -58,7 +59,7 @@ module.exports = function (RED) {
     const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
-      if (config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
+      if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           await connectionManager.connect(connectionConfig);
           if (config.thing !== "" && config.property !== "") {
@@ -96,7 +97,7 @@ module.exports = function (RED) {
       const node = this;
       this.timeWindowCount = config.timeWindowCount;
       this.timeWindowUnit = config.timeWindowUnit;
-      if (config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
+      if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           this.arduinoRestClient = connectionManager.apiRest;
           if (config.thing !== "" && config.property !== "") {
@@ -146,7 +147,7 @@ module.exports = function (RED) {
       const connectionConfig = RED.nodes.getNode(config.connection);
       this.timeWindowCount = config.timeWindowCount;
       this.timeWindowUnit = config.timeWindowUnit;
-      if (config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
+      if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           this.arduinoRestClient = connectionManager.apiRest;
           if (config.thing !== "" && config.property !== "") {
@@ -194,7 +195,7 @@ module.exports = function (RED) {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
       const node = this;
-      if (config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
+      if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           await connectionManager.connect(connectionConfig);
           if (config.thing !== "" && config.property !== "") {
@@ -243,29 +244,63 @@ module.exports = function (RED) {
   });
 
   RED.httpAdmin.get("/things", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
-    const connectionConfig = RED.nodes.getNode(req.query.connectionid);
     try {
-      await connectionManager.connect(connectionConfig);
+      if (req.query.clientid || req.query.clientsecret) {
+        await connectionManager.connect(
+          {
+            credentials: {
+              clientid: req.query.clientid,
+              clientsecret: req.query.clientsecret
+            }
+          }
+        );
+      } else if (req.query.connectionid) {
+        const connectionConfig = RED.nodes.getNode(req.query.connectionid);
+        if (!connectionConfig) {
+          console.log("No credentials available.");
+          return res.send(JSON.stringify({ error: "No credentials available." }));
+        }
+        await connectionManager.connect(connectionConfig);
+      } else {
+        console.log("No credentials available.");
+        return res.send(JSON.stringify({ error: "No credentials available." }));
+      }
       const arduinoRestClient = connectionManager.apiRest;
       const things = await arduinoRestClient.getThings();
       return res.send(JSON.stringify(things));
     } catch (err) {
-      console.log(err);
-      return res.send(JSON.stringify({}));
+      console.log(`Status: ${err.status}, message: ${err.error}`);
+      return res.send(JSON.stringify({ error: "Wrong credentials or system unavailable." }));
     }
   });
 
   RED.httpAdmin.get("/properties", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
-    const connectionConfig = RED.nodes.getNode(req.query.connectionid);
     try {
-      await connectionManager.connect(connectionConfig);
+      if (req.query.clientid && req.query.clientsecret) {
+        await connectionManager.connect(
+          {
+            credentials: {
+              clientid: req.query.clientid,
+              clientsecret: req.query.clientsecret
+            }
+          }
+        );
+      } else if (req.query.connectionid) {
+        const connectionConfig = RED.nodes.getNode(req.query.connectionid);
+        if (!connectionConfig)
+          return res.send(JSON.stringify([]));
+        await connectionManager.connect(connectionConfig);
+      } else {
+        console.log("No credentials available.");
+        return res.send(JSON.stringify([]));
+      }
       const ArduinoRestClient = connectionManager.apiRest;
       const thing_id = req.query.thing_id;
       const properties = await ArduinoRestClient.getProperties(thing_id);
       return res.send(JSON.stringify(properties));
     } catch (err) {
-      console.log(err);
-      return res.send(JSON.stringify({}));
+      console.log(`Status: ${err.status}, message: ${err.error}`);
+      return res.send({ error: "Wrong credentials or system unavailable." });
     }
   });
 

@@ -7,7 +7,7 @@ const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.a
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 
 
-var ids=[];
+var ids = [];
 
 async function connect(connectionConfig) {
   if (!connectionConfig || !connectionConfig.credentials) {
@@ -16,20 +16,20 @@ async function connect(connectionConfig) {
   var date = new Date();
   var timestamp = date.getTime();
   var user = findUser(connectionConfig.credentials.clientid);
-  var requiretoken=false;
+  var requiretoken = false;
   var token;
-  if(user!==-1){
-    if(timestamp > ids[user].expires_token_ts){
-      requiretoken=true;
+  if (user !== -1) {
+    if (timestamp > ids[user].expires_token_ts) {
+      requiretoken = true;
     } else {
-      token=ids[user].token;
+      token = ids[user].token;
     }
   }
 
-  if(requiretoken || user===-1){
+  if (requiretoken || user === -1) {
     var options = {
       method: 'POST',
-      headers: {'content-type': 'application/x-www-form-urlencoded'},
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
       data: {
         grant_type: 'client_credentials',
         client_id: connectionConfig.credentials.clientid,
@@ -45,29 +45,29 @@ async function connect(connectionConfig) {
       data = JSON.parse(rawdata.body);
       token = data.access_token;
       expires_in = data.expires_in;
-      if(token!==undefined){
-        if(user===-1){
-          const newIds={
+      if (token !== undefined) {
+        if (user === -1) {
+          const newIds = {
             clientId: connectionConfig.credentials.clientid,
             token: token,
-            expires_token_ts: timestamp+expires_in
+            expires_token_ts: timestamp + expires_in
           };
           ids.push(newIds);
-        }else{
-          ids[user].token=token;
-          ids[user].expires_token_ts=timestamp+expires_in;
+        } else {
+          ids[user].token = token;
+          ids[user].expires_token_ts = timestamp + expires_in;
         }
-       }
-      } catch (err) {
-        console.log(err);
       }
+    } catch (err) {
+      console.log(err);
     }
+  }
   ArduinoRestClient.updateToken(token);
 
 }
-function findUser(clientId){
-  for (var i=0; i<ids.length; i++){
-    if(ids[i].clientId===clientId){
+function findUser(clientId) {
+  for (var i = 0; i < ids.length; i++) {
+    if (ids[i].clientId === clientId) {
       return i;
     }
   }
