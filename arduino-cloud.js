@@ -78,6 +78,7 @@ module.exports = function (RED) {
                   this.status({});
               } catch (err) {
                 console.log(err);
+                this.status({ fill: "red", shape: "dot", text: "Error setting value" });
               }
             });
           }
@@ -134,6 +135,7 @@ module.exports = function (RED) {
           }
         } catch (err) {
           console.log(err);
+          this.status({ fill: "red", shape: "dot", text: "Error getting value" });
         }
       }
     }
@@ -184,6 +186,7 @@ module.exports = function (RED) {
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
       } catch (err) {
         console.log(err);
+        this.status({ fill: "red", shape: "dot", text: "Error getting value" });
       }
     }
   }
@@ -222,6 +225,7 @@ module.exports = function (RED) {
           }
         } catch (err) {
           console.log(err);
+          this.status({ fill: "red", shape: "dot", text: "Error getting value" });
         }
       }
     }
