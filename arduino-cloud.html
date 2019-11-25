@@ -10,7 +10,8 @@
         thing: { value: "", validate: validator },
         property: { value: "", validate: validator },
         name: { value: "", validate: validator },
-        propname: { value: "" }
+        propname: { value: "" },
+        defaultname: { value: true }
       };
 
     if (nodeName === "property in hist" || nodeName === "property in poll"){
@@ -64,9 +65,11 @@
           const connection = $("#node-input-connection").val();
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
-//          $("#node-input-name").val("");
-          if (connection !== "_ADD_") {
-            initThings(connection, this.thing);
+          if(this.defaultname) {
+            $("#node-input-name").val("");
+          }
+          if (this.connection !== connection && connection !== "_ADD_") {
+            initThings(connection);
           }
           $("#node-input-thing").trigger("change");
         });
@@ -84,11 +87,25 @@
         $("#node-input-property").change(() => {
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !== "" && property_value !== "" && property_value !== undefined && this.propname === "") {
+          if (property_name !== "" && property_value !== "" && property_value !== undefined && this.defaultname) {
             this.propname = property_name;
             $("#node-input-name").val(property_name);
           }
           $("#node-input-name").trigger("change");
+        });
+        $("#node-input-name").change(() => {
+          const name = $("#node-input-name").val();
+          if (name === "") {
+            this.defaultname = true;
+          } else {
+            if (this.propname !== "") {
+              if (name !== this.propname) {
+                this.defaultname = false;
+              } else {
+                this.defaultname = true;
+              }
+            }
+          }
         });
       },
       oneditsave: function () {
