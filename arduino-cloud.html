@@ -189,8 +189,8 @@
       applicationname: { value: "", required: true },
     },
     credentials: {
-      clientid: { type: "password" },
-      clientsecret: { type: "password" }
+      clientid: { type: "password", required: true },
+      clientsecret: { type: "password", required: true }
     },
     label: function () {
       return this.applicationname || "";
@@ -257,9 +257,10 @@
     },
     paletteLabel: "historic",
     oneditprepare: function () {
+      debugger;
       console.log("thing_id: " + this.thing);
       console.log("property_id: " + this.property);
-      if (this.connection) {
+      if (this.connection && this.connection !== "_ADD_") {
         initThings(this.connection, this.thing);
         initProperties(this.connection, this.thing, this.property, 1);
       }
@@ -373,7 +374,7 @@
     oneditprepare: function () {
       console.log("thing_id: " + this.thing);
       console.log("property_id: " + this.property);
-      if (this.connection) {
+      if (this.connection && this.connection !== "_ADD_") {
         initThings(this.connection, this.thing);
         initProperties(this.connection, this.thing, this.property, 1);
       }
@@ -484,7 +485,7 @@
     oneditprepare: function () {
       console.log("thing_id: " + this.thing);
       console.log("property_id: " + this.property);
-      if (this.connection) {
+      if (this.connection && this.connection !== "_ADD_") {
         initThings(this.connection, this.thing);
         initProperties(this.connection, this.thing, this.property, 1);
       }
