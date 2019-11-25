@@ -95,7 +95,7 @@
         $("#node-input-property").change(() => {
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !== "" && property_value !== "" && property_value !== undefined) {
+          if (property_name !== "" && property_value !== "" && property_value !== undefined && this.propname === "") {
             this.propname = property_name;
             $("#node-input-name").val(property_name);
           }
