@@ -10,8 +10,7 @@
         thing: { value: "", validate: validator },
         property: { value: "", validate: validator },
         name: { value: "", validate: validator },
-        propname: { value: "" },
-        prevconnection: { value: "" }
+        propname: { value: "" }
       };
 
     if (nodeName === "property in hist" || nodeName === "property in poll"){
@@ -63,19 +62,9 @@
         }
         $("select#node-input-connection").change(() => {
           const connection = $("#node-input-connection").val();
-          const connectionTmp = window.connectionManager[connection];
-          const isUpdatedConnection = connectionTmp ? connectionTmp.isUpdatedConnection : false;
-          if (connection == this.prevconnection && isUpdatedConnection === false) return;
-          if (connectionTmp)
-            connectionTmp.isUpdatedConnection = false;
-          this.prevconnection = connection;
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
-          $("#node-input-name").val("");
-          this.thing = "";
-          this.property = "";
-          this.propname = "";
-          this.name = "";
+//          $("#node-input-name").val("");
           if (connection !== "_ADD_") {
             initThings(connection, this.thing);
           }
@@ -84,7 +73,7 @@
         $("#node-input-thing").change(() => {
 
           const thing_id = $("#node-input-thing").val();
-          if (thing_id && thing_id !== "0") {
+          if (thing_id && thing_id !== "") {
             const connection = $("#node-input-connection").val();
             initProperties(connection, thing_id, undefined, outs);
           } else {
@@ -241,13 +230,11 @@
         window.connectionManager[this.id] = {
           tmpClientid: $("#node-config-input-clientid").val(),
           tmpClientsecret: $("#node-config-input-clientsecret").val(),
-          isUpdatedConnection: true
         }
       } else {
         window.connectionManager[this.id] = {
           tmpClientid: "",
           tmpClientsecret: "",
-          isUpdatedConnection: false
         }
       }
     }
