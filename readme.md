@@ -1,7 +1,7 @@
 # node-red-contrib-arduino-cloud
 
 This module implements node-red nodes for interacting with [Arduino IoT Cloud](https://create.arduino.cc/iot).
-Multi Arduino Account are allowed.
+Multi Arduino Accounts are allowed.
 
 ## Installation
 + Install node-red-contrib-arduino-cloud:
