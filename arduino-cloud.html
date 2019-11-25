@@ -69,7 +69,6 @@
           if (connectionTmp)
             connectionTmp.isUpdatedConnection = false;
           this.prevconnection = connection;
-          this.connection = connection;
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
           $("#node-input-name").val("");
@@ -86,7 +85,8 @@
 
           const thing_id = $("#node-input-thing").val();
           if (thing_id && thing_id !== "0") {
-            initProperties(this.connection, thing_id, undefined, outs);
+            const connection = $("#node-input-connection").val();
+            initProperties(connection, thing_id, undefined, outs);
           } else {
             $("select#node-input-property").empty();
           }
