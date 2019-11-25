@@ -1,36 +1,39 @@
 <script type="text/javascript">
+  window.connectionManager = [];
+
   function validator(v) {
-    debugger;
     return (v !== null && v !== "" && v !== undefined);
   }
   function setupNode(nodeName, ins, outs) {
-    RED.nodes.registerType(nodeName,{
+    RED.nodes.registerType(nodeName, {
       category: 'Arduino IoT Cloud',
       color: '#00979d',
       defaults: {
-          connection: {type: "arduino-connection", validate: validator},
-          thing: {value:"", validate: validator},
-          property: {value:"", validate: validator},
-          name: {value:"", validate: validator},
-          propname: {value:""},
-          prevconnection: {value:""}
+        connection: { type: "arduino-connection", validate: validator },
+        thing: { value: "", validate: validator },
+        property: { value: "", validate: validator },
+        name: { value: "", validate: validator },
+        propname: { value: "" },
+        prevconnection: { value: "" }
       },
       inputs: ins,
       outputs: outs,
       icon: "arduino.png",
-      label: function() {
-          return this.name||nodeName;
+      label: function () {
+        return this.name || nodeName;
       },
-      oneditprepare: function() {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-        if (this.connection) {
+      oneditprepare: function () {
+        if (this.connection && this.connection !== "_ADD_") {
           initThings(this.connection, this.thing);
           initProperties(this.connection, this.thing, this.property, outs);
         }
-        $("select#node-input-connection").change( () => {
+        $("select#node-input-connection").change(() => {
           const connection = $("#node-input-connection").val();
-          if (connection == this.prevconnection) return;
+          const connectionTmp = window.connectionManager[connection];
+          const isUpdatedConnection = connectionTmp ? connectionTmp.isUpdatedConnection : false;
+          if (connection == this.prevconnection && isUpdatedConnection === false) return;
+          if (connectionTmp)
+            connectionTmp.isUpdatedConnection = false;
           this.prevconnection = connection;
           this.connection = connection;
           $("select#node-input-thing").empty();
@@ -41,13 +44,13 @@
           this.propname = "";
           this.name = "";
           if (connection !== "_ADD_") {
-            initThings(this.connection, this.thing, this.property);
+            initThings(this.connection, this.thing);
           }
           $("#node-input-thing").trigger("change");
         });
-        $("#node-input-thing").change( () => {
+        $("#node-input-thing").change(() => {
 
-          const thing_id = $( "#node-input-thing" ).val();
+          const thing_id = $("#node-input-thing").val();
           if (thing_id) {
             initProperties(this.connection, thing_id, undefined, outs);
           } else {
@@ -55,14 +58,14 @@
           }
           $("#node-input-property").trigger("change");
         });
-        $("#node-input-property").change( () => {
+        $("#node-input-property").change(() => {
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
+          if (property_name !== "" && property_value !== "" && property_value !== undefined) {
             this.propname = property_name;
-            $( "#node-input-name" ).val(property_name);
+            $("#node-input-name").val(property_name);
           }
-          $("#node-input-name").trigger("change"); 
+          $("#node-input-name").trigger("change");
         });
       },
       oneditsave: function () {
@@ -124,58 +127,92 @@
 </script>
 
 <script type="text/javascript">
+  function prepareQueryString(connection) {
+    const tmpClientid = window.connectionManager[connection] ? window.connectionManager[connection].tmpClientid : "";
+    const tmpClientsecret = window.connectionManager[connection] ? window.connectionManager[connection].tmpClientsecret : "";
+    if (tmpClientid && tmpClientid !== "" || tmpClientsecret && tmpClientsecret !== "") {
+      return `clientid=${tmpClientid}&clientsecret=${tmpClientsecret}`;
+    } else if (connection) {
+      return `connectionid=${connection}`;
+    }
+  }
   function initThings(connection, thing_id) {
-    $.getJSON(`things?connectionid=${connection}` , things => {
-      $("<option value='" + "" + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
-      for (const t of things) {
-        $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
+    const queryString = prepareQueryString(connection);
+    if (!queryString || queryString === "")
+      return;
+    $.getJSON(`things?${queryString}`, things => {
+      if (things && typeof (things) == "object" && things.error) {
+        $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
+      } else if (things && Array.isArray(things) && things.length !== 0) {
+        $("<option value='" + "" + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+        for (const t of things) {
+          $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
+        }
+        if (thing_id !== undefined) {
+          $("#node-input-thing").val(thing_id);
+          $("#node-input-property").val("");
+        }
+        $("#node-input-property").trigger("change");
       }
-      if (thing_id !== undefined) {
-        $("#node-input-thing").val(thing_id);
-        $("#node-input-property").val("");
-      }
-      $("#node-input-property").trigger("change");
     });
   }
   function initProperties(connection, thing_id, property_id, outs) {
-    if (thing_id === "" || thing_id === "0")
+    let queryString = prepareQueryString(connection);
+    if (!queryString || queryString === "")
       return;
+    if (!thing_id || thing_id === "" || thing_id === "0")
+      return;
+    queryString = `${queryString}&thing_id=${thing_id}`;
     $("#node-input-property").html("");
-
-    $.getJSON(`properties?connectionid=${connection}&thing_id=${thing_id}` , properties => {
-      $("<option value='" + "" + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
-
-      for (const p of properties) {
-        if (outs > 0 || p.permission === "READ_WRITE")
-          $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
+    $.getJSON(`properties?${queryString}`, properties => {
+      if (properties && typeof (properties) == "object" && properties.error) {
+        $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
+      } else if ((properties && Array.isArray(properties) && properties.length !== 0)) {
+        $("<option value='" + "" + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
+        for (const p of properties) {
+          if (outs > 0 || p.permission === "READ_WRITE")
+            $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
+        }
+        if (property_id !== undefined) {
+          $("#node-input-property").val(property_id);
+        }
+        $("#node-input-name").trigger("change");
       }
-      if (property_id !== undefined) {
-        $("#node-input-property").val(property_id);
-      }
-      $("#node-input-name").trigger("change"); 
     });
   }
 </script>
 
 <script type="text/javascript">
-  RED.nodes.registerType('arduino-connection',{
-      category: 'config',
-      defaults: {
-          applicationname: {value:"",required:true},
-      },
-      credentials: {
-        clientid: {type: "password"},
-        clientsecret: {type: "password"}
-      },
-      label: function() {
-          return this.applicationname || "";
-      },
-      oneditprepare: function() {
+  RED.nodes.registerType('arduino-connection', {
+    category: 'config',
+    defaults: {
+      applicationname: { value: "", required: true },
+    },
+    credentials: {
+      clientid: { type: "password" },
+      clientsecret: { type: "password" }
+    },
+    label: function () {
+      return this.applicationname || "";
+    },
+    oneditprepare: function () {
 
-      },
-      oneditsave: function() {
-        console.log("Application Name: " + this.applicationname);
+    },
+    oneditsave: function () {
+      if ($("#node-config-input-clientid").val() !== "__PWRD__" || $("#node-config-input-clientsecret").val() !== "__PWRD__") {
+        window.connectionManager[this.id] = {
+          tmpClientid: $("#node-config-input-clientid").val(),
+          tmpClientsecret: $("#node-config-input-clientsecret").val(),
+          isUpdatedConnection: true
+        }
+      } else {
+        window.connectionManager[this.id] = {
+          tmpClientid: "",
+          tmpClientsecret: "",
+          isUpdatedConnection: false
+        }
       }
+    }
   });
 </script>
 <script type="text/x-red" data-template-name="arduino-connection">
@@ -198,74 +235,78 @@
 
 
 <script type="text/javascript">
-  RED.nodes.registerType('property in hist',{
-      category: 'Arduino IoT Cloud',
-      color: '#00979d',
-      defaults: {
-        connection: {type: "arduino-connection", validate: validator},
-        thing: {value:"",validate: validator},
-        property: {value:"",validate: validator},
-        propid: {value:""},
-        name: {value:"",validate: validator},
-        timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
-        timeWindowUnit: {value: '3600', required:true},
-        prevconnection: {value:""},
-        propname: {value:""}
-      },
-      inputs:1,
-      outputs:1,
-      icon: "arduino.png",
-      label: function() {
-          return this.name||"historic";
-      },
-      paletteLabel: "historic",
-      oneditprepare: function() {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-        if (this.connection){
-          initThings(this.connection, this.thing, this.property);
-          initProperties(this.connection, this.thing, this.property, 1);
-        }
-        $("select#node-input-connection").change( () => {
-          const connection = $("#node-input-connection").val();
-          if (connection === this.prevconnection ) return;
-          this.prevconnection = connection;
-          this.connection = connection;
-          $("select#node-input-thing").empty();
-          $("select#node-input-property").empty();
-          $("#node-input-name").val("");
-          this.thing = "";
-          this.property = "";
-          this.propname = "";
-          this.name = "";
-          if (connection !== "_ADD_") {
-            initThings(this.connection, this.thing, this.property);
-          }
-          $("#node-input-thing").trigger("change");
-        });
-        $("#node-input-thing").change( () => {
-          const thing_id = $( "#node-input-thing" ).val();
-          if (thing_id && thing_id !== "0") {
-            initProperties(this.connection, thing_id, 1);
-          } else {
-            $("select#node-input-property").empty();
-          }
-          $("#node-input-property").trigger("change");
-        });
-        $("#node-input-property").change( () => {
-          const property_name = $("#node-input-property").find('option:selected').text();
-          const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
-            this.propname = property_name;
-            $( "#node-input-name" ).val(property_name);
-          }
-          $("#node-input-name").trigger("change"); 
-        });
-      },
-      oneditsave: function () {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
+  RED.nodes.registerType('property in hist', {
+    category: 'Arduino IoT Cloud',
+    color: '#00979d',
+    defaults: {
+      connection: { type: "arduino-connection", validate: validator },
+      thing: { value: "", validate: validator },
+      property: { value: "", validate: validator },
+      propid: { value: "" },
+      name: { value: "", validate: validator },
+      timeWindowCount: { value: 1, validate: RED.validators.number(), required: true },
+      timeWindowUnit: { value: '3600', required: true },
+      prevconnection: { value: "" },
+      propname: { value: "" }
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "arduino.png",
+    label: function () {
+      return this.name || "historic";
+    },
+    paletteLabel: "historic",
+    oneditprepare: function () {
+      console.log("thing_id: " + this.thing);
+      console.log("property_id: " + this.property);
+      if (this.connection) {
+        initThings(this.connection, this.thing);
+        initProperties(this.connection, this.thing, this.property, 1);
       }
+      $("select#node-input-connection").change(() => {
+        const connection = $("#node-input-connection").val();
+        const connectionTmp = window.connectionManager[connection];
+        const isUpdatedConnection = connectionTmp ? connectionTmp.isUpdatedConnection : false;
+        if (connection == this.prevconnection && isUpdatedConnection === false) return;
+        if (connectionTmp)
+          connectionTmp.isUpdatedConnection = false;
+        this.prevconnection = connection;
+        this.connection = connection;
+        $("select#node-input-thing").empty();
+        $("select#node-input-property").empty();
+        $("#node-input-name").val("");
+        this.thing = "";
+        this.property = "";
+        this.propname = "";
+        this.name = "";
+        if (connection !== "_ADD_") {
+          initThings(this.connection, this.thing);
+        }
+        $("#node-input-thing").trigger("change");
+      });
+      $("#node-input-thing").change(() => {
+        const thing_id = $("#node-input-thing").val();
+        if (thing_id && thing_id !== "0") {
+          initProperties(this.connection, thing_id, undefined, 1);
+        } else {
+          $("select#node-input-property").empty();
+        }
+        $("#node-input-property").trigger("change");
+      });
+      $("#node-input-property").change(() => {
+        const property_name = $("#node-input-property").find('option:selected').text();
+        const property_value = $("#node-input-property").find('option:selected').val();
+        if (property_name !== "" && property_value !== "" && property_value !== undefined) {
+          this.propname = property_name;
+          $("#node-input-name").val(property_name);
+        }
+        $("#node-input-name").trigger("change");
+      });
+    },
+    oneditsave: function () {
+      console.log("thing_id: " + this.thing);
+      console.log("property_id: " + this.property);
+    }
   });
 </script>
 
@@ -308,74 +349,78 @@
 </script>
 
 <script type="text/javascript">
-  RED.nodes.registerType('property in poll',{
-      category: 'Arduino IoT Cloud',
-      color: '#00979d',
-      defaults: {
-        connection: {type: "arduino-connection", validate: validator},
-        thing: {value:"", validate: validator},
-        property: {value:"", validate: validator},
-        propid: {value:""},
-        name: {value:"", validate: validator},
-        timeWindowCount: {value: 1, validate:RED.validators.number(), required:true},
-        timeWindowUnit: {value: '3600', required:true},
-        prevconnection: {value:""},
-        propname: {value:""},
-      },
-      inputs:0,
-      outputs:1,
-      icon: "arduino.png",
-      label: function() {
-          return this.name||"periodic";
-      },
-      paletteLabel: "periodic",
-      oneditprepare: function() {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-        if (this.connection){
-          initThings(this.connection, this.thing, this.property);
-          initProperties(this.connection, this.thing, this.property, 1);
-        }
-        $("select#node-input-connection").change( () => {
-          const connection = $("#node-input-connection").val();
-          if (connection === this.prevconnection) return;
-          this.prevconnection = connection;
-          this.connection = connection;
-          $("select#node-input-thing").empty();
-          $("select#node-input-property").empty();
-          $("#node-input-name").val("");
-          this.thing = "";
-          this.property = "";
-          this.propname = "";
-          this.name = "";
-          if (connection !== "_ADD_") {
-            initThings(this.connection, this.thing, this.property);
-          }
-          $("#node-input-thing").trigger("change");
-        });
-        $("#node-input-thing").change( () => {
-          const thing_id = $( "#node-input-thing" ).val();
-          if (thing_id && thing_id !== "0") {
-            initProperties(this.connection, thing_id, 1);
-          } else {
-            $("select#node-input-property").empty();
-          }
-          $("#node-input-property").trigger("change");
-        });
-        $("#node-input-property").change( () => {
-          const property_name = $("#node-input-property").find('option:selected').text();
-          const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
-            this.propname = property_name;
-            $( "#node-input-name" ).val(property_name);
-          }
-          $("#node-input-name").trigger("change"); 
-        });
-      },
-      oneditsave: function () {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
+  RED.nodes.registerType('property in poll', {
+    category: 'Arduino IoT Cloud',
+    color: '#00979d',
+    defaults: {
+      connection: { type: "arduino-connection", validate: validator },
+      thing: { value: "", validate: validator },
+      property: { value: "", validate: validator },
+      propid: { value: "" },
+      name: { value: "", validate: validator },
+      timeWindowCount: { value: 1, validate: RED.validators.number(), required: true },
+      timeWindowUnit: { value: '3600', required: true },
+      prevconnection: { value: "" },
+      propname: { value: "" },
+    },
+    inputs: 0,
+    outputs: 1,
+    icon: "arduino.png",
+    label: function () {
+      return this.name || "periodic";
+    },
+    paletteLabel: "periodic",
+    oneditprepare: function () {
+      console.log("thing_id: " + this.thing);
+      console.log("property_id: " + this.property);
+      if (this.connection) {
+        initThings(this.connection, this.thing);
+        initProperties(this.connection, this.thing, this.property, 1);
       }
+      $("select#node-input-connection").change(() => {
+        const connection = $("#node-input-connection").val();
+        const connectionTmp = window.connectionManager[connection];
+        const isUpdatedConnection = connectionTmp ? connectionTmp.isUpdatedConnection : false;
+        if (connection == this.prevconnection && isUpdatedConnection === false) return;
+        if (connectionTmp)
+          connectionTmp.isUpdatedConnection = false;
+        this.prevconnection = connection;
+        this.connection = connection;
+        $("select#node-input-thing").empty();
+        $("select#node-input-property").empty();
+        $("#node-input-name").val("");
+        this.thing = "";
+        this.property = "";
+        this.propname = "";
+        this.name = "";
+        if (connection !== "_ADD_") {
+          initThings(this.connection, this.thing);
+        }
+        $("#node-input-thing").trigger("change");
+      });
+      $("#node-input-thing").change(() => {
+        const thing_id = $("#node-input-thing").val();
+        if (thing_id && thing_id !== "0") {
+          initProperties(this.connection, thing_id, undefined, 1);
+        } else {
+          $("select#node-input-property").empty();
+        }
+        $("#node-input-property").trigger("change");
+      });
+      $("#node-input-property").change(() => {
+        const property_name = $("#node-input-property").find('option:selected').text();
+        const property_value = $("#node-input-property").find('option:selected').val();
+        if (property_name !== "" && property_value !== "" && property_value !== undefined) {
+          this.propname = property_name;
+          $("#node-input-name").val(property_name);
+        }
+        $("#node-input-name").trigger("change");
+      });
+    },
+    oneditsave: function () {
+      console.log("thing_id: " + this.thing);
+      console.log("property_id: " + this.property);
+    }
   });
 </script>
 
@@ -417,72 +462,76 @@
 </script>
 
 <script type="text/javascript">
-  RED.nodes.registerType('property in push',{
-      category: 'Arduino IoT Cloud',
-      color: '#00979d',
-      defaults: {
-        connection: {type: "arduino-connection", validate: validator},
-        thing: {value:"",validate: validator},
-        property: {value:"",validate: validator},
-        propid: {value:""},
-        name: {value:"",validate: validator},
-        prevconnection: {value:""},
-        propname: {value:""}
-      },
-      inputs:1,
-      outputs:1,
-      icon: "arduino.png",
-      label: function() {
-          return this.name||"inject";
-      },
-      paletteLabel: "inject",
-      oneditprepare: function() {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-        if (this.connection){
-          initThings(this.connection, this.thing, this.property);
-          initProperties(this.connection, this.thing, this.property, 1);
-        }
-        $("select#node-input-connection").change( () => {
-          const connection = $("#node-input-connection").val();
-          if (connection === this.prevconnection ) return;
-          this.prevconnection = connection;
-          this.connection = connection;
-          $("select#node-input-thing").empty();
-          $("select#node-input-property").empty();
-          $("#node-input-name").val("");
-          this.thing = "";
-          this.property = "";
-          this.propname = "";
-          this.name = "";
-          if (connection !== "_ADD_") {
-            initThings(this.connection, this.thing, this.property);
-          }
-          $("#node-input-thing").trigger("change");
-        });
-        $("#node-input-thing").change( () => {
-          const thing_id = $( "#node-input-thing" ).val();
-          if (thing_id && thing_id !== "0") {
-            initProperties(this.connection, thing_id, 1);
-          } else {
-            $("select#node-input-property").empty();
-          }
-          $("#node-input-property").trigger("change");
-        });
-        $("#node-input-property").change( () => {
-          const property_name = $("#node-input-property").find('option:selected').text();
-          const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !=="" && property_value !== "" && property_value !== undefined) {
-            this.propname = property_name;
-            $( "#node-input-name" ).val(property_name);
-          }
-          $("#node-input-name").trigger("change"); 
-        });
-      },
-      oneditsave: function () {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
+  RED.nodes.registerType('property in push', {
+    category: 'Arduino IoT Cloud',
+    color: '#00979d',
+    defaults: {
+      connection: { type: "arduino-connection", validate: validator },
+      thing: { value: "", validate: validator },
+      property: { value: "", validate: validator },
+      propid: { value: "" },
+      name: { value: "", validate: validator },
+      prevconnection: { value: "" },
+      propname: { value: "" }
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "arduino.png",
+    label: function () {
+      return this.name || "inject";
+    },
+    paletteLabel: "inject",
+    oneditprepare: function () {
+      console.log("thing_id: " + this.thing);
+      console.log("property_id: " + this.property);
+      if (this.connection) {
+        initThings(this.connection, this.thing);
+        initProperties(this.connection, this.thing, this.property, 1);
       }
+      $("select#node-input-connection").change(() => {
+        const connection = $("#node-input-connection").val();
+        const connectionTmp = window.connectionManager[connection];
+        const isUpdatedConnection = connectionTmp ? connectionTmp.isUpdatedConnection : false;
+        if (connection == this.prevconnection && isUpdatedConnection === false) return;
+        if (connectionTmp)
+          connectionTmp.isUpdatedConnection = false;
+        this.prevconnection = connection;
+        this.connection = connection;
+        $("select#node-input-thing").empty();
+        $("select#node-input-property").empty();
+        $("#node-input-name").val("");
+        this.thing = "";
+        this.property = "";
+        this.propname = "";
+        this.name = "";
+        if (connection !== "_ADD_") {
+          initThings(this.connection, this.thing);
+        }
+        $("#node-input-thing").trigger("change");
+      });
+      $("#node-input-thing").change(() => {
+        const thing_id = $("#node-input-thing").val();
+        if (thing_id && thing_id !== "0") {
+          initProperties(this.connection, thing_id, undefined, 1);
+        } else {
+          $("select#node-input-property").empty();
+        }
+        $("#node-input-property").trigger("change");
+      });
+      $("#node-input-property").change(() => {
+        const property_name = $("#node-input-property").find('option:selected').text();
+        const property_value = $("#node-input-property").find('option:selected').val();
+        if (property_name !== "" && property_value !== "" && property_value !== undefined) {
+          this.propname = property_name;
+          $("#node-input-name").val(property_name);
+        }
+        $("#node-input-name").trigger("change");
+      });
+    },
+    oneditsave: function () {
+      console.log("thing_id: " + this.thing);
+      console.log("property_id: " + this.property);
+    }
   });
 </script>
 
@@ -509,4 +558,3 @@
 <script type="text/x-red" data-help-name="property in push">
   <p>This node injects in the flow the value of an Arduino Cloud Property after receiving an input event.</p>
 </script>
-
