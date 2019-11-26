@@ -21,30 +21,8 @@
     return ret;
   }
 
-  function getName(nodeName){
-    var ret;
-    switch (nodeName){
-      case 'property in':
-      case 'property out':
-        ret='property';
-        break;
-      case 'property in hist':
-        ret='historic';
-        break;
-      case 'property in poll':
-        ret ='periodic';
-        break;
-      case 'property in push':
-        ret = 'inject';
-        break;
-
-    }
-    return ret;
-  }
-
-  function setupNode(nodeName, ins, outs) {
+  function setupNode(nodeName, labelName, ins, outs) {
     var defaults = getDefaults(nodeName);
-    var name = getName(nodeName);
     RED.nodes.registerType(nodeName, {
       category: 'Arduino IoT Cloud',
       color: '#00979d',
@@ -53,9 +31,9 @@
       outputs: outs,
       icon: "arduino.png",
       label: function () {
-        return this.name || name;
+        return this.name || labelName;
       },
-      paletteLabel: name,
+      paletteLabel: labelName,
       oneditprepare: function () {
         if (this.connection && this.connection !== "_ADD_") {
           initThings(this.connection, this.thing);
@@ -108,18 +86,14 @@
           }
         });
       },
-      oneditsave: function () {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-      }
     });
   }
 
-  setupNode("property in", 0, 1);
-  setupNode("property out", 1, 0);
-  setupNode("property in hist", 1, 1);//historic
-  setupNode("property in poll", 0, 1);//periodic
-  setupNode("property in push", 1, 1);//inject
+  setupNode("property in", "property", 0, 1);
+  setupNode("property out", "property", 1, 0);
+  setupNode("property in hist", "historic", 1, 1);
+  setupNode("property in poll", "periodic", 0, 1);
+  setupNode("property in push", "inject", 1, 1);
 </script>
 
 
