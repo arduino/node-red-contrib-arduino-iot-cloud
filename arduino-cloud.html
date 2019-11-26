@@ -43,7 +43,7 @@
           const connection = $("#node-input-connection").val();
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
-          if(this.defaultname) {
+          if(this.defaultname && connection === "_ADD_") {
             $("#node-input-name").val("");
           }
           if (this.connection !== connection && connection !== "_ADD_") {
