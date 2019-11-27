@@ -15,6 +15,8 @@ module.exports = function (RED) {
           this.thing = config.thing;
           this.propertyId = config.property;
           this.propertyName = config.name;
+          var token =connectionManager.getToken(connectionConfig.credentials.clientid);
+          connectionManager.mqttClient.readProperty(connectionConfig.credentials.clientid, token,this.thing, this.propertyName, this.update )
           this.poll(connectionConfig);
         } catch (err) {
           console.log(err);
@@ -24,7 +26,7 @@ module.exports = function (RED) {
     realConstructor.apply(this, [config]);
   }
   ArduinoIotInput.prototype = {
-    poll: async function (connectionConfig) {
+    /*poll: async function (connectionConfig) {
       try {
         await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
@@ -51,6 +53,16 @@ module.exports = function (RED) {
         this.status({ fill: "red", shape: "dot", text: "Error getting value" });
         console.log(err);
       }
+    }*/
+    update: function (msg){
+      var date = new Date();
+      this.send(
+        {
+          topic: this.propertyName,
+          payload: msg,
+          timestamp: date.getTime()
+        }
+      );
     }
   }
   RED.nodes.registerType("property in", ArduinoIotInput);

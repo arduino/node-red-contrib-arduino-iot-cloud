@@ -1,4 +1,5 @@
 const arduinCloudRestApi = require('./arduino-cloud-api');
+const mqttClient = require('./arduino-handler-mqtt');
 const request = require("async-request");
 
 var ArduinoRestClient = new arduinCloudRestApi.ArduinoCloudClient();
@@ -65,6 +66,14 @@ async function connect(connectionConfig) {
   ArduinoRestClient.updateToken(token);
 
 }
+function getToken(clientId){
+  var user = findUser(clientId);
+  if(user !==-1){
+    return ids[user].token;
+  }
+  return -1;
+
+}
 function findUser(clientId) {
   for (var i = 0; i < ids.length; i++) {
     if (ids[i].clientId === clientId) {
@@ -76,4 +85,5 @@ function findUser(clientId) {
 }
 exports.connect = connect;
 exports.apiRest = ArduinoRestClient;
-
+exports.getToken = getToken;
+exports.mqttClient = mqttClient;
