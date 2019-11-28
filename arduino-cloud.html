@@ -5,46 +5,28 @@
     return (v !== null && v !== "" && v !== undefined);
   }
 
+  function validateTime(v) {
+    return (v !== null && v !== "" && v !== undefined && Number.isInteger(parseInt(v)) && parseInt(v) !== 0);
+  }
+
   function getDefaults(nodeName){
     var ret={connection: { type: "arduino-connection", validate: validator },
         thing: { value: "", validate: validator },
         property: { value: "", validate: validator },
         name: { value: "", validate: validator },
         propname: { value: "" },
-        prevconnection: { value: "" }
+        defaultname: { value: true }
       };
 
     if (nodeName === "property in hist" || nodeName === "property in poll"){
-      ret['timeWindowCount'] = { value: 1, validate: RED.validators.number(), required: true };
+      ret['timeWindowCount'] = { value: 1, validate: validateTime};
       ret['timeWindowUnit'] = { value: '3600', required: true };
     }
     return ret;
   }
 
-  function getName(nodeName){
-    var ret;
-    switch (nodeName){
-      case 'property in':
-      case 'property out':
-        ret='property';
-        break;
-      case 'property in hist':
-        ret='historic';
-        break;
-      case 'property in poll':
-        ret ='periodic';
-        break;
-      case 'property in push':
-        ret = 'inject';
-        break;
-
-    }
-    return ret;
-  }
-
-  function setupNode(nodeName, ins, outs) {
+  function setupNode(nodeName, labelName, ins, outs) {
     var defaults = getDefaults(nodeName);
-    var name = getName(nodeName);
     RED.nodes.registerType(nodeName, {
       category: 'Arduino IoT Cloud',
       color: '#00979d',
@@ -53,9 +35,9 @@
       outputs: outs,
       icon: "arduino.png",
       label: function () {
-        return this.name || name;
+        return this.name || labelName;
       },
-      paletteLabel: name,
+      paletteLabel: labelName,
       oneditprepare: function () {
         if (this.connection && this.connection !== "_ADD_") {
           initThings(this.connection, this.thing);
@@ -63,28 +45,20 @@
         }
         $("select#node-input-connection").change(() => {
           const connection = $("#node-input-connection").val();
-          const connectionTmp = window.connectionManager[connection];
-          const isUpdatedConnection = connectionTmp ? connectionTmp.isUpdatedConnection : false;
-          if (connection == this.prevconnection && isUpdatedConnection === false) return;
-          if (connectionTmp)
-            connectionTmp.isUpdatedConnection = false;
-          this.prevconnection = connection;
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
-          $("#node-input-name").val("");
-          this.thing = "";
-          this.property = "";
-          this.propname = "";
-          this.name = "";
-          if (connection !== "_ADD_") {
-            initThings(connection, this.thing);
+          if(this.defaultname && connection === "_ADD_") {
+            $("#node-input-name").val("");
+          }
+          if (this.connection !== connection && connection !== "_ADD_") {
+            initThings(connection);
           }
           $("#node-input-thing").trigger("change");
         });
         $("#node-input-thing").change(() => {
 
           const thing_id = $("#node-input-thing").val();
-          if (thing_id && thing_id !== "0") {
+          if (thing_id && thing_id !== "") {
             const connection = $("#node-input-connection").val();
             initProperties(connection, thing_id, undefined, outs);
           } else {
@@ -95,25 +69,35 @@
         $("#node-input-property").change(() => {
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !== "" && property_value !== "" && property_value !== undefined && this.propname === "") {
+          if (property_name !== "" && property_value !== "" && property_value !== undefined && this.defaultname) {
             this.propname = property_name;
             $("#node-input-name").val(property_name);
           }
           $("#node-input-name").trigger("change");
         });
+        $("#node-input-name").change(() => {
+          const name = $("#node-input-name").val();
+          if (name === "") {
+            this.defaultname = true;
+          } else {
+            if (this.propname !== "") {
+              if (name !== this.propname) {
+                this.defaultname = false;
+              } else {
+                this.defaultname = true;
+              }
+            }
+          }
+        });
       },
-      oneditsave: function () {
-        console.log("thing_id: " + this.thing);
-        console.log("property_id: " + this.property);
-      }
     });
   }
 
-  setupNode("property in", 0, 1);
-  setupNode("property out", 1, 0);
-  setupNode("property in hist", 1, 1);//historic
-  setupNode("property in poll", 0, 1);//periodic
-  setupNode("property in push", 1, 1);//inject
+  setupNode("property in", "property", 0, 1);
+  setupNode("property out", "property", 1, 0);
+  setupNode("property in hist", "historic", 1, 1);
+  setupNode("property in poll", "periodic", 0, 1);
+  setupNode("property in push", "inject", 1, 1);
 </script>
 
 
@@ -180,6 +164,7 @@
     if (!queryString || queryString === "")
       return;
     $.getJSON(`things?${queryString}`, things => {
+      $("select#node-input-thing").empty();
       if (things && typeof (things) == "object" && things.error) {
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
       } else if (things && Array.isArray(things) && things.length !== 0) {
@@ -203,6 +188,7 @@
     queryString = `${queryString}&thing_id=${thing_id}`;
     $("#node-input-property").html("");
     $.getJSON(`properties?${queryString}`, properties => {
+      $("select#node-input-property").empty();
       if (properties && typeof (properties) == "object" && properties.error) {
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
       } else if ((properties && Array.isArray(properties) && properties.length !== 0)) {
@@ -241,13 +227,11 @@
         window.connectionManager[this.id] = {
           tmpClientid: $("#node-config-input-clientid").val(),
           tmpClientsecret: $("#node-config-input-clientsecret").val(),
-          isUpdatedConnection: true
         }
       } else {
         window.connectionManager[this.id] = {
           tmpClientid: "",
           tmpClientsecret: "",
-          isUpdatedConnection: false
         }
       }
     }

@@ -108,29 +108,32 @@ module.exports = function (RED) {
             node.on('input', async function () {
               const now = moment();
               const end = now.format();
-              const start = now.subtract(this.timeWindowCount * this.timeWindowUnit, 'second').format();
-              await connectionManager.connect(connectionConfig);
-              const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
-              const times = result.responses[0].times;
-              const values = result.responses[0].values;
-              let data = [];
-              if (values && times) {
-                values.forEach(function (item, index, array) {
-                  data.push({
-                    x: moment(times[index]).unix() * 1000,
-                    y: values[index]
+              const count = this.timeWindowCount
+              if(count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
+                const start = now.subtract(count * this.timeWindowUnit, 'second').format();
+                await connectionManager.connect(connectionConfig);
+                const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
+                const times = result.responses[0].times;
+                const values = result.responses[0].values;
+                let data = [];
+                if (values && times) {
+                  values.forEach(function (item, index, array) {
+                    data.push({
+                      x: moment(times[index]).unix() * 1000,
+                      y: values[index]
+                    });
                   });
-                });
-              }
-              node.send(
-                {
-                  topic: config.name,
-                  payload: [{
-                    series: [],
-                    data: [data]
-                  }]
                 }
-              );
+                node.send(
+                  {
+                    topic: config.name,
+                    payload: [{
+                      series: [],
+                      data: [data]
+                    }]
+                  }
+                );
+              }
             });
           }
         } catch (err) {
@@ -157,7 +160,13 @@ module.exports = function (RED) {
             this.propertyId = config.property;
             this.propertyName = config.name;
             const pollTime = this.timeWindowCount * this.timeWindowUnit;
-            this.poll(connectionConfig, pollTime);
+            if(pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
+              this.poll(connectionConfig, pollTime); 
+              this.on('close', function () {
+                if(this.pollTimeoutPoll)
+                  clearTimeout(this.pollTimeoutPoll);
+              }); 
+            }
           }
         } catch (err) {
           console.log(err);
