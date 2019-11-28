@@ -16,8 +16,16 @@ module.exports = function (RED) {
           this.propertyId = config.property;
           this.propertyName = config.name;
           var token =connectionManager.getToken(connectionConfig.credentials.clientid);
-          connectionManager.mqttClient.readProperty(connectionConfig.credentials.clientid, token,this.thing, this.propertyName, this.update )
-          this.poll(connectionConfig);
+          connectionManager.mqttClient.readProperty(connectionConfig.credentials.clientid, token,this.thing, this.propertyName, this.update );
+
+          this.on('close', function(done) {
+            await connectionManager.mqttClient.disconnect(connectionConfig.credentials.clientid,this.thing, this.propertyName);
+
+            done();
+
+        });
+
+          //this.poll(connectionConfig);
         } catch (err) {
           console.log(err);
         }
