@@ -161,7 +161,11 @@ module.exports = function (RED) {
             this.propertyName = config.name;
             const pollTime = this.timeWindowCount * this.timeWindowUnit;
             if(pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
-              this.poll(connectionConfig, pollTime);  
+              this.poll(connectionConfig, pollTime); 
+              this.on('close', function () {
+                if(this.pollTimeoutPoll)
+                  clearTimeout(this.pollTimeoutPoll);
+              }); 
             }
           }
         } catch (err) {
