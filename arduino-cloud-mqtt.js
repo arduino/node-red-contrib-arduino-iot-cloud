@@ -1,4 +1,4 @@
-import ArduinoClientMqtt from './arduino-iot-client-mqtt';
+import ArduinoClientMqtt from 'arduino-iot-client-mqtt';
 
 /**
  * {
