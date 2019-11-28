@@ -5,6 +5,10 @@
     return (v !== null && v !== "" && v !== undefined);
   }
 
+  function validateTime(v) {
+    return (v !== null && v !== "" && v !== undefined && Number.isInteger(parseInt(v)) && parseInt(v) !== 0);
+  }
+
   function getDefaults(nodeName){
     var ret={connection: { type: "arduino-connection", validate: validator },
         thing: { value: "", validate: validator },
@@ -15,7 +19,7 @@
       };
 
     if (nodeName === "property in hist" || nodeName === "property in poll"){
-      ret['timeWindowCount'] = { value: 1, validate: RED.validators.number(), required: true };
+      ret['timeWindowCount'] = { value: 1, validate: validateTime};
       ret['timeWindowUnit'] = { value: '3600', required: true };
     }
     return ret;
