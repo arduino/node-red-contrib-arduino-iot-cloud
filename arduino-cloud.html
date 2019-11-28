@@ -47,17 +47,18 @@
           initThings(this.connection, this.thing);
           initProperties(this.connection, this.thing, this.property, outs);
         }
-        $("select#node-input-connection").change(() => {
+        $("select#node-input-connection").change((e) => {
           const connection = $("#node-input-connection").val();
+          const thing_id = $("#node-input-thing").val();
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
           if(connection === "_ADD_") {
-            $("<option value='" + "" + "'> " + "Select a connection" + "</option>").appendTo("#node-input-thing");
+            $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-thing");
             if(this.defaultname){
               $("#node-input-name").val("");
             }
           }
-          if (this.connection !== connection && connection !== "_ADD_") {
+          if ((this.connection !== connection && connection !== "_ADD_") || thing_id === "") {
             initThings(connection);
           }
           $("#node-input-thing").trigger("change");
@@ -70,15 +71,14 @@
             initProperties(connection, thing_id, undefined, outs);
           } else if (connection === "_ADD_") {
             $("select#node-input-property").empty();
-            $("<option value='" + "" + "'> " + "Select a connection" + "</option>").appendTo("#node-input-property");
+            $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-property");
           } else {
             $("select#node-input-property").empty();
-            $("<option value='" + "" + "'> " + "Select a thing" + "</option>").appendTo("#node-input-property");
+            $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
           } 
           $("#node-input-property").trigger("change");
         });
         $("#node-input-property").change(() => {
-          debugger;
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
           if (property_name !== "" && property_value !== "" && property_value !== undefined && this.defaultname) {
