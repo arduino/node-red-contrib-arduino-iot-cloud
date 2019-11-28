@@ -1,5 +1,5 @@
 const arduinCloudRestApi = require('./arduino-cloud-api');
-const mqttClient = require('./arduino-handler-mqtt');
+const mqttClient = require('./arduino-cloud-mqtt');
 const request = require("async-request");
 
 var ArduinoRestClient = new arduinCloudRestApi.ArduinoCloudClient();
