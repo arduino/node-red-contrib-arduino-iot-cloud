@@ -1,10 +1,11 @@
-import ArduinoCloud from 'arduino-iot-client-mqtt';
+import ArduinoClientMqtt from 'arduino-iot-client-mqtt';
 
 /**
  * {
  *  user: clientid,
  *  mqttClient: obj,
- *  connected: connected
+ *  connected: connected,
+ *  numSubscriptions: num
  * }
  */
 var connections=[];
@@ -17,35 +18,50 @@ async function readProperty(clientId,token, thingId, propertyName, callback){
     token: token,
     apiUrl: "https://auth-dev.arduino.cc",
     onDisconnect: () => {
-      disconnect(clientId);
+      disconnected(clientId);
       console.log(`connection lost for ${clientId}`);
     }
   };
 
   if(client === -1){
-    mqttobj= Object.create(ArduinoCloud);
+    mqttobj= new ArduinoClientMqtt();
     await mqttobj.connect(ArduinoCloudOptions);
     connections.push({
       clientId: clientId,
       mqttClient:   mqttobj,
-      connected: true
+      connected: true,
+      numSubscriptions: 0
     });
     client= connections.length -1;
   }else{
     mqttobj=connections[client].mqttClient;
+
   }
   if(connections[client].connected===false){
     await mqttobj.connect(ArduinoCloudOptions);
     connections[client].connected=true;
   }
 
-  await onPropertyValue(thingId, propertyName, callback);
+  await mqttobj.onPropertyValue(thingId, propertyName, callback);
+  connections[client].numSubscriptions++;
+}
+
+async function disconnect(clientId, thingId, propertyName){
+  var client = findUser(clientId);
+  var mqttobj = connections[client].mqttClient;
+  await mqttobj.removePropertyValueCallback(thingId, propertyName);
+  connections[client].numSubscriptions--;
+  if(connections[client].numSubscriptions===0){
+    await mqttobj.disconnect();
+    connections.splice(client,1);
+  }
 
 }
 
-function disconnect(clientId){
+function disconnected(clientId){
   var client = findUser(clientId);
   connections[client].connected=false;
+
 }
 
 
@@ -60,3 +76,4 @@ function findUser(clientId) {
 }
 
 exports.readProperty = readProperty;
+exports.disconnect = disconnect;
