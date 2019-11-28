@@ -45,7 +45,7 @@ async function connect(connectionConfig) {
       rawdata = await request(accessTokenUri, options);
       data = JSON.parse(rawdata.body);
       token = data.access_token;
-      expires_in = data.expires_in;
+      expires_in = data.expires_in*1000;
       if (token !== undefined) {
         if (user === -1) {
           const newIds = {
