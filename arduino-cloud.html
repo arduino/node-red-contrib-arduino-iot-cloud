@@ -160,6 +160,7 @@
     if (!queryString || queryString === "")
       return;
     $.getJSON(`things?${queryString}`, things => {
+      $("select#node-input-thing").empty();
       if (things && typeof (things) == "object" && things.error) {
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
       } else if (things && Array.isArray(things) && things.length !== 0) {
@@ -183,6 +184,7 @@
     queryString = `${queryString}&thing_id=${thing_id}`;
     $("#node-input-property").html("");
     $.getJSON(`properties?${queryString}`, properties => {
+      $("select#node-input-property").empty();
       if (properties && typeof (properties) == "object" && properties.error) {
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
       } else if ((properties && Array.isArray(properties) && properties.length !== 0)) {
