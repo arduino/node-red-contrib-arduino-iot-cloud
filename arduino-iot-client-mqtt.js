@@ -65,7 +65,7 @@ class clientMqtt{
 
   // Connect establishes a connection with mqtt, using token as the password, and returns a promise
 // of a Symbol identifying the mqtt client
-  connect = options => new Promise((resolve, reject) => {
+  connect(options){ return new Promise((resolve, reject) => {
     let ssl = false;
     if (options.ssl !== false) {
       ssl = true;
@@ -223,8 +223,8 @@ class clientMqtt{
 
     client.connect(connectionOpts);
   });
-
-  disconnect = () => new Promise((resolve, reject) => {
+  }
+  disconnect() {return new Promise((resolve, reject) => {
     if (!this.connection) {
       return reject(new Error('disconnection failed: connection closed'));
     }
@@ -252,8 +252,8 @@ class clientMqtt{
 
     return resolve();
   });
-
-  updateToken = async function updateToken(token) {
+  }
+  async updateToken(token) {
     // This infinite loop will exit once the reconnection is successful -
     // and will pause between each reconnection tentative, every 5 secs.
     // eslint-disable-next-line no-constant-condition
@@ -296,7 +296,7 @@ class clientMqtt{
     }
   };
 
-  subscribe = (topic, cb) => new Promise((resolve, reject) => {
+  subscribe(topic, cb){ return new Promise((resolve, reject) => {
     if (!this.connection) {
       return reject(new Error('subscription failed: connection closed'));
     }
@@ -312,8 +312,8 @@ class clientMqtt{
       onFailure: error => reject(new Error(`subscription failed: ${error.errorMessage}`)),
     });
   });
-
-  unsubscribe = topic => new Promise((resolve, reject) => {
+  }
+  unsubscribe(topic) { return new Promise((resolve, reject) => {
     if (!this.connection) {
       return reject(new Error('disconnection failed: connection closed'));
     }
@@ -323,8 +323,8 @@ class clientMqtt{
       onFailure: () => reject(),
     });
   });
-
-  arrayBufferToBase64 = (buffer) => {
+  }
+  arrayBufferToBase64(buffer) {
     let binary = '';
     const bytes = new Uint8Array(buffer);
     const len = bytes.byteLength;
@@ -334,7 +334,7 @@ class clientMqtt{
     return window.btoa(binary);
   };
 
-  sendMessage = (topic, message) => new Promise((resolve, reject) => {
+  sendMessage(topic, message){ return new Promise((resolve, reject) => {
     if (!this.connection) {
       return reject(new Error('disconnection failed: connection closed'));
     }
@@ -342,24 +342,25 @@ class clientMqtt{
     this.connection.publish(topic, message, 1, false);
     return resolve();
   });
+  }
 
-  openCloudMonitor = (deviceId, cb) => {
+  openCloudMonitor(deviceId, cb){
     const cloudMonitorOutputTopic = `/a/d/${deviceId}/s/o`;
     return subscribe(cloudMonitorOutputTopic, cb);
   };
 
 
-  writeCloudMonitor = (deviceId, message) => {
+  writeCloudMonitor(deviceId, message){
     const cloudMonitorInputTopic = `/a/d/${deviceId}/s/i`;
     return sendMessage(cloudMonitorInputTopic, message);
   };
 
-  closeCloudMonitor = (deviceId) => {
+  closeCloudMonitor(deviceId){
     const cloudMonitorOutputTopic = `/a/d/${deviceId}/s/o`;
     return unsubscribe(cloudMonitorOutputTopic);
   };
 
-  toCloudProtocolV2 = (cborValue) => {
+  toCloudProtocolV2(cborValue){
     const cloudV2CBORValue = {};
     let cborLabel = null;
 
@@ -420,7 +421,7 @@ class clientMqtt{
     return cloudV2CBORValue;
   };
 
-  sendProperty = (thingId, name, value, timestamp) => {
+  sendProperty(thingId, name, value, timestamp) {
     const propertyInputTopic = `/a/t/${thingId}/e/i`;
 
     if (timestamp && !Number.isInteger(timestamp)) {
@@ -495,7 +496,7 @@ class clientMqtt{
     return sendMessage(propertyInputTopic, CBOR.encode([cborValue], true));
   };
 
-  getSenml = (deviceId, name, value, timestamp) => {
+  getSenml(deviceId, name, value, timestamp) {
     if (timestamp && !Number.isInteger(timestamp)) {
       throw new Error('Timestamp must be Integer');
     }
@@ -577,12 +578,12 @@ class clientMqtt{
     return senMl;
   };
 
-  getCborValue = (senMl) => {
+  getCborValue(senMl) {
     const cborEncoded = CBOR.encode(senMl);
     return arrayBufferToBase64(cborEncoded);
   };
 
-  onPropertyValue = (thingId, name, cb) => {
+  onPropertyValue(thingId, name, cb){
     if (!name) {
       throw new Error('Invalid property name');
     }
@@ -610,7 +611,7 @@ class clientMqtt{
   };
 
 
-  removePropertyValueCallback = (thingId, name) => {
+  removePropertyValueCallback(thingId, name)  {
     if (!name) {
       throw new Error('Invalid property name');
     }
