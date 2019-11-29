@@ -54,12 +54,13 @@ const arduinoCloudPort = 8443;
 const arduinoCloudHost = 'wss.iot.arduino.cc';
 const arduinoAuthURL = 'https://auth.arduino.cc';
 
-class MQTT{
+class clientMqtt{
   constructor(){
     this.connection = null;
     this.connectionOptions = null;
     this.subscribedTopics = {};
     this.propertyCallback = {};
+    this.numSubscriptions = 0;
   }
 
   // Connect establishes a connection with mqtt, using token as the password, and returns a promise
@@ -603,6 +604,7 @@ class MQTT{
 
     if (this.propertyCallback[propOutputTopic] && !this.propertyCallback[propOutputTopic][name]) {
       this.propertyCallback[propOutputTopic][name] = cb;
+      this.numSubscriptions++;
     }
     return Promise.resolve(propOutputTopic);
   };
@@ -614,7 +616,10 @@ class MQTT{
     }
     const propOutputTopic = `/a/t/${thingId}/e/o`;
     delete this.propertyCallback[propOutputTopic][name];
-    return Promise.resolve(propOutputTopic);
+    this.numSubscriptions--;
+
+    return Promise.resolve( this.numSubscriptions);
   };
 }
 
+exports.clientMqtt = clientMqtt;

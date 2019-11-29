@@ -1,4 +1,4 @@
-import ArduinoClientMqtt from './arduino-iot-client-mqtt';
+const ArduinoClientMqtt = require ('./arduino-iot-client-mqtt');
 
 /**
  * {
@@ -20,7 +20,8 @@ async function readProperty(clientId,token, thingId, propertyName, callback){
     onDisconnect: () => {
       disconnected(clientId);
       console.log(`connection lost for ${clientId}`);
-    }
+    },
+    useCloudProtocolV2: true
   };
 
   if(client === -1){
