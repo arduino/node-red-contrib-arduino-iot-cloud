@@ -202,7 +202,6 @@ module.exports = function (RED) {
   ArduinoIotInputPoll.prototype = {
     poll: async function (connectionConfig, pollTime) {
       try {
-        await connectionManager.connect(connectionConfig);
         const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
         this.send(
           {
