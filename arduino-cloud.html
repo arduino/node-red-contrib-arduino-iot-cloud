@@ -58,7 +58,7 @@
               $("#node-input-name").val("");
             }
           }
-          if ((this.connection !== connection && connection !== "_ADD_") || thing_id === "") {
+          if ((this.connection !== connection || thing_id === "") && connection !== "_ADD_") {
             initThings(connection);
           }
           $("#node-input-thing").trigger("change");
