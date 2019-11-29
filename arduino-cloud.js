@@ -10,20 +10,16 @@ module.exports = function (RED) {
       this.lastValue = undefined;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          await connectionManager.connect(connectionConfig);
-          this.arduinoRestClient = connectionManager.apiRest;
+
+          this.arduinoClient = await connectionManager.getClientMqtt(connectionConfig);
           this.thing = config.thing;
           this.propertyId = config.property;
           this.propertyName = config.name;
-          var token =connectionManager.getToken(connectionConfig.credentials.clientid);
-          connectionManager.mqttClient.readProperty(connectionConfig.credentials.clientid, token,this.thing, this.propertyName, this.update );
+          await this.arduinoClient.onPropertyValue( this.thing, this.propertyName, this.update);
 
           this.on('close', function(done) {
-            await connectionManager.mqttClient.disconnect(connectionConfig.credentials.clientid,this.thing, this.propertyName);
-
-            done();
-
-        });
+            connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.propertyName).then(() =>{done();});
+          });
 
           //this.poll(connectionConfig);
         } catch (err) {
@@ -81,15 +77,14 @@ module.exports = function (RED) {
       const connectionConfig = RED.nodes.getNode(config.connection);
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          await connectionManager.connect(connectionConfig);
+
           if (config.thing !== "" && config.property !== "") {
-            this.arduinoRestClient = connectionManager.apiRest;
+            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
             this.thing = config.thing;
             this.propertyId = config.property;
             this.propertyName = config.name;
             this.on('input', async function (msg) {
               try {
-                await connectionManager.connect(connectionConfig);
                 this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
                 const s = getStatus(msg.payload);
                 if (s != undefined)
@@ -100,6 +95,9 @@ module.exports = function (RED) {
                 console.log(err);
                 this.status({ fill: "red", shape: "dot", text: "Error setting value" });
               }
+            });
+            this.on('close', function() {
+              connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
             });
           }
         } catch (err) {
@@ -120,7 +118,7 @@ module.exports = function (RED) {
       this.timeWindowUnit = config.timeWindowUnit;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          this.arduinoRestClient = connectionManager.apiRest;
+          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
           if (config.thing !== "" && config.property !== "") {
             this.thing = config.thing;
             this.propertyId = config.property;
@@ -131,7 +129,7 @@ module.exports = function (RED) {
               const count = this.timeWindowCount
               if(count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
                 const start = now.subtract(count * this.timeWindowUnit, 'second').format();
-                await connectionManager.connect(connectionConfig);
+
                 const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
                 const times = result.responses[0].times;
                 const values = result.responses[0].values;
@@ -155,6 +153,10 @@ module.exports = function (RED) {
                 );
               }
             });
+
+            this.on('close', function() {
+              connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+            });
           }
         } catch (err) {
           console.log(err);
@@ -174,18 +176,20 @@ module.exports = function (RED) {
       this.timeWindowUnit = config.timeWindowUnit;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          this.arduinoRestClient = connectionManager.apiRest;
+          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
           if (config.thing !== "" && config.property !== "") {
             this.thing = config.thing;
             this.propertyId = config.property;
             this.propertyName = config.name;
             const pollTime = this.timeWindowCount * this.timeWindowUnit;
             if(pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
-              this.poll(connectionConfig, pollTime); 
+              this.poll(connectionConfig, pollTime);
               this.on('close', function () {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
                 if(this.pollTimeoutPoll)
                   clearTimeout(this.pollTimeoutPoll);
-              }); 
+
+              });
             }
           }
         } catch (err) {
@@ -229,14 +233,14 @@ module.exports = function (RED) {
       const node = this;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          await connectionManager.connect(connectionConfig);
+
           if (config.thing !== "" && config.property !== "") {
-            this.arduinoRestClient = connectionManager.apiRest;
+            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
             this.thing = config.thing;
             this.propertyId = config.property;
             this.propertyName = config.name;
             node.on('input', async function () {
-              await connectionManager.connect(connectionConfig);
+
               const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
               this.send(
                 {
@@ -250,6 +254,9 @@ module.exports = function (RED) {
                 this.status({ fill: "grey", shape: "dot", text: s });
               else
                 this.status({});
+            });
+            this.on('close', function () {
+              connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
             });
           }
         } catch (err) {
