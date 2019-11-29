@@ -1,4 +1,4 @@
-import ArduinoClientMqtt from './arduino-iot-client-mqtt';
+const ArduinoClientMqtt = require ('./arduino-iot-client-mqtt');
 
 /**
  * {
