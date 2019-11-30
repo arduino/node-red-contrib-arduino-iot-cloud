@@ -28,7 +28,7 @@ const apiProperties = new ArduinoIotClient.PropertiesV2Api(client);
 const apiSeries = new ArduinoIotClient.SeriesV2Api(client);
 const apiThings = new ArduinoIotClient.ThingsV2Api(client);
 
-class arduinClientHttp {
+class ArduinClientHttp {
   constructor(token) {
     this.token = token;
 
@@ -74,4 +74,4 @@ class arduinClientHttp {
     return apiSeries.seriesV2BatchQueryRaw(body);
   }
 }
-exports.arduinClientHttp = arduinClientHttp;
+exports.ArduinClientHttp = ArduinClientHttp;
