@@ -1,5 +1,5 @@
 const request = require("async-request");
-const arduinClientHttp = require('./arduino-cloud-api');
+const ArduinClientHttp = require('./arduino-cloud-api');
 const ArduinoClientMqtt = require ('./arduino-iot-client-mqtt');
 //import { mqttClient } from './arduino-connection-manager_old';
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
@@ -52,12 +52,12 @@ async function getClientMqtt(connectionConfig){
     throw new Error("Cannot find cooonection config or credentials.");
   }
   try{
-  var user = findUser(clientId);
-  var clientMqtt;
+  let user = findUser(connectionConfig.credentials.clientid);
+  let clientMqtt;
   if(user === -1){
 
-    clientMqtt = new ArduinoClientMqtt();
-    var tokenInfo = await getToken(connectionConfig);
+    clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
+    const tokenInfo = await getToken(connectionConfig);
     if(tokenInfo !==undefined){
       const ArduinoCloudOptions = {
         host: "wss.iot.oniudra.cc",
@@ -70,7 +70,7 @@ async function getClientMqtt(connectionConfig){
         useCloudProtocolV2: true
       };
       await clientMqtt.connect(ArduinoCloudOptions);
-      var timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
+      const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
       connections.push({
         clientId: connectionConfig.credentials.clientid,
         connectionConfig: connectionConfig,
@@ -80,13 +80,15 @@ async function getClientMqtt(connectionConfig){
         clientHttp: null,
         timeoutUpdateToken: timeout
       });
+    } else {
+      // TODO: what happens when token is undefined?
+      clientMqtt = undefined;
     }
-
   } else{
     if(connections[user].clientMqtt !== null){
       clientMqtt = connections[user].clientMqtt;
     }else{
-      clientMqtt = new ArduinoClientMqtt();
+      clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
       const ArduinoCloudOptions = {
         host: "wss.iot.oniudra.cc",
         token: connections[user].token,
@@ -113,13 +115,13 @@ async function getClientHttp(connectionConfig){
     throw new Error("Cannot find cooonection config or credentials.");
   }
   try{
-  var user = findUser(clientId);
+  var user = findUser(connectionConfig.credentials.clientid);
   var clientHttp;
   if(user === -1){
 
     var tokenInfo = await getToken(connectionConfig);
     if(tokenInfo !==undefined){
-      clientHttp= new arduinClientHttp(tokenInfo.token);
+      clientHttp= new ArduinClientHttp.ArduinClientHttp(tokenInfo.token);
       var timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
       connections.push({
         clientId: connectionConfig.credentials.clientid,
@@ -137,7 +139,7 @@ async function getClientHttp(connectionConfig){
     if(connections[user].clientHttp !== null){
       clientHttp = connections[user].clientHttp;
     }else{
-      clientHttp = new arduinClientHttp(connections[user].token);
+      clientHttp = new ArduinClientHttp.ArduinClientHttp(connections[user].token);
 
       connections[user].clientHttp=clientHttp;
     }
@@ -176,11 +178,12 @@ async function updateToken(connectionConfig){
   }
 }
 
-async function deleteClientMqtt(clientId, propertyName ){
+async function deleteClientMqtt(clientId, thing, propertyName ){
   var user = findUser(clientId);
   if(user !== -1){
     if(connections[user].clientMqtt !== null){
-      var ret = await connections[user].clientMqtt.removePropertyValueCallback(clientId, propertyName);
+      var ret = await connections[user].clientMqtt.removePropertyValueCallback(thing, propertyName);
+      // TODO: NOT CLEAR WHAT FOLLOWS. SHOULD BE -1 INSTEAD OF 0 ?
       if(ret === 0){
         await connections[user].clientMqtt.disconnect();
         delete connections[user].clientMqtt;

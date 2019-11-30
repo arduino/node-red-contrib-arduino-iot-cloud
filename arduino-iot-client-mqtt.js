@@ -54,7 +54,7 @@ const arduinoCloudPort = 8443;
 const arduinoCloudHost = 'wss.iot.arduino.cc';
 const arduinoAuthURL = 'https://auth.arduino.cc';
 
-class clientMqtt{
+class ArduinoClientMqtt{
   constructor(){
     this.connection = null;
     this.connectionOptions = null;
@@ -600,7 +600,7 @@ class clientMqtt{
     if (!this.propertyCallback[propOutputTopic]) {
       this.propertyCallback[propOutputTopic] = {};
       this.propertyCallback[propOutputTopic][name] = cb;
-      return subscribe(propOutputTopic, cb);
+      return this.subscribe(propOutputTopic, cb);
     }
 
     if (this.propertyCallback[propOutputTopic] && !this.propertyCallback[propOutputTopic][name]) {
@@ -623,4 +623,4 @@ class clientMqtt{
   };
 }
 
-exports.clientMqtt = clientMqtt;
+exports.ArduinoClientMqtt = ArduinoClientMqtt;
