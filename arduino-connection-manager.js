@@ -1,7 +1,6 @@
 const request = require("async-request");
 const ArduinClientHttp = require('./arduino-cloud-api');
 const ArduinoClientMqtt = require ('./arduino-iot-client-mqtt');
-//import { mqttClient } from './arduino-connection-manager_old';
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 
@@ -100,7 +99,7 @@ async function getClientMqtt(connectionConfig){
         useCloudProtocolV2: true
       };
       await clientMqtt.connect(ArduinoCloudOptions);
-      connections[user].clientMqtt=mqttClient;
+      connections[user].clientMqtt=clientMqtt;
     }
   }
   return clientMqtt;
