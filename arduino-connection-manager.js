@@ -3,6 +3,7 @@ const ArduinClientHttp = require('./arduino-cloud-api');
 const ArduinoClientMqtt = require ('./arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
+const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
 
 /**
  * {
@@ -59,9 +60,8 @@ async function getClientMqtt(connectionConfig){
     const tokenInfo = await getToken(connectionConfig);
     if(tokenInfo !==undefined){
       const ArduinoCloudOptions = {
-        host: "wss.iot.oniudra.cc",
+        host: arduinoCloudHost,
         token: tokenInfo.token,
-        apiUrl: "https://auth-dev.arduino.cc",
         onDisconnect: () => {
           disconnected(clientId);
           console.log(`connection lost for ${clientId}`);

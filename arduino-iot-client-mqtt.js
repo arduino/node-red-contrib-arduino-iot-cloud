@@ -52,7 +52,6 @@ const ArduinoCloudError = require('./ArduinoCloudError');
 
 const arduinoCloudPort = 8443;
 const arduinoCloudHost = 'wss.iot.arduino.cc';
-const arduinoAuthURL = 'https://auth.arduino.cc';
 
 class ArduinoClientMqtt{
   constructor(){
@@ -73,7 +72,6 @@ class ArduinoClientMqtt{
     const opts = {
       host: options.host || arduinoCloudHost,
       port: options.port || arduinoCloudPort,
-      apiUrl: options.apiUrl || arduinoAuthURL,
       ssl,
       token: options.token,
       onDisconnect: options.onDisconnect,
@@ -94,10 +92,6 @@ class ArduinoClientMqtt{
 
     if (!opts.token) {
       return reject(new Error('connection failed: you need to provide a valid token'));
-    }
-
-    if (!opts.apiUrl) {
-      return reject(new Error('no apiUrl parameter is provided'));
     }
 
     const userid = jws.decode(options.token).payload["http://arduino.cc/user_id"];
