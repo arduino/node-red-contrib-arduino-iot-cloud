@@ -1,4 +1,4 @@
-const connectionManager = require("./arduino-connection-manager");
+const connectionManager = require("./utils/arduino-connection-manager");
 const moment = require("moment");
 const _ = require('lodash');
 

@@ -1,6 +1,6 @@
 const request = require("async-request");
-const ArduinClientHttp = require('./arduino-cloud-api');
-const ArduinoClientMqtt = require ('./arduino-iot-client-mqtt');
+const ArduinClientHttp = require('./arduino-cloud-api-wrapper');
+const ArduinoClientMqtt = require ('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
