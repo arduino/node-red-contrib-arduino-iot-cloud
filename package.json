@@ -24,7 +24,6 @@
     "jws": "^3.2.2",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
-    "paho-client": "github:bcmi-labs/paho.mqtt.javascript",
-    "ws": "^7.2.0"
+    "mqtt": "^3.0.0"
   }
 }

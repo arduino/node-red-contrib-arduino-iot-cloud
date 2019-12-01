@@ -63,6 +63,7 @@ async function getClientMqtt(connectionConfig){
         host: arduinoCloudHost,
         token: tokenInfo.token,
         onDisconnect: () => {
+          // TODO: cosa vuol dire ?
           disconnected(clientId);
           console.log(`connection lost for ${clientId}`);
         },
@@ -91,7 +92,6 @@ async function getClientMqtt(connectionConfig){
       const ArduinoCloudOptions = {
         host: "wss.iot.oniudra.cc",
         token: connections[user].token,
-        apiUrl: "https://auth-dev.arduino.cc",
         onDisconnect: () => {
           disconnected(clientId);
           console.log(`connection lost for ${clientId}`);

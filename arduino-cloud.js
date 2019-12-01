@@ -15,7 +15,7 @@ module.exports = function (RED) {
           this.propertyId = config.property;
           this.propertyName = config.propname;
           this.arduinoClient = await connectionManager.getClientMqtt(connectionConfig);
-          if (this.arduinoClient && this.arduinoClient.connection.isConnected()) {
+          if (this.arduinoClient && this.arduinoClient.connection.connected) {
             await this.arduinoClient.onPropertyValue(this.thing, this.propertyName, (msg) => {
               this.send(
                 {
