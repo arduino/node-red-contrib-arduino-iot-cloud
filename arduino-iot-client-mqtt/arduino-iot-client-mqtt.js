@@ -43,9 +43,7 @@
      +---------------+-------+------------+------------+------------+
 */
 
-const WebSocket = require('ws');
-global.WebSocket = WebSocket;
-const Paho = require('paho-client');
+const mqtt = require('mqtt');
 const CBOR = require('@arduino/cbor-js');
 const jws = require('jws');
 const ArduinoCloudError = require('./ArduinoCloudError');
@@ -53,8 +51,8 @@ const ArduinoCloudError = require('./ArduinoCloudError');
 const arduinoCloudPort = 8443;
 const arduinoCloudHost = 'wss.iot.arduino.cc';
 
-class ArduinoClientMqtt{
-  constructor(){
+class ArduinoClientMqtt {
+  constructor() {
     this.connection = null;
     this.connectionOptions = null;
     this.subscribedTopics = {};
@@ -63,189 +61,157 @@ class ArduinoClientMqtt{
   }
 
   // Connect establishes a connection with mqtt, using token as the password, and returns a promise
-// of a Symbol identifying the mqtt client
-  connect(options){ return new Promise((resolve, reject) => {
-    let ssl = false;
-    if (options.ssl !== false) {
-      ssl = true;
-    }
-    const opts = {
-      host: options.host || arduinoCloudHost,
-      port: options.port || arduinoCloudPort,
-      ssl,
-      token: options.token,
-      onDisconnect: options.onDisconnect,
-      onTrace: options.onTrace,
-      onConnected: options.onConnected,
-      useCloudProtocolV2: options.useCloudProtocolV2 || false,
-    };
-
-    this.connectionOptions = opts;
-
-    if (this.connection) {
-      return reject(new Error('connection failed: connection already open'));
-    }
-
-    if (!opts.host) {
-      return reject(new Error('connection failed: you need to provide a valid host (broker)'));
-    }
-
-    if (!opts.token) {
-      return reject(new Error('connection failed: you need to provide a valid token'));
-    }
-
-    const userid = jws.decode(options.token).payload["http://arduino.cc/user_id"];
-    const clientID = `${userid}:${new Date().getTime()}`;
-    const client = new Paho.Client(opts.host, opts.port, clientID);
-    client.topics = {};
-    client.properties = {};
-
-    client.onMessageArrived = (msg) => {
-      if (msg.topic.indexOf('/s/o') > -1) {
-        client.topics[msg.topic].forEach((cb) => {
-          cb(msg.payloadString);
-        });
-      } else {
-        const buf = new ArrayBuffer(msg.payloadBytes.length);
-        const bufView = new Uint8Array(buf);
-        for (let i = 0, strLen = msg.payloadBytes.length; i < strLen; i += 1) {
-          bufView[i] = msg.payloadBytes[i];
-        }
-
-        const propertyValue = CBOR.decode(buf);
-        const propertyNameId = 0;
-        const attributeNameId = 1;
-
-        let valueToSend = {};
-        let propertyNameKeyPrevious = '';
-        let propertyNameKey = '';
-        propertyValue.forEach((p) => {
-          // Support cbor labels
-          propertyNameKey = p.n !== undefined ? p.n : p['0'];
-          const propertyNameKeySplit = propertyNameKey.split(':');
-
-          const valueKey = p.v !== undefined ? 'v' : '2';
-          const valueStringKey = p.vs !== undefined ? 'vs' : '3';
-          const valueBooleanKey = p.vb !== undefined ? 'vb' : '4';
-          let value = null;
-          propertyNameKey = propertyNameKeySplit[propertyNameId];
-          if (this.propertyCallback[msg.topic][propertyNameKey]) {
-            if (!(p[valueKey] === undefined)) {
-              value = p[valueKey];
-            } else if (!(p[valueStringKey] === undefined)) {
-              value = p[valueStringKey];
-            } else if (!(p[valueBooleanKey] === undefined)) {
-              value = p[valueBooleanKey];
-            }
-          }
-          if (propertyNameKeyPrevious === '') {
-            propertyNameKeyPrevious = propertyNameKeySplit[propertyNameId];
-          }
-          if (propertyNameKeyPrevious !== propertyNameKey) {
-            if (this.propertyCallback[msg.topic][propertyNameKeyPrevious]) {
-              this.propertyCallback[msg.topic][propertyNameKeyPrevious](valueToSend);
-            }
-            propertyNameKeyPrevious = propertyNameKey;
-            valueToSend = {};
-          }
-          if (propertyNameKeySplit.length === 1 && value !== null) {
-            valueToSend = value;
-          } else {
-            const attributeName = propertyNameKeySplit[attributeNameId];
-            valueToSend[attributeName] = value;
-          }
-        });
-        if (valueToSend !== {} && this.propertyCallback[msg.topic][propertyNameKey]) {
-          this.propertyCallback[msg.topic][propertyNameKey](valueToSend);
-        }
+  // of a Symbol identifying the mqtt client
+  connect(options) {
+    return new Promise((resolve, reject) => {
+      let ssl = false;
+      if (options.ssl !== false) {
+        ssl = true;
       }
-    };
+      this.opts = {
+        host: options.host || arduinoCloudHost,
+        port: options.port || arduinoCloudPort,
+        ssl,
+        token: options.token,
+        onDisconnect: options.onDisconnect,
+        onConnected: options.onConnected,
+        useCloudProtocolV2: options.useCloudProtocolV2 || false,
+      };
 
-    client.onConnected = (reconnect) => {
-      const reconnectPromises = [];
-
-      if (reconnect === true) {
-        // This is a re-connection: re-subscribe to all topics subscribed before the
-        // connection loss
-        Object.values(this.subscribedTopics).forEach((subscribeParams) => {
-          reconnectPromises.push(() => subscribe(subscribeParams.topic, subscribeParams.cb));
-        });
+      if (this.connection) {
+        return reject(new Error('connection failed: connection already open'));
       }
 
-      return Promise.all(reconnectPromises)
-        .then(() => {
-          if (typeof opts.onConnected === 'function') {
-            opts.onConnected(reconnect);
-          }
-        });
-    };
+      if (!this.opts.host) {
+        return reject(new Error('connection failed: you need to provide a valid host (broker)'));
+      }
 
-    if (typeof onDisconnect === 'function') {
-      client.onConnectionLost = opts.onDisconnect;
-    }
+      if (!this.opts.token) {
+        return reject(new Error('connection failed: you need to provide a valid token'));
+      }
 
-    const connectionOpts = {
-      useSSL: opts.ssl,
-      timeout: 30,
-      mqttVersion: 4,
-      userName: userid,
-      // password: token,
-      mqttVersionExplicit: true,
-      // If reconnect is set to true, in the event that the connection is lost, the client will
-      // attempt to reconnect to the server. It will initially wait 1 second before it attempts
-      // to reconnect, for every failed reconnect attempt, the delay will double until it is at
-      // 2 minutes at which point the delay will stay at 2 minutes.
-      reconnect: true,
-      keepAliveInterval: 30,
-      onSuccess: () => {
+      const userid = jws.decode(options.token).payload["http://arduino.cc/user_id"];
+      const clientID = `${userid}:${new Date().getTime()}`;
+      const connectionOpts = {
+        clientId: clientID,
+        username: userid,
+        password: this.opts.token,
+        properties: {},
+        protocolVersion: 4,
+        connectTimeout: 30000,
+        keepalive: 30
+      };
+
+      const client = mqtt.connect('wss://' + this.opts.host + ':' + this.opts.port + '/mqtt', connectionOpts);
+
+      client.topics = {};
+
+      client.on("connect", () => {
         this.connection = client;
         return resolve(this.connection);
-      },
-      onFailure: ({ errorCode, errorMessage }) => reject(
-        new ArduinoCloudError(errorCode, errorMessage),
-      ),
-    };
+      });
 
+      client.on("error", (err) => {
+        reject(
+          new ArduinoCloudError(errorCode, errorMessage),
+        );
+      });
+      
+      client.on("message", (topic, msg) => {
+        if (topic.indexOf('/s/o') > -1) {
+          client.topics[topic].forEach((cb) => {
+            cb(msg.toString());
+          });
+        } else {
+          // const buf = new ArrayBuffer(msg.payloadBytes.length);
+          // const bufView = new Uint8Array(buf);
+          // for (let i = 0, strLen = msg.payloadBytes.length; i < strLen; i += 1) {
+          //   bufView[i] = msg.payloadBytes[i];
+          // }
 
-    connectionOpts.password = opts.token;
+          const propertyValue = CBOR.decode(toArrayBuffer(msg));
+          const propertyNameId = 0;
+          const attributeNameId = 1;
 
-    if (typeof opts.onTrace === 'function') {
-      client.trace = (log) => {
-        opts.onTrace(log);
-      };
-    }
+          let valueToSend = {};
+          let propertyNameKeyPrevious = '';
+          let propertyNameKey = '';
+          propertyValue.forEach((p) => {
+            // Support cbor labels
+            propertyNameKey = p.n !== undefined ? p.n : p['0'];
+            const propertyNameKeySplit = propertyNameKey.split(':');
 
-    client.connect(connectionOpts);
-  });
-  }
-  disconnect() {return new Promise((resolve, reject) => {
-    if (!this.connection) {
-      return reject(new Error('disconnection failed: connection closed'));
-    }
+            const valueKey = p.v !== undefined ? 'v' : '2';
+            const valueStringKey = p.vs !== undefined ? 'vs' : '3';
+            const valueBooleanKey = p.vb !== undefined ? 'vb' : '4';
+            let value = null;
+            propertyNameKey = propertyNameKeySplit[propertyNameId];
+            if (this.propertyCallback[topic][propertyNameKey]) {
+              if (!(p[valueKey] === undefined)) {
+                value = p[valueKey];
+              } else if (!(p[valueStringKey] === undefined)) {
+                value = p[valueStringKey];
+              } else if (!(p[valueBooleanKey] === undefined)) {
+                value = p[valueBooleanKey];
+              }
+            }
+            if (propertyNameKeyPrevious === '') {
+              propertyNameKeyPrevious = propertyNameKeySplit[propertyNameId];
+            }
+            if (propertyNameKeyPrevious !== propertyNameKey) {
+              if (this.propertyCallback[topic][propertyNameKeyPrevious]) {
+                this.propertyCallback[topic][propertyNameKeyPrevious](valueToSend);
+              }
+              propertyNameKeyPrevious = propertyNameKey;
+              valueToSend = {};
+            }
+            if (propertyNameKeySplit.length === 1 && value !== null) {
+              valueToSend = value;
+            } else {
+              const attributeName = propertyNameKeySplit[attributeNameId];
+              valueToSend[attributeName] = value;
+            }
+          });
+          if (valueToSend !== {} && this.propertyCallback[topic][propertyNameKey]) {
+            this.propertyCallback[topic][propertyNameKey](valueToSend);
+          }
+        }
+      });
 
-    try {
-      this.connection.disconnect();
-    } catch (error) {
-      return reject(error);
-    }
-
-    // Remove the connection
-    this.connection = null;
-
-    // Remove property callbacks to allow resubscribing in a later connect()
-    Object.keys(this.propertyCallback).forEach((topic) => {
-      if (this.propertyCallback[topic]) {
-        delete this.propertyCallback[topic];
+      if (typeof this.opts.onDisconnect === 'function') {
+        client.on("close", this.opts.onDisconnect);
       }
     });
+  }
+  disconnect() {
+    return new Promise((resolve, reject) => {
+      if (!this.connection) {
+        return reject(new Error('disconnection failed: connection closed'));
+      }
 
-    // Clean up subscribed topics - a new connection might not need the same topics
-    Object.keys(this.subscribedTopics).forEach((topic) => {
-      delete this.subscribedTopics[topic];
+      try {
+        this.connection.end();
+      } catch (error) {
+        return reject(error);
+      }
+
+      // Remove the connection
+      this.connection = null;
+
+      // Remove property callbacks to allow resubscribing in a later connect()
+      Object.keys(this.propertyCallback).forEach((topic) => {
+        if (this.propertyCallback[topic]) {
+          delete this.propertyCallback[topic];
+        }
+      });
+
+      // Clean up subscribed topics - a new connection might not need the same topics
+      Object.keys(this.subscribedTopics).forEach((topic) => {
+        delete this.subscribedTopics[topic];
+      });
+
+      return resolve();
     });
-
-    return resolve();
-  });
   }
   async updateToken(token) {
     // This infinite loop will exit once the reconnection is successful -
@@ -255,15 +221,15 @@ class ArduinoClientMqtt{
       try {
         if (this.connection) {
           // Disconnect to the connection that is using the old token
-          this.connection.disconnect();
+          this.connection.end();
 
           // Remove the connection
           this.connection = null;
         }
 
         // Reconnect using the new token
-        const reconnectOptions = Object.assign({}, this.connectionOptions, { token });
-        await connect(reconnectOptions);
+        const reconnectOptions = Object.assign({}, this.opts, { token });
+        await this.connect(reconnectOptions);
 
         // Re-subscribe to all topics subscribed before the reconnection
         Object.values(this.subscribedTopics).forEach((subscribeParams) => {
@@ -290,33 +256,38 @@ class ArduinoClientMqtt{
     }
   };
 
-  subscribe(topic, cb){ return new Promise((resolve, reject) => {
-    if (!this.connection) {
-      return reject(new Error('subscription failed: connection closed'));
-    }
+  subscribe(topic, cb) {
+    return new Promise((resolve, reject) => {
+      if (!this.connection) {
+        return reject(new Error('subscription failed: connection closed'));
+      }
 
-    return this.connection.subscribe(topic, {
-      onSuccess: () => {
-        if (!this.connection.topics[topic]) {
-          this.connection.topics[topic] = [];
+      return this.connection.subscribe(topic, (err) => {
+        if (!err) {
+          if (!this.connection.topics[topic]) {
+            this.connection.topics[topic] = [];
+          }
+          this.connection.topics[topic].push(cb);
+          return resolve(topic);
+        } else {
+          reject(new Error(`subscription failed: ${error.errorMessage}`));
         }
-        this.connection.topics[topic].push(cb);
-        return resolve(topic);
-      },
-      onFailure: error => reject(new Error(`subscription failed: ${error.errorMessage}`)),
+      });
     });
-  });
   }
-  unsubscribe(topic) { return new Promise((resolve, reject) => {
-    if (!this.connection) {
-      return reject(new Error('disconnection failed: connection closed'));
-    }
+  unsubscribe(topic) {
+    return new Promise((resolve, reject) => {
+      if (!this.connection) {
+        return reject(new Error('disconnection failed: connection closed'));
+      }
 
-    return this.connection.unsubscribe(topic, {
-      onSuccess: () => resolve(topic),
-      onFailure: () => reject(),
+      return this.connection.unsubscribe(topic, null, (err) => {
+        if (err)
+          reject();
+        else
+          resolve(topic);
+      });
     });
-  });
   }
   arrayBufferToBase64(buffer) {
     let binary = '';
@@ -328,33 +299,34 @@ class ArduinoClientMqtt{
     return window.btoa(binary);
   };
 
-  sendMessage(topic, message){ return new Promise((resolve, reject) => {
-    if (!this.connection) {
-      return reject(new Error('disconnection failed: connection closed'));
-    }
+  sendMessage(topic, message) {
+    return new Promise((resolve, reject) => {
+      if (!this.connection) {
+        return reject(new Error('disconnection failed: connection closed'));
+      }
 
-    this.connection.publish(topic, message, 1, false);
-    return resolve();
-  });
+      this.connection.publish(topic, message);
+      return resolve();
+    });
   }
 
-  openCloudMonitor(deviceId, cb){
+  openCloudMonitor(deviceId, cb) {
     const cloudMonitorOutputTopic = `/a/d/${deviceId}/s/o`;
     return subscribe(cloudMonitorOutputTopic, cb);
   };
 
 
-  writeCloudMonitor(deviceId, message){
+  writeCloudMonitor(deviceId, message) {
     const cloudMonitorInputTopic = `/a/d/${deviceId}/s/i`;
     return sendMessage(cloudMonitorInputTopic, message);
   };
 
-  closeCloudMonitor(deviceId){
+  closeCloudMonitor(deviceId) {
     const cloudMonitorOutputTopic = `/a/d/${deviceId}/s/o`;
     return unsubscribe(cloudMonitorOutputTopic);
   };
 
-  toCloudProtocolV2(cborValue){
+  toCloudProtocolV2(cborValue) {
     const cloudV2CBORValue = {};
     let cborLabel = null;
 
@@ -577,7 +549,7 @@ class ArduinoClientMqtt{
     return arrayBufferToBase64(cborEncoded);
   };
 
-  onPropertyValue(thingId, name, cb){
+  onPropertyValue(thingId, name, cb) {
     if (!name) {
       throw new Error('Invalid property name');
     }
@@ -605,7 +577,7 @@ class ArduinoClientMqtt{
   };
 
 
-  removePropertyValueCallback(thingId, name)  {
+  removePropertyValueCallback(thingId, name) {
     if (!name) {
       throw new Error('Invalid property name');
     }
@@ -613,8 +585,17 @@ class ArduinoClientMqtt{
     delete this.propertyCallback[propOutputTopic][name];
     this.numSubscriptions--;
 
-    return Promise.resolve( this.numSubscriptions);
+    return Promise.resolve(this.numSubscriptions);
   };
+}
+
+function toArrayBuffer(buf) {
+  var ab = new ArrayBuffer(buf.length);
+  var view = new Uint8Array(ab);
+  for (var i = 0; i < buf.length; ++i) {
+      view[i] = buf[i];
+  }
+  return ab;
 }
 
 exports.ArduinoClientMqtt = ArduinoClientMqtt;
