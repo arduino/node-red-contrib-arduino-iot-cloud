@@ -4,7 +4,7 @@ const ArduinoClientMqtt = require ('../arduino-iot-client-mqtt/arduino-iot-clien
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
-
+const Mutex = require('async-mutex').Mutex;
 /**
  * {
  *  clientId: clientId,
@@ -17,6 +17,9 @@ const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
  * }
  */
 var connections=[];
+const getClientMutex = new Mutex();
+
+
 
 async function getToken(connectionConfig){
   var options = {
@@ -48,9 +51,11 @@ async function getToken(connectionConfig){
 }
 
 async function getClientMqtt(connectionConfig){
+
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
   }
+  const releaseMutex = await getClientMutex.acquire();
   try{
   let user = findUser(connectionConfig.credentials.clientid);
   let clientMqtt;
@@ -102,17 +107,22 @@ async function getClientMqtt(connectionConfig){
       connections[user].clientMqtt=clientMqtt;
     }
   }
+  releaseMutex();
+
   return clientMqtt;
   }catch(err){
     console.log(err);
+    releaseMutex();
   }
 
 }
 
 async function getClientHttp(connectionConfig){
+
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
   }
+  const releaseMutex = await getClientMutex.acquire();
   try{
   var user = findUser(connectionConfig.credentials.clientid);
   var clientHttp;
@@ -143,10 +153,14 @@ async function getClientHttp(connectionConfig){
       connections[user].clientHttp=clientHttp;
     }
   }
+  releaseMutex();
   return clientHttp;
   }catch(err){
     console.log(err);
+    releaseMutex();
+
   }
+
 }
 
 function findUser(clientId) {
