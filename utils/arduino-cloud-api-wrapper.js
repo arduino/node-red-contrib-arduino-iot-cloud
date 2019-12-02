@@ -28,10 +28,10 @@ const apiProperties = new ArduinoIotClient.PropertiesV2Api(client);
 const apiSeries = new ArduinoIotClient.SeriesV2Api(client);
 const apiThings = new ArduinoIotClient.ThingsV2Api(client);
 
-class ArduinClientHttp {
+class ArduinoClientHttp {
   constructor(token) {
     this.token = token;
-
+    this.openConnections=0;
     if(process.env.API_BASE_PATH){
       client.basePath = process.env.API_BASE_PATH;
     }
@@ -74,4 +74,4 @@ class ArduinClientHttp {
     return apiSeries.seriesV2BatchQueryRaw(body);
   }
 }
-exports.ArduinClientHttp = ArduinClientHttp;
+exports.ArduinoClientHttp = ArduinoClientHttp;

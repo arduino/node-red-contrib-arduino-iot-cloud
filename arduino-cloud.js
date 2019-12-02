@@ -57,6 +57,7 @@ module.exports = function (RED) {
           if (config.thing !== "" && config.property !== "") {
             this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
             if (this.arduinoRestClient){
+              this.arduinoRestClient.openConnections++;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
@@ -73,8 +74,8 @@ module.exports = function (RED) {
                   this.status({ fill: "red", shape: "dot", text: "Error setting value" });
                 }
               });
-              this.on('close', function () {
-                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+              this.on('close', function (done) {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }else{
               this.status({ fill: "red", shape: "ring", text: "Connection Error" });
@@ -100,6 +101,7 @@ module.exports = function (RED) {
         try {
           this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
           if (this.arduinoRestClient){
+            this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
               this.thing = config.thing;
               this.propertyId = config.property;
@@ -135,8 +137,8 @@ module.exports = function (RED) {
                 }
               });
 
-              this.on('close', function () {
-                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+              this.on('close', function (done) {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }
           }else{
@@ -162,6 +164,7 @@ module.exports = function (RED) {
         try {
           this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
           if (this.arduinoRestClient){
+            this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
               this.thing = config.thing;
               this.propertyId = config.property;
@@ -169,8 +172,8 @@ module.exports = function (RED) {
               const pollTime = this.timeWindowCount * this.timeWindowUnit;
               if (pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
                 this.poll(connectionConfig, pollTime);
-                this.on('close', function () {
-                  connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+                this.on('close', function (done) {
+                  connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
                   if (this.pollTimeoutPoll)
                     clearTimeout(this.pollTimeoutPoll);
 
@@ -224,6 +227,7 @@ module.exports = function (RED) {
           if (config.thing !== "" && config.property !== "") {
             this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
             if (this.arduinoRestClient){
+              this.arduinoRestClient.openConnections++;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
@@ -243,8 +247,8 @@ module.exports = function (RED) {
                 else
                   this.status({});
               });
-              this.on('close', function () {
-                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+              this.on('close', function (done) {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }else{
               this.status({ fill: "red", shape: "ring", text: "Connection Error" });

@@ -1,5 +1,5 @@
 const request = require("async-request");
-const ArduinClientHttp = require('./arduino-cloud-api-wrapper');
+const ArduinoClientHttp = require('./arduino-cloud-api-wrapper');
 const ArduinoClientMqtt = require ('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
@@ -129,7 +129,8 @@ async function getClientHttp(connectionConfig){
 
     var tokenInfo = await getToken(connectionConfig);
     if(tokenInfo !==undefined){
-      clientHttp= new ArduinClientHttp.ArduinClientHttp(tokenInfo.token);
+      clientHttp= new ArduinoClientHttp.ArduinoClientHttp(tokenInfo.token);
+
       var timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
       connections.push({
         clientId: connectionConfig.credentials.clientid,
@@ -147,11 +148,12 @@ async function getClientHttp(connectionConfig){
     if(connections[user].clientHttp !== null){
       clientHttp = connections[user].clientHttp;
     }else{
-      clientHttp = new ArduinClientHttp.ArduinClientHttp(connections[user].token);
+      clientHttp = new ArduinoClientHttp.ArduinoClientHttp(connections[user].token);
 
       connections[user].clientHttp=clientHttp;
     }
   }
+
   releaseMutex();
   return clientHttp;
   }catch(err){
@@ -214,11 +216,15 @@ async function deleteClientMqtt(clientId, thing, propertyName ){
   releaseMutex();
 }
 
-function deleteClientHttp(clientId){
+async function deleteClientHttp(clientId){
+  const releaseMutex = await getClientMutex.acquire();
   var user = findUser(clientId);
   if(user !== -1){
     if(connections[user].clientHttp !== null){
-      connections[user].clientHttp= null;
+      connections[user].clientHttp.openConnections--;
+      if(connections[user].clientHttp.openConnections === 0){
+        connections[user].clientHttp= null;
+      }
     }
     if(connections[user].clientMqtt === null){
       if(connections[user].timeoutUpdateToken)
@@ -226,6 +232,7 @@ function deleteClientHttp(clientId){
       connections.splice(user,1);
     }
   }
+  releaseMutex();
 }
 
 async function reconnectMqtt(clientId){
