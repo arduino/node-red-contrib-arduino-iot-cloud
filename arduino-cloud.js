@@ -30,6 +30,8 @@ module.exports = function (RED) {
               else
                 this.status({});
             });
+          }else{
+            this.status({ fill: "red", shape: "ring", text: "Connection Error" });
           }
           this.on('close', function (done) {
             connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyName).then(() => { done(); });

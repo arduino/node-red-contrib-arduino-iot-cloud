@@ -116,7 +116,7 @@ class ArduinoClientMqtt {
           new ArduinoCloudError(errorCode, errorMessage),
         );
       });
-      
+
       client.on("message", (topic, msg) => {
         if (topic.indexOf('/s/o') > -1) {
           client.topics[topic].forEach((cb) => {
@@ -562,7 +562,7 @@ class ArduinoClientMqtt {
       topic: propOutputTopic,
       cb,
     };
-
+    this.numSubscriptions++;
     if (!this.propertyCallback[propOutputTopic]) {
       this.propertyCallback[propOutputTopic] = {};
       this.propertyCallback[propOutputTopic][name] = cb;
@@ -571,7 +571,6 @@ class ArduinoClientMqtt {
 
     if (this.propertyCallback[propOutputTopic] && !this.propertyCallback[propOutputTopic][name]) {
       this.propertyCallback[propOutputTopic][name] = cb;
-      this.numSubscriptions++;
     }
     return Promise.resolve(propOutputTopic);
   };
