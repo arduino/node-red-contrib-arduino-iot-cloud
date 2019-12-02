@@ -191,7 +191,7 @@ class ArduinoClientMqtt {
       }
 
       try {
-        this.connection.end();
+        this.connection.end(true);
       } catch (error) {
         return reject(error);
       }
