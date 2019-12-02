@@ -28,31 +28,34 @@ const apiProperties = new ArduinoIotClient.PropertiesV2Api(client);
 const apiSeries = new ArduinoIotClient.SeriesV2Api(client);
 const apiThings = new ArduinoIotClient.ThingsV2Api(client);
 
-class ArduinoCloudClient {
+class ArduinClientHttp {
   constructor(token) {
     this.token = token;
-    oauth2.accessToken = token;
+
     if(process.env.API_BASE_PATH){
       client.basePath = process.env.API_BASE_PATH;
     }
   }
   updateToken(token) {
     this.token = token;
-    oauth2.accessToken = token;
   }
   setProperty(thing_id, property_id, value) {
     const body = JSON.stringify({
       value: value
     });
+    oauth2.accessToken = this.token;
     return apiProperties.propertiesV2Publish(thing_id, property_id, body);
   }
   getThings() {
+    oauth2.accessToken = this.token;
     return apiThings.thingsV2List();
   }
   getProperties(thingId) {
+    oauth2.accessToken = this.token;
     return apiProperties.propertiesV2List(thingId);
   }
   getProperty(thingId, propertyId) {
+    oauth2.accessToken = this.token;
     return apiProperties.propertiesV2Show(thingId, propertyId);
   }
   getSeries(thingId, propertyId, start, end) {
@@ -67,7 +70,8 @@ class ArduinoCloudClient {
       }],
       resp_version: 1
     });
+    oauth2.accessToken = this.token;
     return apiSeries.seriesV2BatchQueryRaw(body);
   }
 }
-exports.ArduinoCloudClient = ArduinoCloudClient;
+exports.ArduinClientHttp = ArduinClientHttp;

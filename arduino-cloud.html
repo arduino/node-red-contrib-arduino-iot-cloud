@@ -112,55 +112,6 @@
   setupNode("property in push", "inject", 1, 1);
 </script>
 
-
-<script type="text/x-red" data-template-name="property in">
-  <div class="form-row node-input-connection">
-    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
-    <input type="text" id="node-input-connection">
-  </div>
-  <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
-    <select id="node-input-thing">
-    </select>
-  </div>
-  <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
-      <select id="node-input-property">
-      </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
-  </div>
-</script>
-<script type="text/x-red" data-help-name="property in">
-  <p>This node injects in the flow the changed value of a specific Arduino IoT Cloud property.</p>
-</script>
-
-<script type="text/x-red" data-template-name="property out">
-  <div class="form-row node-input-connection">
-    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
-    <input type="text" id="node-input-connection">
-  </div>
-  <div class="form-row">
-      <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
-      <select id="node-input-thing">
-      </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
-    <select id="node-input-property">
-        </select>
-  </div>
-  <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-      <input type="text" id="node-input-name" placeholder="Name">
-  </div>
-</script>
-<script type="text/x-red" data-help-name="property out">
-  <p>This node update a specific Arduino IoT Cloud property with the value received in input</p>
-</script>
-
 <script type="text/javascript">
   function prepareQueryString(connection) {
     const tmpClientid = window.connectionManager[connection] ? window.connectionManager[connection].tmpClientid : "";
@@ -264,15 +215,15 @@
 </script>
 <script type="text/x-red" data-template-name="arduino-connection">
   <div class="form-row">
-    <label for="node-config-input-applicationname"><i class="fa fa-tag"></i> Name</label>
+    <label for="node-config-input-applicationname"><i class="fa fa-tag fa-fw"></i>Name</label>
     <input type="text" id="node-config-input-applicationname" placeholder="Application name">
   </div>
   <div class="form-row">
-    <label for="node-config-input-clientid"><i class="icon-tag"></i> Client ID</label>
+    <label for="node-config-input-clientid"><i class="fa fa-id-badge fa-fw"></i>Client ID</label>
     <input type="password" id="node-config-input-clientid" placeholder="Client ID">
   </div>
   <div class="form-row">
-    <label for="node-config-input-clientsecret"><i class="icon-tag"></i> Client secret</label>
+    <label for="node-config-input-clientsecret"><i class="fa fa-lock fa-fw"></i>Client secret</label>
     <input type="password" id="node-config-input-clientsecret" placeholder="Client secret">
   </div>
 </script>
@@ -280,24 +231,71 @@
   <p>Provides configuration options for an Arduino IoT Cloud session.</p>
 </script>
 
-
-<script type="text/x-red" data-template-name="property in hist">
-  <div class="form-row node-input-connection">
-    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+<script type="text/x-red" data-template-name="property in">
+  <div class="form-row">
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property in">
+  <p>This node injects in the flow the changed value of a specific Arduino IoT Cloud property.</p>
+</script>
+
+<script type="text/x-red" data-template-name="property out">
+  <div class="form-row">
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+      <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+      <select id="node-input-thing">
+      </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+    <select id="node-input-property">
+        </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+<script type="text/x-red" data-help-name="property out">
+  <p>This node update a specific Arduino IoT Cloud property with the value received in input</p>
+</script> 
+
+<script type="text/x-red" data-template-name="property in hist">
+  <div class="form-row">
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row" id="time-window-show">
-    <label for="node-input-timeWindowCount"><i class="fa fa-history"></i> Time filter</label>
+    <label for="node-input-timeWindowCount"><i class="fa fa-history fa-fw"></i> Time filter</label>
     <label for="node-input-timeWindowCount" style="width:auto">last</label>
     <input type="text" id="node-input-timeWindowCount" style="width:50px;">
     <select id="node-input-timeWindowUnit" style="width:80px;">
@@ -311,7 +309,7 @@
     <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
   </div>
 </script>
@@ -320,22 +318,22 @@
 </script>
 
 <script type="text/x-red" data-template-name="property in poll">
-  <div class="form-row node-input-connection">
-    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+  <div class="form-row">
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row" id="time-window-show">
-    <label for="node-input-timeWindowCount"><i class="fa fa-repeat"></i> Poll Every</label>
+    <label for="node-input-timeWindowCount"><i class="fa fa-repeat fa-fw"></i> Poll Every</label>
     <input type="text" id="node-input-timeWindowCount" style="width:50px;">
     <select id="node-input-timeWindowUnit" style="width:80px;">
         <option value="1">seconds</option>
@@ -348,7 +346,7 @@
     <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
   </div>
 </script>
@@ -358,22 +356,22 @@
 
 
 <script type="text/x-red" data-template-name="property in push">
-  <div class="form-row node-input-connection">
-    <label for="node-input-connection"><i class="fa fa-random"></i> Connection</label>
+  <div class="form-row">
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-microchip"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-thermometer-full"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
   </div>
 </script>

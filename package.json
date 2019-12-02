@@ -19,8 +19,13 @@
   },
   "dependencies": {
     "@arduino/arduino-iot-client": "^1.0.1",
+    "@arduino/cbor-js": "github:arduino/cbor-js",
+    "async-mutex": "^0.1.4",
     "async-request": "^1.2.0",
+    "jws": "^3.2.2",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "mqtt": "^3.0.0",
+    "request": "^2.88.0"
   }
 }

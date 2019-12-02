@@ -45,6 +45,5 @@ To use development version of arduino APIs set the following environment variabl
 
 + `NODE_RED_ACCESS_TOKEN_URI=https://login.oniudra.cc/oauth/token`
 
-
-
++ `NODE_RED_MQTT_HOST=wss.iot.oniudra.cc`
 
