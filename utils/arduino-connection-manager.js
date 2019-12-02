@@ -67,10 +67,9 @@ async function getClientMqtt(connectionConfig){
       const ArduinoCloudOptions = {
         host: arduinoCloudHost,
         token: tokenInfo.token,
-        onDisconnect: (clientId) => {
-          // TODO: cosa vuol dire ?
-          //disconnected(clientId);
-          console.log(`connection lost for ${clientId}`);
+        onDisconnect: () => {
+          reconnectMqtt(connectionConfig.credentials.clientid);
+          console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
         },
         useCloudProtocolV2: true
       };
@@ -98,8 +97,8 @@ async function getClientMqtt(connectionConfig){
         host: "wss.iot.oniudra.cc",
         token: connections[user].token,
         onDisconnect: () => {
-          disconnected(clientId);
-          console.log(`connection lost for ${clientId}`);
+          reconnectMqtt(connectionConfig.credentials.clientid);
+          console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
         },
         useCloudProtocolV2: true
       };
@@ -226,6 +225,22 @@ function deleteClientHttp(clientId){
         clearTimeout(connections[user].timeoutUpdateToken);
       connections.splice(user,1);
     }
+  }
+}
+
+async function reconnectMqtt(clientId){
+  var user = findUser(clientId);
+  if(user !== -1){
+    const ArduinoCloudOptions = {
+      host: "wss.iot.oniudra.cc",
+      token: connections[user].token,
+      reconnectMqtt: () => {
+        disconnected(clientId);
+        console.log(`connection lost for ${clientId}`);
+      },
+      useCloudProtocolV2: true
+    };
+    await connections[user].clientMqtt.connect(ArduinoCloudOptions);
   }
 }
 

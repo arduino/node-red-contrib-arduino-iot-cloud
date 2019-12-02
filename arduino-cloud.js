@@ -56,25 +56,29 @@ module.exports = function (RED) {
 
           if (config.thing !== "" && config.property !== "") {
             this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
-            this.thing = config.thing;
-            this.propertyId = config.property;
-            this.propertyName = config.name;
-            this.on('input', async function (msg) {
-              try {
-                this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
-                const s = getStatus(msg.payload);
-                if (s != undefined)
-                  this.status({ fill: "grey", shape: "dot", text: s });
-                else
-                  this.status({});
-              } catch (err) {
-                console.log(err);
-                this.status({ fill: "red", shape: "dot", text: "Error setting value" });
-              }
-            });
-            this.on('close', function () {
-              connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
-            });
+            if (this.arduinoRestClient){
+              this.thing = config.thing;
+              this.propertyId = config.property;
+              this.propertyName = config.name;
+              this.on('input', async function (msg) {
+                try {
+                  this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+                  const s = getStatus(msg.payload);
+                  if (s != undefined)
+                    this.status({ fill: "grey", shape: "dot", text: s });
+                  else
+                    this.status({});
+                } catch (err) {
+                  console.log(err);
+                  this.status({ fill: "red", shape: "dot", text: "Error setting value" });
+                }
+              });
+              this.on('close', function () {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+              });
+            }else{
+              this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+            }
           }
         } catch (err) {
           console.log(err);
@@ -95,44 +99,48 @@ module.exports = function (RED) {
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
-          if (config.thing !== "" && config.property !== "") {
-            this.thing = config.thing;
-            this.propertyId = config.property;
-            this.propertyName = config.name;
-            node.on('input', async function () {
-              const now = moment();
-              const end = now.format();
-              const count = this.timeWindowCount
-              if (count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
-                const start = now.subtract(count * this.timeWindowUnit, 'second').format();
+          if (this.arduinoRestClient){
+            if (config.thing !== "" && config.property !== "") {
+              this.thing = config.thing;
+              this.propertyId = config.property;
+              this.propertyName = config.name;
+              node.on('input', async function () {
+                const now = moment();
+                const end = now.format();
+                const count = this.timeWindowCount
+                if (count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
+                  const start = now.subtract(count * this.timeWindowUnit, 'second').format();
 
-                const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
-                const times = result.responses[0].times;
-                const values = result.responses[0].values;
-                let data = [];
-                if (values && times) {
-                  values.forEach(function (item, index, array) {
-                    data.push({
-                      x: moment(times[index]).unix() * 1000,
-                      y: values[index]
+                  const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
+                  const times = result.responses[0].times;
+                  const values = result.responses[0].values;
+                  let data = [];
+                  if (values && times) {
+                    values.forEach(function (item, index, array) {
+                      data.push({
+                        x: moment(times[index]).unix() * 1000,
+                        y: values[index]
+                      });
                     });
-                  });
-                }
-                node.send(
-                  {
-                    topic: config.name,
-                    payload: [{
-                      series: [],
-                      data: [data]
-                    }]
                   }
-                );
-              }
-            });
+                  node.send(
+                    {
+                      topic: config.name,
+                      payload: [{
+                        series: [],
+                        data: [data]
+                      }]
+                    }
+                  );
+                }
+              });
 
-            this.on('close', function () {
-              connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
-            });
+              this.on('close', function () {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+              });
+            }
+          }else{
+            this.status({ fill: "red", shape: "ring", text: "Connection Error" });
           }
         } catch (err) {
           console.log(err);
@@ -153,20 +161,24 @@ module.exports = function (RED) {
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
-          if (config.thing !== "" && config.property !== "") {
-            this.thing = config.thing;
-            this.propertyId = config.property;
-            this.propertyName = config.name;
-            const pollTime = this.timeWindowCount * this.timeWindowUnit;
-            if (pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
-              this.poll(connectionConfig, pollTime);
-              this.on('close', function () {
-                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
-                if (this.pollTimeoutPoll)
-                  clearTimeout(this.pollTimeoutPoll);
+          if (this.arduinoRestClient){
+            if (config.thing !== "" && config.property !== "") {
+              this.thing = config.thing;
+              this.propertyId = config.property;
+              this.propertyName = config.name;
+              const pollTime = this.timeWindowCount * this.timeWindowUnit;
+              if (pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
+                this.poll(connectionConfig, pollTime);
+                this.on('close', function () {
+                  connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+                  if (this.pollTimeoutPoll)
+                    clearTimeout(this.pollTimeoutPoll);
 
-              });
+                });
+              }
             }
+          }else{
+            this.status({ fill: "red", shape: "ring", text: "Connection Error" });
           }
         } catch (err) {
           console.log(err);
@@ -211,28 +223,32 @@ module.exports = function (RED) {
 
           if (config.thing !== "" && config.property !== "") {
             this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
-            this.thing = config.thing;
-            this.propertyId = config.property;
-            this.propertyName = config.name;
-            node.on('input', async function () {
+            if (this.arduinoRestClient){
+              this.thing = config.thing;
+              this.propertyId = config.property;
+              this.propertyName = config.name;
+              node.on('input', async function () {
 
-              const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
-              this.send(
-                {
-                  topic: property.name,
-                  payload: property.last_value,
-                  timestamp: property.value_updated_at
-                }
-              );
-              const s = getStatus(property.last_value);
-              if (s != undefined)
-                this.status({ fill: "grey", shape: "dot", text: s });
-              else
-                this.status({});
-            });
-            this.on('close', function () {
-              connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
-            });
+                const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+                this.send(
+                  {
+                    topic: property.name,
+                    payload: property.last_value,
+                    timestamp: property.value_updated_at
+                  }
+                );
+                const s = getStatus(property.last_value);
+                if (s != undefined)
+                  this.status({ fill: "grey", shape: "dot", text: s });
+                else
+                  this.status({});
+              });
+              this.on('close', function () {
+                connectionManager.deleteClientHttp(connectionConfig.credentials.clientid);
+              });
+            }else{
+              this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+            }
           }
         } catch (err) {
           console.log(err);
