@@ -234,12 +234,12 @@ class ArduinoClientMqtt {
 
         // Re-subscribe to all topics subscribed before the reconnection
         Object.values(this.subscribedTopics).forEach((subscribeParams) => {
-          subscribe(subscribeParams.topic, subscribeParams.cb);
+          this.subscribe(subscribeParams.topic, subscribeParams.cb);
         });
 
-        if (typeof this.connectionOptions.onConnected === 'function') {
+        if (typeof this.opts.onConnected === 'function') {
           // Call the connection callback (with the reconnection param set to true)
-          this.connectionOptions.onConnected(true);
+          this.opts.onConnected(true);
         }
 
         // Exit the infinite loop

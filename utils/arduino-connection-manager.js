@@ -175,12 +175,14 @@ function findUser(clientId) {
 
 async function updateToken(connectionConfig){
   try{
-    var user = findUser(clientId);
+    var user = findUser(connectionConfig.credentials.clientid);
     if(user !== -1){
       var tokenInfo= await getToken(connectionConfig);
       if(tokenInfo !==undefined){
         connections[user].token= tokenInfo.token;
         connections[user].expires_token_ts=tokenInfo.expires_in;
+        connections[user].clientMqtt.updateToken(tokenInfo.token);
+        connections[user].clientHttp.updateToken(tokenInfo.token);
         connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
       }else{
         connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 1000);
