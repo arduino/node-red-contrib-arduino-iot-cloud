@@ -13,17 +13,18 @@
     return (v !== null && v !== "" && v !== undefined && Number.isInteger(parseInt(v)) && parseInt(v) !== 0);
   }
 
-  function getDefaults(nodeName){
-    var ret={connection: { type: "arduino-connection", validate: validateConnection },
-        thing: { value: "", validate: validator },
-        property: { value: "", validate: validator },
-        name: { value: "", validate: validator },
-        propname: { value: "" },
-        defaultname: { value: true }
-      };
+  function getDefaults(nodeName) {
+    var ret = {
+      connection: { type: "arduino-connection", validate: validateConnection },
+      thing: { value: "", validate: validator },
+      property: { value: "", validate: validator },
+      name: { value: "", validate: validator },
+      propname: { value: "" },
+      defaultname: { value: true }
+    };
 
-    if (nodeName === "property in hist" || nodeName === "property in poll"){
-      ret['timeWindowCount'] = { value: 1, validate: validateTime};
+    if (nodeName === "property in hist" || nodeName === "property in poll") {
+      ret['timeWindowCount'] = { value: 1, validate: validateTime };
       ret['timeWindowUnit'] = { value: '3600', required: true };
     }
     return ret;
@@ -41,6 +42,9 @@
       label: function () {
         return this.name || labelName;
       },
+      labelStyle: function () {
+        return this.name ? "node_label_italic" : "";
+      },
       paletteLabel: labelName,
       oneditprepare: function () {
         if (this.connection && this.connection !== "_ADD_") {
@@ -52,9 +56,9 @@
           const thing_id = $("#node-input-thing").val();
           $("select#node-input-thing").empty();
           $("select#node-input-property").empty();
-          if(connection === "_ADD_") {
+          if (connection === "_ADD_") {
             $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-thing");
-            if(this.defaultname){
+            if (this.defaultname) {
               $("#node-input-name").val("");
             }
           }
@@ -75,7 +79,7 @@
           } else {
             $("select#node-input-property").empty();
             $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
-          } 
+          }
           $("#node-input-property").trigger("change");
         });
         $("#node-input-property").change(() => {
@@ -277,7 +281,7 @@
 </script>
 <script type="text/x-red" data-help-name="property out">
   <p>This node update a specific Arduino IoT Cloud property with the value received in input</p>
-</script> 
+</script>
 
 <script type="text/x-red" data-template-name="property in hist">
   <div class="form-row">
