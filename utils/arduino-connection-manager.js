@@ -67,9 +67,9 @@ async function getClientMqtt(connectionConfig){
       const ArduinoCloudOptions = {
         host: arduinoCloudHost,
         token: tokenInfo.token,
-        onDisconnect: () => {
+        onDisconnect: (clientId) => {
           // TODO: cosa vuol dire ?
-          disconnected(clientId);
+          //disconnected(clientId);
           console.log(`connection lost for ${clientId}`);
         },
         useCloudProtocolV2: true
@@ -192,11 +192,12 @@ async function updateToken(connectionConfig){
 }
 
 async function deleteClientMqtt(clientId, thing, propertyName ){
+  const releaseMutex = await getClientMutex.acquire();
   var user = findUser(clientId);
   if(user !== -1){
     if(connections[user].clientMqtt !== null){
       var ret = await connections[user].clientMqtt.removePropertyValueCallback(thing, propertyName);
-      // TODO: NOT CLEAR WHAT FOLLOWS. SHOULD BE -1 INSTEAD OF 0 ?
+
       if(ret === 0){
         await connections[user].clientMqtt.disconnect();
         delete connections[user].clientMqtt;
@@ -209,6 +210,7 @@ async function deleteClientMqtt(clientId, thing, propertyName ){
       }
     }
   }
+  releaseMutex();
 }
 
 function deleteClientHttp(clientId){

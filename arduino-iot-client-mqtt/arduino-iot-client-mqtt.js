@@ -179,7 +179,8 @@ class ArduinoClientMqtt {
       });
 
       if (typeof this.opts.onDisconnect === 'function') {
-        client.on("close", this.opts.onDisconnect);
+        client.on("offline", this.opts.onDisconnect);
+        client.on("disconnect", this.opts.onDisconnect);
       }
     });
   }
@@ -221,7 +222,7 @@ class ArduinoClientMqtt {
       try {
         if (this.connection) {
           // Disconnect to the connection that is using the old token
-          this.connection.end();
+          await this.connection.end();
 
           // Remove the connection
           this.connection = null;
