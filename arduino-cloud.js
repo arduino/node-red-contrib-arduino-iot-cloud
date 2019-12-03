@@ -135,6 +135,7 @@ module.exports = function (RED) {
                         }]
                       }
                     );
+                    this.status({});
                   }
                 }catch (err) {
                   console.log(err);
