@@ -214,6 +214,11 @@ class ArduinoClientMqtt {
       return resolve();
     });
   }
+
+  async reconnect() {
+    await this.connection.reconnect();
+  };
+
   async updateToken(token) {
     // This infinite loop will exit once the reconnection is successful -
     // and will pause between each reconnection tentative, every 5 secs.

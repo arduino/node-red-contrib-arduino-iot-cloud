@@ -209,6 +209,7 @@ module.exports = function (RED) {
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
       } catch (err) {
         console.log(err);
+        this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
         this.status({ fill: "red", shape: "dot", text: "Error getting value" });
       }
     }
