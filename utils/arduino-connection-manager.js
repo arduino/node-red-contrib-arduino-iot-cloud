@@ -1,6 +1,6 @@
 const request = require("async-request");
 const ArduinoClientHttp = require('./arduino-cloud-api-wrapper');
-const ArduinoClientMqtt = require ('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
+const ArduinoClientMqtt = require('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
@@ -16,12 +16,12 @@ const Mutex = require('async-mutex').Mutex;
  *  timeoutUpdateToken: timeout
  * }
  */
-var connections=[];
+var connections = [];
 const getClientMutex = new Mutex();
 
 
 
-async function getToken(connectionConfig){
+async function getToken(connectionConfig) {
   var options = {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -43,120 +43,120 @@ async function getToken(connectionConfig){
     var token = data.access_token;
     expires_in = data.expires_in;
     if (token !== undefined) {
-      return {token: token, expires_in: expires_in };
+      return { token: token, expires_in: expires_in };
     }
   } catch (err) {
     console.log(err);
   }
 }
 
-async function getClientMqtt(connectionConfig){
+async function getClientMqtt(connectionConfig) {
 
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
   }
   const releaseMutex = await getClientMutex.acquire();
-  try{
-  let user = findUser(connectionConfig.credentials.clientid);
-  let clientMqtt;
-  if(user === -1){
+  try {
+    let user = findUser(connectionConfig.credentials.clientid);
+    let clientMqtt;
+    if (user === -1) {
 
-    clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
-    const tokenInfo = await getToken(connectionConfig);
-    if(tokenInfo !==undefined){
-      const ArduinoCloudOptions = {
-        host: arduinoCloudHost,
-        token: tokenInfo.token,
-        onDisconnect: () => {
-          reconnectMqtt(connectionConfig.credentials.clientid);
-          console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-        },
-        useCloudProtocolV2: true
-      };
-      await clientMqtt.connect(ArduinoCloudOptions);
-      const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
-      connections.push({
-        clientId: connectionConfig.credentials.clientid,
-        connectionConfig: connectionConfig,
-        token: tokenInfo.token,
-        expires_token_ts: tokenInfo.expires_in,
-        clientMqtt: clientMqtt,
-        clientHttp: null,
-        timeoutUpdateToken: timeout
-      });
-    } else {
-      // TODO: what happens when token is undefined?
-      clientMqtt = undefined;
-    }
-  } else{
-    if(connections[user].clientMqtt !== null){
-      clientMqtt = connections[user].clientMqtt;
-    }else{
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
-      const ArduinoCloudOptions = {
-        host: "wss.iot.oniudra.cc",
-        token: connections[user].token,
-        onDisconnect: () => {
-          reconnectMqtt(connectionConfig.credentials.clientid);
-          console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-        },
-        useCloudProtocolV2: true
-      };
-      await clientMqtt.connect(ArduinoCloudOptions);
-      connections[user].clientMqtt=clientMqtt;
+      const tokenInfo = await getToken(connectionConfig);
+      if (tokenInfo !== undefined) {
+        const ArduinoCloudOptions = {
+          host: arduinoCloudHost,
+          token: tokenInfo.token,
+          onDisconnect: () => {
+            reconnectMqtt(connectionConfig.credentials.clientid);
+            console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
+          },
+          useCloudProtocolV2: true
+        };
+        await clientMqtt.connect(ArduinoCloudOptions);
+        const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
+        connections.push({
+          clientId: connectionConfig.credentials.clientid,
+          connectionConfig: connectionConfig,
+          token: tokenInfo.token,
+          expires_token_ts: tokenInfo.expires_in,
+          clientMqtt: clientMqtt,
+          clientHttp: null,
+          timeoutUpdateToken: timeout
+        });
+      } else {
+        // TODO: what happens when token is undefined?
+        clientMqtt = undefined;
+      }
+    } else {
+      if (connections[user].clientMqtt !== null) {
+        clientMqtt = connections[user].clientMqtt;
+      } else {
+        clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
+        const ArduinoCloudOptions = {
+          host: "wss.iot.oniudra.cc",
+          token: connections[user].token,
+          onDisconnect: () => {
+            reconnectMqtt(connectionConfig.credentials.clientid);
+            console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
+          },
+          useCloudProtocolV2: true
+        };
+        await clientMqtt.connect(ArduinoCloudOptions);
+        connections[user].clientMqtt = clientMqtt;
+      }
     }
-  }
-  releaseMutex();
+    releaseMutex();
 
-  return clientMqtt;
-  }catch(err){
+    return clientMqtt;
+  } catch (err) {
     console.log(err);
     releaseMutex();
   }
 
 }
 
-async function getClientHttp(connectionConfig){
+async function getClientHttp(connectionConfig) {
 
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
   }
   const releaseMutex = await getClientMutex.acquire();
-  try{
-  var user = findUser(connectionConfig.credentials.clientid);
-  var clientHttp;
-  if(user === -1){
+  try {
+    var user = findUser(connectionConfig.credentials.clientid);
+    var clientHttp;
+    if (user === -1) {
 
-    var tokenInfo = await getToken(connectionConfig);
-    if(tokenInfo !==undefined){
-      clientHttp= new ArduinoClientHttp.ArduinoClientHttp(tokenInfo.token);
+      var tokenInfo = await getToken(connectionConfig);
+      if (tokenInfo !== undefined) {
+        clientHttp = new ArduinoClientHttp.ArduinoClientHttp(tokenInfo.token);
 
-      var timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
-      connections.push({
-        clientId: connectionConfig.credentials.clientid,
-        connectionConfig: connectionConfig,
-        token: tokenInfo.token,
-        expires_token_ts: tokenInfo.expires_in,
-        clientMqtt: null,
-        clientHttp: clientHttp,
-        timeoutUpdateToken: timeout
-      });
+        var timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
+        connections.push({
+          clientId: connectionConfig.credentials.clientid,
+          connectionConfig: connectionConfig,
+          token: tokenInfo.token,
+          expires_token_ts: tokenInfo.expires_in,
+          clientMqtt: null,
+          clientHttp: clientHttp,
+          timeoutUpdateToken: timeout
+        });
 
+      }
+
+    } else {
+      if (connections[user].clientHttp !== null) {
+        clientHttp = connections[user].clientHttp;
+      } else {
+        clientHttp = new ArduinoClientHttp.ArduinoClientHttp(connections[user].token);
+
+        connections[user].clientHttp = clientHttp;
+      }
     }
 
-  } else{
-    if(connections[user].clientHttp !== null){
-      clientHttp = connections[user].clientHttp;
-    }else{
-      clientHttp = new ArduinoClientHttp.ArduinoClientHttp(connections[user].token);
-
-      connections[user].clientHttp=clientHttp;
-    }
-  }
-
-  releaseMutex();
-  return clientHttp;
-  }catch(err){
+    releaseMutex();
+    return clientHttp;
+  } catch (err) {
     console.log(err);
     releaseMutex();
 
@@ -174,41 +174,41 @@ function findUser(clientId) {
 
 }
 
-async function updateToken(connectionConfig){
-  try{
+async function updateToken(connectionConfig) {
+  try {
     var user = findUser(connectionConfig.credentials.clientid);
-    if(user !== -1){
-      var tokenInfo= await getToken(connectionConfig);
-      if(tokenInfo !==undefined){
-        connections[user].token= tokenInfo.token;
-        connections[user].expires_token_ts=tokenInfo.expires_in;
+    if (user !== -1) {
+      var tokenInfo = await getToken(connectionConfig);
+      if (tokenInfo !== undefined) {
+        connections[user].token = tokenInfo.token;
+        connections[user].expires_token_ts = tokenInfo.expires_in;
         connections[user].clientMqtt.updateToken(tokenInfo.token);
         connections[user].clientHttp.updateToken(tokenInfo.token);
         connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
-      }else{
+      } else {
         connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 1000);
       }
     }
-  }catch(err){
+  } catch (err) {
     console.log(err);
   }
 }
 
-async function deleteClientMqtt(clientId, thing, propertyName ){
+async function deleteClientMqtt(clientId, thing, propertyName) {
   const releaseMutex = await getClientMutex.acquire();
   var user = findUser(clientId);
-  if(user !== -1){
-    if(connections[user].clientMqtt !== null){
+  if (user !== -1) {
+    if (connections[user].clientMqtt !== null) {
       var ret = await connections[user].clientMqtt.removePropertyValueCallback(thing, propertyName);
 
-      if(ret === 0){
+      if (ret === 0) {
         await connections[user].clientMqtt.disconnect();
         delete connections[user].clientMqtt;
         connections[user].clientMqtt = null;
-        if(connections[user].clientHttp === null){
-          if(connections[user].timeoutUpdateToken)
+        if (connections[user].clientHttp === null) {
+          if (connections[user].timeoutUpdateToken)
             clearTimeout(connections[user].timeoutUpdateToken);
-          connections.splice(user,1);
+          connections.splice(user, 1);
         }
       }
     }
@@ -216,34 +216,35 @@ async function deleteClientMqtt(clientId, thing, propertyName ){
   releaseMutex();
 }
 
-async function deleteClientHttp(clientId){
+async function deleteClientHttp(clientId) {
   const releaseMutex = await getClientMutex.acquire();
   var user = findUser(clientId);
-  if(user !== -1){
-    if(connections[user].clientHttp !== null){
+  if (user !== -1) {
+    if (connections[user].clientHttp !== null) {
       connections[user].clientHttp.openConnections--;
-      if(connections[user].clientHttp.openConnections === 0){
-        connections[user].clientHttp= null;
+      if (connections[user].clientHttp.openConnections === 0) {
+        connections[user].clientHttp = null;
       }
     }
-    if(connections[user].clientMqtt === null){
-      if(connections[user].timeoutUpdateToken)
+    if (connections[user].clientMqtt === null) {
+      if (connections[user].timeoutUpdateToken)
         clearTimeout(connections[user].timeoutUpdateToken);
-      connections.splice(user,1);
+      connections.splice(user, 1);
     }
   }
   releaseMutex();
 }
 
-async function reconnectMqtt(clientId){
+async function reconnectMqtt(clientId) {
   var user = findUser(clientId);
-  if(user !== -1){
+  if (user !== -1) {
+    await connections[user].clientMqtt.disconnect();
     const ArduinoCloudOptions = {
       host: "wss.iot.oniudra.cc",
       token: connections[user].token,
-      reconnectMqtt: () => {
-        disconnected(clientId);
-        console.log(`connection lost for ${clientId}`);
+      onDisconnect: () => {
+        reconnectMqtt(connectionConfig.credentials.clientid);
+        console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
       },
       useCloudProtocolV2: true
     };
