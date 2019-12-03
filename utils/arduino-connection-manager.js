@@ -50,7 +50,7 @@ async function getToken(connectionConfig) {
   }
 }
 
-async function getClientMqtt(connectionConfig) {
+async function getClientMqtt(connectionConfig, RED) {
 
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
@@ -60,17 +60,31 @@ async function getClientMqtt(connectionConfig) {
     let user = findUser(connectionConfig.credentials.clientid);
     let clientMqtt;
     if (user === -1) {
-
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
       const tokenInfo = await getToken(connectionConfig);
       if (tokenInfo !== undefined) {
         const ArduinoCloudOptions = {
           host: arduinoCloudHost,
           token: tokenInfo.token,
-          onDisconnect: () => {
+          onDisconnect: async () => {
             console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-            reconnectMqtt(connectionConfig.credentials.clientid);
+            RED.nodes.eachNode((n)=>{
+              if(n.type === "property in"){
+                const node = RED.nodes.getNode(n.id);
+                node.status({ fill: "red", shape: "dot", text: "Connection Error" });
+              }
+            });
 
+            await reconnectMqtt(connectionConfig.credentials.clientid);
+
+          },
+          onConnected: () =>{
+            RED.nodes.eachNode((n)=>{
+              if(n.type === "property in"){
+                const node = RED.nodes.getNode(n.id);
+                node.status({});
+              }
+            });
           },
           useCloudProtocolV2: true
         };
@@ -97,10 +111,25 @@ async function getClientMqtt(connectionConfig) {
         const ArduinoCloudOptions = {
           host: "wss.iot.oniudra.cc",
           token: connections[user].token,
-          onDisconnect: () => {
+          onDisconnect: async () => {
             console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-            reconnectMqtt(connectionConfig.credentials.clientid);
+            RED.nodes.eachNode((n)=>{
+              if(n.type === "property in"){
+                const node = RED.nodes.getNode(n.id);
+                node.status({ fill: "red", shape: "dot", text: "Connection Error" });
+              }
+            });
 
+            await reconnectMqtt(connectionConfig.credentials.clientid);
+
+          },
+          onConnected: () =>{
+            RED.nodes.eachNode((n)=>{
+              if(n.type === "property in"){
+                const node = RED.nodes.getNode(n.id);
+                node.status({});
+              }
+            });
           },
           useCloudProtocolV2: true
         };

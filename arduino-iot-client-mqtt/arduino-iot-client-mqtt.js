@@ -108,6 +108,10 @@ class ArduinoClientMqtt {
 
       client.on("connect", () => {
         this.connection = client;
+        if (typeof this.opts.onConnected === 'function') {
+          this.opts.onConnected();
+        }
+
         return resolve(this.connection);
       });
 

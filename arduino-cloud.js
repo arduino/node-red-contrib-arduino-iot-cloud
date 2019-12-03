@@ -14,7 +14,7 @@ module.exports = function (RED) {
           this.thing = config.thing;
           this.propertyId = config.property;
           this.propertyName = config.propname;
-          this.arduinoClient = await connectionManager.getClientMqtt(connectionConfig);
+          this.arduinoClient = await connectionManager.getClientMqtt(connectionConfig, RED);
           if (this.arduinoClient && this.arduinoClient.connection.connected) {
             await this.arduinoClient.onPropertyValue(this.thing, this.propertyName, (msg) => {
               this.send(
@@ -63,7 +63,7 @@ module.exports = function (RED) {
               this.propertyName = config.name;
               this.on('input', async function (msg) {
                 try {
-                  this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
                   const s = getStatus(msg.payload);
                   if (s != undefined)
                     this.status({ fill: "grey", shape: "dot", text: s });
@@ -107,33 +107,38 @@ module.exports = function (RED) {
               this.propertyId = config.property;
               this.propertyName = config.name;
               node.on('input', async function () {
-                const now = moment();
-                const end = now.format();
-                const count = this.timeWindowCount
-                if (count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
-                  const start = now.subtract(count * this.timeWindowUnit, 'second').format();
+                try{
+                  const now = moment();
+                  const end = now.format();
+                  const count = this.timeWindowCount
+                  if (count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
+                    const start = now.subtract(count * this.timeWindowUnit, 'second').format();
 
-                  const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
-                  const times = result.responses[0].times;
-                  const values = result.responses[0].values;
-                  let data = [];
-                  if (values && times) {
-                    values.forEach(function (item, index, array) {
-                      data.push({
-                        x: moment(times[index]).unix() * 1000,
-                        y: values[index]
+                    const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
+                    const times = result.responses[0].times;
+                    const values = result.responses[0].values;
+                    let data = [];
+                    if (values && times) {
+                      values.forEach(function (item, index, array) {
+                        data.push({
+                          x: moment(times[index]).unix() * 1000,
+                          y: values[index]
+                        });
                       });
-                    });
-                  }
-                  node.send(
-                    {
-                      topic: config.name,
-                      payload: [{
-                        series: [],
-                        data: [data]
-                      }]
                     }
-                  );
+                    node.send(
+                      {
+                        topic: config.name,
+                        payload: [{
+                          series: [],
+                          data: [data]
+                        }]
+                      }
+                    );
+                  }
+                }catch (err) {
+                  console.log(err);
+                  this.status({ fill: "red", shape: "dot", text: "Error getting value" });
                 }
               });
 
@@ -233,20 +238,24 @@ module.exports = function (RED) {
               this.propertyId = config.property;
               this.propertyName = config.name;
               node.on('input', async function () {
-
-                const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
-                this.send(
-                  {
-                    topic: property.name,
-                    payload: property.last_value,
-                    timestamp: property.value_updated_at
-                  }
-                );
-                const s = getStatus(property.last_value);
-                if (s != undefined)
-                  this.status({ fill: "grey", shape: "dot", text: s });
-                else
-                  this.status({});
+                try{
+                  const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+                  this.send(
+                    {
+                      topic: property.name,
+                      payload: property.last_value,
+                      timestamp: property.value_updated_at
+                    }
+                  );
+                  const s = getStatus(property.last_value);
+                  if (s != undefined)
+                    this.status({ fill: "grey", shape: "dot", text: s });
+                  else
+                    this.status({});
+                } catch (err) {
+                  console.log(err);
+                  this.status({ fill: "red", shape: "dot", text: "Error getting value" });
+                }
               });
               this.on('close', function (done) {
                 connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
