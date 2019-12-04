@@ -112,7 +112,7 @@ async function getClientMqtt(connectionConfig, RED) {
       } else {
         clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
         const ArduinoCloudOptions = {
-          host: "wss.iot.oniudra.cc",
+          host: arduinoCloudHost,
           token: connections[user].token,
           onDisconnect: async () => {
             console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
