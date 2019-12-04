@@ -88,8 +88,6 @@ async function getClientMqtt(connectionConfig, RED) {
           },
           useCloudProtocolV2: true
         };
-        await clientMqtt.connect(ArduinoCloudOptions);
-        const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
         connections.push({
           clientId: connectionConfig.credentials.clientid,
           connectionConfig: connectionConfig,
@@ -99,6 +97,10 @@ async function getClientMqtt(connectionConfig, RED) {
           clientHttp: null,
           timeoutUpdateToken: timeout
         });
+        await clientMqtt.connect(ArduinoCloudOptions);
+
+        const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
+
       } else {
         // TODO: what happens when token is undefined?
         clientMqtt = undefined;
@@ -133,8 +135,9 @@ async function getClientMqtt(connectionConfig, RED) {
           },
           useCloudProtocolV2: true
         };
-        await clientMqtt.connect(ArduinoCloudOptions);
         connections[user].clientMqtt = clientMqtt;
+        await clientMqtt.connect(ArduinoCloudOptions);
+
       }
     }
     releaseMutex();
@@ -269,7 +272,9 @@ async function deleteClientHttp(clientId) {
 async function reconnectMqtt(clientId) {
   var user = findUser(clientId);
   if (user !== -1) {
-    await connections[user].clientMqtt.reconnect();
+    if(connections[user].clientMqtt){
+      await connections[user].clientMqtt.reconnect();
+    }
   }
 }
 
