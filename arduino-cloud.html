@@ -265,7 +265,30 @@
       <dt>topic <span class="property-type">string</span></dt>
       <dd>the message topic.</dd>
       <dt>payload <span class="property-type"></span></dt>
-      <dd>the property last value.</dd>
+      <dd>the property incoming value.</dd>
+      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
       <dt>timestamp <span class="property-type">number</span></dt>
       <dd>the value timestamp.</dd>
     </dl>
@@ -314,6 +337,29 @@
     <dl class="message-properties">
         <dt>payload<span class="property-type"></span></dt>
         <dd> the payload of the message that update the Arduino IoT Cloud property.</dd>
+        <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
     </dl>
 
   <h3>Details</h3>
@@ -377,6 +423,28 @@
       <dd>the message topic.</dd>
       <dt>payload.data <span class="property-type">JSON</span></dt>
       <dd>array of elements <p><code>{x: value_timestamp, y: value}</code></p> </dd>
+      <dd>The value format type is the property type for primitive types. Instead, for multi-value property the value is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Value example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
       <dt>timestamp <span class="property-type">number</span></dt>
       <dd>the value timestamp.</dd>
     </dl>
@@ -440,6 +508,29 @@
       <dd>the message topic.</dd>
       <dt>payload <span class="property-type"></span></dt>
       <dd>the property last value.</dd>
+      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
       <dt>timestamp <span class="property-type">number</span></dt>
       <dd>the value timestamp.</dd>
     </dl>
@@ -496,6 +587,29 @@
       <dd>the message topic.</dd>
       <dt>payload <span class="property-type"></span></dt>
       <dd>the property last value.</dd>
+      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
       <dt>timestamp <span class="property-type">number</span></dt>
       <dd>the value timestamp.</dd>
     </dl>
