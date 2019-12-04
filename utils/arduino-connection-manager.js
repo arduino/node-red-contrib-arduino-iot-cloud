@@ -88,6 +88,7 @@ async function getClientMqtt(connectionConfig, RED) {
           },
           useCloudProtocolV2: true
         };
+        const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
         connections.push({
           clientId: connectionConfig.credentials.clientid,
           connectionConfig: connectionConfig,
@@ -99,7 +100,7 @@ async function getClientMqtt(connectionConfig, RED) {
         });
         await clientMqtt.connect(ArduinoCloudOptions);
 
-        const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
+
 
       } else {
         // TODO: what happens when token is undefined?
