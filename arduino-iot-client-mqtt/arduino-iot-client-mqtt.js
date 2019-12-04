@@ -117,7 +117,7 @@ class ArduinoClientMqtt {
 
       client.on("error", (err) => {
         reject(
-          new ArduinoCloudError(errorCode, errorMessage),
+          new ArduinoCloudError(5, err.toString()),
         );
       });
 
