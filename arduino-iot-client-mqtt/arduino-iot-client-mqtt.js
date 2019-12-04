@@ -103,11 +103,11 @@ class ArduinoClientMqtt {
       };
 
       const client = mqtt.connect('wss://' + this.opts.host + ':' + this.opts.port + '/mqtt', connectionOpts);
+      this.connection = client;
 
       client.topics = {};
 
       client.on("connect", () => {
-        this.connection = client;
         if (typeof this.opts.onConnected === 'function') {
           this.opts.onConnected();
         }
