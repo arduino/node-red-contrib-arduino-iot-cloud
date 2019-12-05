@@ -27,6 +27,11 @@
       ret['timeWindowCount'] = { value: 1, validate: validateTime };
       ret['timeWindowUnit'] = { value: '3600', required: true };
     }
+
+    if (nodeName === "property in"){
+      ret['variableName'] = {value: ""};
+    }
+
     return ret;
   }
 
@@ -47,13 +52,13 @@
       },
       paletteLabel: labelName,
       oneditprepare: function () {
-        debugger;
+
         if (this.connection && this.connection !== "_ADD_") {
           initThings(this.connection, this.thing);
           initProperties(this.connection, this.thing, this.property, outs);
         }
         $("select#node-input-connection").change((e) => {
-          debugger;
+
           const connection = $("#node-input-connection").val();
           const thing_id = $("#node-input-thing").val();
           if (connection === "_ADD_") {
@@ -76,7 +81,7 @@
           const property_id = $("#node-input-property").val();
           const connection = $("#node-input-connection").val();
           const thing_text = $("#node-input-thing").find('option:selected').text()
-          debugger;
+
           if (connection === "_ADD_") {
             $("select#node-input-property").empty();
             $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-property");
@@ -90,15 +95,24 @@
               $("select#node-input-property").empty();
               initProperties(connection, thing_id, undefined, outs);
             }
-          }   
+          }
         });
         $("#node-input-property").change(() => {
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
-          debugger;
-          if (property_name !== " " && property_name !== "" && property_value !== "" && property_value !== undefined && this.defaultname) {
+          var variablename_property;
+          if(nodeName === 'property in'){
+            variablename_property = $("#node-input-property").find('option:selected').attr("variablename");
+          }
+
+          if (property_name !== " " && property_name !== "" && property_value !== "" && property_value !== undefined ) {
             this.propname = property_name;
-            $("#node-input-name").val(property_name);
+            if(nodeName === 'property in'){
+              this.variableName = variablename_property;
+            }
+            if(this.defaultname){
+              $("#node-input-name").val(property_name);
+            }
           }
           $("#node-input-name").trigger("change");
         });
@@ -138,13 +152,12 @@
     }
   }
   function initThings(connection, thing_id) {
-    debugger;
     const queryString = prepareQueryString(connection);
     if (!queryString || queryString === "")
       return;
 
     $("select#node-input-thing").empty();
-    $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-thing");  
+    $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-thing");
     $("select#node-input-thing").val("updating");
 
     $.getJSON(`things?${queryString}`, things => {
@@ -172,7 +185,6 @@
     });
   }
   function initProperties(connection, thing_id, property_id, outs) {
-    debugger;
     let queryString = prepareQueryString(connection);
     if (!queryString || queryString === "")
       return;
@@ -181,7 +193,7 @@
     queryString = `${queryString}&thing_id=${thing_id}`;
 
     $("select#node-input-property").empty();
-    $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-property");  
+    $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-property");
     $("select#node-input-property").val("updating");
 
     $.getJSON(`properties?${queryString}`, properties => {
@@ -195,7 +207,7 @@
         $("<option value='" + "" + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
         for (const p of properties) {
           if (outs > 0 || p.permission === "READ_WRITE")
-            $("<option value='" + p.id + "'>" + p.name + "</option>").appendTo("#node-input-property");
+          $("<option value='" + p.id + "' variablename='"+p.variable_name+"'>" + p.name + "</option>").appendTo("#node-input-property");
         }
         if (property_id !== undefined) {
           $("#node-input-property").val(property_id);
