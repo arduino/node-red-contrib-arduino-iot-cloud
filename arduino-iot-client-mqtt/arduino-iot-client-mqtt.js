@@ -99,7 +99,8 @@ class ArduinoClientMqtt {
         properties: {},
         protocolVersion: 4,
         connectTimeout: 30000,
-        keepalive: 30
+        keepalive: 30,
+        clean: true
       };
 
       const client = mqtt.connect('wss://' + this.opts.host + ':' + this.opts.port + '/mqtt', connectionOpts);
