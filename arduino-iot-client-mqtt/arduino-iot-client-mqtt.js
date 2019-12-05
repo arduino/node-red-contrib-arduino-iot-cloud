@@ -280,7 +280,7 @@ class ArduinoClientMqtt {
           this.connection.topics[topic].push(cb);
           return resolve(topic);
         } else {
-          reject(new Error(`subscription failed: ${error.errorMessage}`));
+          reject(new Error(`subscription failed: ${err.toString()}`));
         }
       });
     });
