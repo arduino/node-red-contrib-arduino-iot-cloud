@@ -47,45 +47,56 @@
       },
       paletteLabel: labelName,
       oneditprepare: function () {
+        debugger;
         if (this.connection && this.connection !== "_ADD_") {
           initThings(this.connection, this.thing);
           initProperties(this.connection, this.thing, this.property, outs);
         }
         $("select#node-input-connection").change((e) => {
+          debugger;
           const connection = $("#node-input-connection").val();
           const thing_id = $("#node-input-thing").val();
-          $("select#node-input-thing").empty();
-          $("select#node-input-property").empty();
           if (connection === "_ADD_") {
+            $("select#node-input-thing").empty();
             $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-thing");
             if (this.defaultname) {
               $("#node-input-name").val("");
             }
+            $("#node-input-thing").trigger("change");
+          } else {
+            if (thing_id !== "updating") {
+              $("select#node-input-thing").empty();
+              $("select#node-input-property").empty();
+              initThings(connection);
+            }
           }
-          if ((this.connection !== connection || thing_id === "") && connection !== "_ADD_") {
-            initThings(connection);
-          }
-          $("#node-input-thing").trigger("change");
         });
         $("#node-input-thing").change(() => {
           const thing_id = $("#node-input-thing").val();
+          const property_id = $("#node-input-property").val();
           const connection = $("#node-input-connection").val();
           const thing_text = $("#node-input-thing").find('option:selected').text()
-          if (thing_id && thing_id !== "") {
-            initProperties(connection, thing_id, undefined, outs);
-          } else if (connection === "_ADD_") {
+          debugger;
+          if (connection === "_ADD_") {
             $("select#node-input-property").empty();
             $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-property");
-          } else {
-            $("select#node-input-property").empty();
-            $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
-          }
-          $("#node-input-property").trigger("change");
+            $("#node-input-property").trigger("change");
+          } else if (property_id !== "updating") {
+            if (thing_id === undefined || thing_id === null || thing_id === "") {
+              $("select#node-input-property").empty();
+              $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
+              $("#node-input-property").trigger("change");
+            } else {
+              $("select#node-input-property").empty();
+              initProperties(connection, thing_id, undefined, outs);
+            }
+          }   
         });
         $("#node-input-property").change(() => {
           const property_name = $("#node-input-property").find('option:selected').text();
           const property_value = $("#node-input-property").find('option:selected').val();
-          if (property_name !== "" && property_value !== "" && property_value !== undefined && this.defaultname) {
+          debugger;
+          if (property_name !== " " && property_name !== "" && property_value !== "" && property_value !== undefined && this.defaultname) {
             this.propname = property_name;
             $("#node-input-name").val(property_name);
           }
@@ -127,9 +138,15 @@
     }
   }
   function initThings(connection, thing_id) {
+    debugger;
     const queryString = prepareQueryString(connection);
     if (!queryString || queryString === "")
       return;
+
+    $("select#node-input-thing").empty();
+    $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-thing");  
+    $("select#node-input-thing").val("updating");
+
     $.getJSON(`things?${queryString}`, things => {
       $("select#node-input-thing").empty();
       if (things && typeof (things) == "object" && things.error) {
@@ -145,7 +162,7 @@
         if (thing_id !== undefined) {
           $("#node-input-thing").val(thing_id);
         }
-        $("#node-input-property").trigger("change");
+        $("#node-input-thing").trigger("change");
       } else if (things && Array.isArray(things) && things.length === 0) {
         $("select#node-input-thing").empty();
         $("<option value='" + "" + "'> " + "No things available" + "</option>").appendTo("#node-input-thing");
@@ -155,13 +172,18 @@
     });
   }
   function initProperties(connection, thing_id, property_id, outs) {
+    debugger;
     let queryString = prepareQueryString(connection);
     if (!queryString || queryString === "")
       return;
     if (!thing_id || thing_id === "" || thing_id === "0")
       return;
     queryString = `${queryString}&thing_id=${thing_id}`;
-    $("#node-input-property").html("");
+
+    $("select#node-input-property").empty();
+    $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-property");  
+    $("select#node-input-property").val("updating");
+
     $.getJSON(`properties?${queryString}`, properties => {
       $("select#node-input-property").empty();
       if (properties && typeof (properties) == "object" && properties.error) {
@@ -178,7 +200,7 @@
         if (property_id !== undefined) {
           $("#node-input-property").val(property_id);
         }
-        $("#node-input-name").trigger("change");
+        $("#node-input-property").trigger("change");
       } else if (properties && Array.isArray(properties) && properties.length === 0) {
         $("<option value='" + "" + "'> " + "No properties available" + "</option>").appendTo("#node-input-property");
       }
