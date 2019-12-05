@@ -86,7 +86,7 @@
             $("select#node-input-property").empty();
             $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-property");
             $("#node-input-property").trigger("change");
-          } else if (property_id !== "updating") {
+          } else if (thing_id !== "updating" && property_id !== "updating" && thing_text !== " Wrong credentials or system unavailable.") {
             if (thing_id === undefined || thing_id === null || thing_id === "") {
               $("select#node-input-property").empty();
               $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
@@ -167,6 +167,7 @@
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
         $("select#node-input-property").empty();
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-property");
+        $("#node-input-thing").trigger("change");
       } else if (things && Array.isArray(things) && things.length !== 0) {
         $("<option value='" + "" + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
         for (const t of things) {
