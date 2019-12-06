@@ -73,6 +73,7 @@ class ArduinoClientMqtt {
         port: options.port || arduinoCloudPort,
         ssl,
         token: options.token,
+        onOffline: options.onOffline,
         onDisconnect: options.onDisconnect,
         onConnected: options.onConnected,
         useCloudProtocolV2: options.useCloudProtocolV2 || false,
@@ -186,10 +187,15 @@ class ArduinoClientMqtt {
           }
        }
       });
-
+      if (typeof this.opts.onOffline === 'function') {
+        client.on("offline", () => {
+          this.opts.onOffline();
+        });
+      }
       if (typeof this.opts.onDisconnect === 'function') {
-        client.on("offline", this.opts.onDisconnect);
-        client.on("disconnect", this.opts.onDisconnect);
+        client.on("disconnect", () => {
+          this.opts.onDisconnect();
+        });
       }
     });
   }

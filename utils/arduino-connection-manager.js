@@ -75,7 +75,7 @@ async function getClientMqtt(connectionConfig, RED) {
               }
             });
 
-            await reconnectMqtt(connectionConfig.credentials.clientid);
+//            await reconnectMqtt(connectionConfig.credentials.clientid);
 
           },
           onConnected: () =>{
@@ -119,12 +119,19 @@ async function getClientMqtt(connectionConfig, RED) {
             RED.nodes.eachNode((n)=>{
               if(n.type === "property in"){
                 const node = RED.nodes.getNode(n.id);
-                node.status({ fill: "red", shape: "dot", text: "Connection Error" });
+                node.status({ fill: "red", shape: "dot", text: "Disconnected" });
               }
             });
-
             await reconnectMqtt(connectionConfig.credentials.clientid);
-
+          },
+          onOffline: async () => {
+            console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
+            RED.nodes.eachNode((n)=>{
+              if(n.type === "property in"){
+                const node = RED.nodes.getNode(n.id);
+                node.status({ fill: "red", shape: "dot", text: "Offline" });
+              }
+            });
           },
           onConnected: () =>{
             RED.nodes.eachNode((n)=>{
