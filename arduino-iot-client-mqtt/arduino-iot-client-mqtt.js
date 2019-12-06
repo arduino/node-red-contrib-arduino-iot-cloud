@@ -570,12 +570,18 @@ class ArduinoClientMqtt {
     return arrayBufferToBase64(cborEncoded);
   };
 
-  onPropertyValue(thingId, name,nodeId, cb) {
+  onPropertyValue(thingId, name, cb,nodeId) {
     if (!name) {
       throw new Error('Invalid property name');
     }
     if (typeof cb !== 'function') {
       throw new Error('Invalid callback');
+    }
+    var node;
+    if(!nodeId){
+      node=1
+    }else{
+      node=nodeId;
     }
     const propOutputTopic = `/a/t/${thingId}/e/o`;
 
@@ -588,7 +594,7 @@ class ArduinoClientMqtt {
       this.propertyCallback[propOutputTopic] = {};
       this.propertyCallback[propOutputTopic][name] = [];
       this.propertyCallback[propOutputTopic][name].push({
-        nodeId: nodeId,
+        nodeId: node,
         callback:cb
       });
 
@@ -598,12 +604,12 @@ class ArduinoClientMqtt {
     if (this.propertyCallback[propOutputTopic] && !this.propertyCallback[propOutputTopic][name]) {
       this.propertyCallback[propOutputTopic][name] = [];
       this.propertyCallback[propOutputTopic][name].push({
-        nodeId: nodeId,
+        nodeId: node,
         callback:cb
       });
     }else if(this.propertyCallback[propOutputTopic] && this.propertyCallback[propOutputTopic][name]){
       this.propertyCallback[propOutputTopic][name].push({
-        nodeId: nodeId,
+        nodeId: node,
         callback:cb
       });
     }
@@ -615,11 +621,17 @@ class ArduinoClientMqtt {
     if (!name) {
       throw new Error('Invalid property name');
     }
+    var node;
+    if(!nodeId){
+      node=1
+    }else{
+      node=nodeId;
+    }
     const propOutputTopic = `/a/t/${thingId}/e/o`;
     var pos=-1;
     for(var i=0; i<this.propertyCallback[propOutputTopic][name].length; i++){
       var cbObject=this.propertyCallback[propOutputTopic][name][i];
-      if(cbObject.nodeId===nodeId){
+      if(cbObject.nodeId===node){
         pos=i;
         break;
       }

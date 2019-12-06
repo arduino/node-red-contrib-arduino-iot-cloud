@@ -17,7 +17,7 @@ module.exports = function (RED) {
           this.propertyVariableName = config.variableName;
           this.arduinoClient = await connectionManager.getClientMqtt(connectionConfig, RED);
           if (this.arduinoClient && this.arduinoClient.connection.connected) {
-            await this.arduinoClient.onPropertyValue(this.thing, this.propertyVariableName, config.id,(msg) => {
+            await this.arduinoClient.onPropertyValue(this.thing, this.propertyVariableName,(msg) => {
               this.send(
                 {
                   topic: this.propertyName,
@@ -30,7 +30,7 @@ module.exports = function (RED) {
                 this.status({ fill: "grey", shape: "dot", text: s });
               else
                 this.status({});
-            });
+            },config.id);
           }else{
             this.status({ fill: "red", shape: "ring", text: "Connection Error" });
           }
