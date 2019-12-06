@@ -229,12 +229,12 @@ async function updateToken(connectionConfig) {
   }
 }
 
-async function deleteClientMqtt(clientId, thing, propertyName) {
+async function deleteClientMqtt(clientId, thing, propertyName, nodeId) {
   const releaseMutex = await getClientMutex.acquire();
   var user = findUser(clientId);
   if (user !== -1) {
     if (connections[user].clientMqtt !== null) {
-      var ret = await connections[user].clientMqtt.removePropertyValueCallback(thing, propertyName);
+      var ret = await connections[user].clientMqtt.removePropertyValueCallback(thing, propertyName,nodeId);
 
       if (ret === 0) {
         await connections[user].clientMqtt.disconnect();

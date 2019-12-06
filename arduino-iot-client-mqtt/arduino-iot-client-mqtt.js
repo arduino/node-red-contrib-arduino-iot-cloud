@@ -165,7 +165,9 @@ class ArduinoClientMqtt {
             }
             if (propertyNameKeyPrevious !== propertyNameKey) {
               if (this.propertyCallback[topic][propertyNameKeyPrevious]) {
-                this.propertyCallback[topic][propertyNameKeyPrevious](valueToSend);
+                for(var i=0; i<this.propertyCallback[topic][propertyNameKeyPrevious].length; i++){
+                 this.propertyCallback[topic][propertyNameKeyPrevious][i].callback(valueToSend);
+                }
               }
               propertyNameKeyPrevious = propertyNameKey;
               valueToSend = {};
@@ -178,9 +180,11 @@ class ArduinoClientMqtt {
             }
           });
           if (valueToSend !== {} && this.propertyCallback[topic][propertyNameKey]) {
-            this.propertyCallback[topic][propertyNameKey](valueToSend);
+            for(var i=0; i<this.propertyCallback[topic][propertyNameKey].length; i++){
+             this.propertyCallback[topic][propertyNameKey][i].callback(valueToSend);
+            }
           }
-        }
+       }
       });
 
       if (typeof this.opts.onDisconnect === 'function') {
@@ -560,7 +564,7 @@ class ArduinoClientMqtt {
     return arrayBufferToBase64(cborEncoded);
   };
 
-  onPropertyValue(thingId, name, cb) {
+  onPropertyValue(thingId, name,nodeId, cb) {
     if (!name) {
       throw new Error('Invalid property name');
     }
@@ -576,23 +580,50 @@ class ArduinoClientMqtt {
     this.numSubscriptions++;
     if (!this.propertyCallback[propOutputTopic]) {
       this.propertyCallback[propOutputTopic] = {};
-      this.propertyCallback[propOutputTopic][name] = cb;
+      this.propertyCallback[propOutputTopic][name] = [];
+      this.propertyCallback[propOutputTopic][name].push({
+        nodeId: nodeId,
+        callback:cb
+      });
+
       return this.subscribe(propOutputTopic, cb);
     }
 
     if (this.propertyCallback[propOutputTopic] && !this.propertyCallback[propOutputTopic][name]) {
-      this.propertyCallback[propOutputTopic][name] = cb;
+      this.propertyCallback[propOutputTopic][name] = [];
+      this.propertyCallback[propOutputTopic][name].push({
+        nodeId: nodeId,
+        callback:cb
+      });
+    }else if(this.propertyCallback[propOutputTopic] && this.propertyCallback[propOutputTopic][name]){
+      this.propertyCallback[propOutputTopic][name].push({
+        nodeId: nodeId,
+        callback:cb
+      });
     }
     return Promise.resolve(propOutputTopic);
   };
 
 
-  removePropertyValueCallback(thingId, name) {
+  removePropertyValueCallback(thingId, name, nodeId) {
     if (!name) {
       throw new Error('Invalid property name');
     }
     const propOutputTopic = `/a/t/${thingId}/e/o`;
-    delete this.propertyCallback[propOutputTopic][name];
+    var pos=-1;
+    for(var i=0; i<this.propertyCallback[propOutputTopic][name].length; i++){
+      var cbObject=this.propertyCallback[propOutputTopic][name][i];
+      if(cbObject.nodeId===nodeId){
+        pos=i;
+        break;
+      }
+    }
+    if(pos!=-1){
+      this.propertyCallback[propOutputTopic][name].splice(pos,1);
+    }
+    if(this.propertyCallback[propOutputTopic][name].length===0){
+      delete this.propertyCallback[propOutputTopic][name];
+    }
     this.numSubscriptions--;
 
     return Promise.resolve(this.numSubscriptions);
