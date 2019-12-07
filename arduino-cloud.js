@@ -7,6 +7,7 @@ module.exports = function (RED) {
     const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
+      this.status({});
       this.lastValue = undefined;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
@@ -52,6 +53,7 @@ module.exports = function (RED) {
     const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
+      this.status({});
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
 
@@ -95,6 +97,7 @@ module.exports = function (RED) {
     const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
+      this.status({});
       const node = this;
       this.timeWindowCount = config.timeWindowCount;
       this.timeWindowUnit = config.timeWindowUnit;
@@ -165,6 +168,7 @@ module.exports = function (RED) {
     const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
+      this.status({});
       this.timeWindowCount = config.timeWindowCount;
       this.timeWindowUnit = config.timeWindowUnit;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
@@ -228,6 +232,7 @@ module.exports = function (RED) {
     const realConstructor = async (config) => {
       RED.nodes.createNode(this, config);
       const connectionConfig = RED.nodes.getNode(config.connection);
+      this.status({});
       const node = this;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
