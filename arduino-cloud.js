@@ -136,7 +136,7 @@ module.exports = function (RED) {
                         }]
                       }
                     );
-                    this.status({});
+                    this.status({ fill: "grey", shape: "dot", text: "Sent " + data.length + " elements" });
                   }
                 }catch (err) {
                   console.log(err);
