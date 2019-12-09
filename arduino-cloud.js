@@ -1,6 +1,5 @@
 const connectionManager = require("./utils/arduino-connection-manager");
 const moment = require("moment");
-const _ = require('lodash');
 
 module.exports = function (RED) {
   function ArduinoIotInput(config) {
