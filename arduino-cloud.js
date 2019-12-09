@@ -345,8 +345,6 @@ function getStatus(value) {
       return value.toFixed(3);
     else
       return value;
-  } else {
-    return JSON.stringify(value);
   }
-  return;
+  return "Object Injected";
 }
