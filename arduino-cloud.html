@@ -2,7 +2,7 @@
   window.connectionManager = [];
 
   function validator(v) {
-    return (v !== null && v !== undefined && v !== "");
+    return (v !== null && v !== undefined && v !== "" && v !== "err");
   }
 
   function validateConnection(v) {
@@ -86,7 +86,7 @@
             $("select#node-input-property").empty();
             $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-property");
             $("#node-input-property").trigger("change");
-          } else if (thing_id !== "updating" && property_id !== "updating" && thing_text !== " Wrong credentials or system unavailable.") {
+          } else if (thing_id !== "updating" && property_id !== "updating" && thing_id !== "err") {
             if (thing_id === undefined || thing_id === null || thing_id === "") {
               $("select#node-input-property").empty();
               $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
@@ -164,7 +164,7 @@
       $("select#node-input-thing").empty();
       if (things && typeof (things) == "object" && things.error) {
         $("select#node-input-thing").empty();
-        $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
+        $("<option value='" + "err" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
         $("select#node-input-property").empty();
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-property");
         $("#node-input-thing").trigger("change");
@@ -200,10 +200,8 @@
     $.getJSON(`properties?${queryString}`, properties => {
       $("select#node-input-property").empty();
       if (properties && typeof (properties) == "object" && properties.error) {
-        $("select#node-input-thing").empty();
-        $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-thing");
         $("select#node-input-property").empty();
-        $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-property");
+        $("<option value='" + "" + "'> " + properties.error + "</option>").appendTo("#node-input-property");
       } else if ((properties && Array.isArray(properties) && properties.length !== 0)) {
         $("<option value='" + "" + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
         for (const p of properties) {
