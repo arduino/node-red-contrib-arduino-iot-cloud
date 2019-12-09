@@ -50,6 +50,43 @@ async function getToken(connectionConfig) {
   }
 }
 
+function getMqttOptions(clientId,token,RED){
+  return {
+    host: arduinoCloudHost,
+    token: token,
+    onDisconnect: async () => {
+      console.log(`connection lost for ${clientId}`);
+      RED.nodes.eachNode((n)=>{
+        if(n.type === "property in"){
+          const node = RED.nodes.getNode(n.id);
+          node.status({ fill: "red", shape: "dot", text: "Connection Error" });
+        }
+      });
+
+      await reconnectMqtt(clientId);
+
+    },
+    onOffline: async () => {
+      console.log(`connection lost for ${clientId}`);
+      RED.nodes.eachNode((n)=>{
+        if(n.type === "property in"){
+          const node = RED.nodes.getNode(n.id);
+          node.status({ fill: "red", shape: "dot", text: "Offline" });
+        }
+      });
+    },
+    onConnected: () =>{
+      RED.nodes.eachNode((n)=>{
+        if(n.type === "property in"){
+          const node = RED.nodes.getNode(n.id);
+          node.status({});
+        }
+      });
+    },
+    useCloudProtocolV2: true
+  };
+}
+
 async function getClientMqtt(connectionConfig, RED) {
 
   if (!connectionConfig || !connectionConfig.credentials) {
@@ -63,31 +100,7 @@ async function getClientMqtt(connectionConfig, RED) {
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
       const tokenInfo = await getToken(connectionConfig);
       if (tokenInfo !== undefined) {
-        const ArduinoCloudOptions = {
-          host: arduinoCloudHost,
-          token: tokenInfo.token,
-          onDisconnect: async () => {
-            console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-            RED.nodes.eachNode((n)=>{
-              if(n.type === "property in"){
-                const node = RED.nodes.getNode(n.id);
-                node.status({ fill: "red", shape: "dot", text: "Connection Error" });
-              }
-            });
-
-//            await reconnectMqtt(connectionConfig.credentials.clientid);
-
-          },
-          onConnected: () =>{
-            RED.nodes.eachNode((n)=>{
-              if(n.type === "property in"){
-                const node = RED.nodes.getNode(n.id);
-                node.status({});
-              }
-            });
-          },
-          useCloudProtocolV2: true
-        };
+        const ArduinoCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,tokenInfo.token,RED)
         const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
         connections.push({
           clientId: connectionConfig.credentials.clientid,
@@ -99,11 +112,7 @@ async function getClientMqtt(connectionConfig, RED) {
           timeoutUpdateToken: timeout
         });
         await clientMqtt.connect(ArduinoCloudOptions);
-
-
-
       } else {
-        // TODO: what happens when token is undefined?
         clientMqtt = undefined;
       }
     } else {
@@ -111,38 +120,7 @@ async function getClientMqtt(connectionConfig, RED) {
         clientMqtt = connections[user].clientMqtt;
       } else {
         clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
-        const ArduinoCloudOptions = {
-          host: arduinoCloudHost,
-          token: connections[user].token,
-          onDisconnect: async () => {
-            console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-            RED.nodes.eachNode((n)=>{
-              if(n.type === "property in"){
-                const node = RED.nodes.getNode(n.id);
-                node.status({ fill: "red", shape: "dot", text: "Disconnected" });
-              }
-            });
-            await reconnectMqtt(connectionConfig.credentials.clientid);
-          },
-          onOffline: async () => {
-            console.log(`connection lost for ${connectionConfig.credentials.clientid}`);
-            RED.nodes.eachNode((n)=>{
-              if(n.type === "property in"){
-                const node = RED.nodes.getNode(n.id);
-                node.status({ fill: "red", shape: "dot", text: "Offline" });
-              }
-            });
-          },
-          onConnected: () =>{
-            RED.nodes.eachNode((n)=>{
-              if(n.type === "property in"){
-                const node = RED.nodes.getNode(n.id);
-                node.status({});
-              }
-            });
-          },
-          useCloudProtocolV2: true
-        };
+        const ArduinoCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,connections[user].token,RED)
         connections[user].clientMqtt = clientMqtt;
         await clientMqtt.connect(ArduinoCloudOptions);
 
