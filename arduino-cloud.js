@@ -53,7 +53,7 @@ module.exports = function (RED) {
             this.status({ fill: "red", shape: "ring", text: "Connection Error" });
           }
           this.on('close', function (done) {
-            connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyName,config.id).then(() => { done(); });
+            connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyVariableName,config.id).then(() => { done(); });
           });
 
           //this.poll(connectionConfig);
