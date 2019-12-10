@@ -1,3 +1,22 @@
+/*
+* Copyright 2019 ARDUINO SA (http://www.arduino.cc/)
+* This file is part of node-red-contrib-arduino-cloud.
+* Copyright (c) 2019
+*
+* This software is released under:
+* The GNU General Public License, which covers the main part of
+* node-red-contrib-arduino-cloud
+* The terms of this license can be found at:
+* https://www.gnu.org/licenses/gpl-3.0.en.html
+*
+* You can be released from the requirements of the above licenses by purchasing
+* a commercial license. Buying such a license is mandatory if you want to modify or
+* otherwise use the software for commercial activities involving the Arduino
+* software without disclosing the source code of your own applications. To purchase
+* a commercial license, send an email to license@arduino.cc.
+*
+*/
+
 const request = require("async-request");
 const ArduinoClientHttp = require('./arduino-cloud-api-wrapper');
 const ArduinoClientMqtt = require('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
@@ -5,7 +24,7 @@ const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.a
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
 const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
 const Mutex = require('async-mutex').Mutex;
-/**
+/** Connections elem struct
  * {
  *  clientId: clientId,
  *  connectionConfig: connectionConfig,

@@ -1,3 +1,21 @@
+/*
+* Copyright 2019 ARDUINO SA (http://www.arduino.cc/)
+* This file is part of node-red-contrib-arduino-cloud.
+* Copyright (c) 2019
+*
+* This software is released under:
+* The GNU General Public License, which covers the main part of
+* node-red-contrib-arduino-cloud
+* The terms of this license can be found at:
+* https://www.gnu.org/licenses/gpl-3.0.en.html
+*
+* You can be released from the requirements of the above licenses by purchasing
+* a commercial license. Buying such a license is mandatory if you want to modify or
+* otherwise use the software for commercial activities involving the Arduino
+* software without disclosing the source code of your own applications. To purchase
+* a commercial license, send an email to license@arduino.cc.
+*
+*/
 const connectionManager = require("./utils/arduino-connection-manager");
 const moment = require("moment");
 
@@ -66,7 +84,12 @@ module.exports = function (RED) {
               this.on('input', async function (msg) {
                 try {
                   await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
-                  const s = getStatus(msg.payload);
+                  var s;
+                  if (typeof msg.payload !== "object") {
+                    s = getStatus(msg.payload);
+                  }else{
+                    s="Object Sent"
+                  }
                   if (s != undefined)
                     this.status({ fill: "grey", shape: "dot", text: s });
                   else

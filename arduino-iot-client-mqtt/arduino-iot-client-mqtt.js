@@ -1,12 +1,11 @@
 /*
-* Copyright 2018 ARDUINO SA (http://www.arduino.cc/)
-* This file is part of arduino-iot-js.
-* Copyright (c) 2018
-* Authors: Fabrizio Mirabito
+* Copyright 2019 ARDUINO SA (http://www.arduino.cc/)
+* This file is part of node-red-contrib-arduino-cloud.
+* Copyright (c) 2019
 *
 * This software is released under:
 * The GNU General Public License, which covers the main part of
-* arduino-iot-js
+* node-red-contrib-arduino-cloud
 * The terms of this license can be found at:
 * https://www.gnu.org/licenses/gpl-3.0.en.html
 *
