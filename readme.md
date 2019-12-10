@@ -4,8 +4,12 @@ This module implements node-red nodes for interacting with [Arduino IoT Cloud](h
 Multi Arduino Accounts are allowed.
 
 ## Installation
-+ Install node-red-contrib-arduino-cloud:
-`npm install -g https://github.com/bcmi-labs/node-red-contrib-arduino-cloud.git`
+Install node-red-contrib-arduino-cloud with:
+
+`npm install -g https://{username}:{token}@github.com/bcmi-labs/node-red-contrib-arduino-cloud.git`
+
+where `username` is your github login username and `token` is one of your github personal access tokens.
+
 ## Configuration
 1) Obtain from an Arduino Cloud account the Client ID and Client Secret
 2) Select Arduino nodes from the pallete and drag to a flow
