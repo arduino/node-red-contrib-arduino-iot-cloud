@@ -112,7 +112,7 @@
             if (thing_id === undefined || thing_id === null || thing_id === "") {
               $("select#node-input-property").empty();
               str = this._("arduino-cloud.config.node.placeholders.no-thing-selected");
-              $("<option value='" + "" + "' " + str+ "</option>").appendTo("#node-input-property");
+              $("<option value='" + "" + "'>" + str+ "</option>").appendTo("#node-input-property");
               $("#node-input-property").trigger("change");
             } else {
               $("select#node-input-property").empty();
