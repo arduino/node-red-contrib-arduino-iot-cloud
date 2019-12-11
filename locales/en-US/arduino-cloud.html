@@ -1,0 +1,268 @@
+<script type="text/x-red" data-help-name="arduino-connection">
+  <p>Provides configuration options for an Arduino IoT Cloud session.</p>
+</script>
+
+<script type="text/x-red" data-help-name="property in">
+  <p>This node injects in the flow the changed value of a specific Arduino IoT Cloud property.</p>
+
+  <h3>Outputs</h3>
+
+
+    <dl class="message-properties">
+      <dt>topic <span class="property-type">string</span></dt>
+      <dd>the message topic.</dd>
+      <dt>payload <span class="property-type"></span></dt>
+      <dd>the property incoming value.</dd>
+      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
+      <dt>timestamp <span class="property-type">number</span></dt>
+      <dd>the value timestamp.</dd>
+    </dl>
+
+
+
+
+  <h3>Details</h3>
+   <h4>Node Properties</h4>
+    <code>Connection</code>
+      <p>This property allow to set up a connection to Arduino Cloud.</p>
+      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
+    <code>Thing</code>
+      <p>Choose an Arduino Thing.</p>
+    <code>Property</code>
+      <p>Choose a property of the selected Arduino Thing.</p>
+    <code>Name</code>
+      <p>Insert a node name. Default is the Arduino Property name.</p>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="property out">
+  <p>This node update a specific Arduino IoT Cloud property with the value received in input</p>
+  <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type"></span></dt>
+        <dd> the payload of the message that update the Arduino IoT Cloud property.</dd>
+        <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
+    </dl>
+
+  <h3>Details</h3>
+   <h4>Node Properties</h4>
+    <code>Connection</code>
+      <p>This property allow to set up a connection to Arduino Cloud.</p>
+      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
+    <code>Thing</code>
+      <p>Choose an Arduino Thing.</p>
+    <code>Property</code>
+      <p>Choose a property of the selected Arduino Thing.</p>
+    <code>Name</code>
+      <p>Insert a node name. Default is the Arduino Property name.</p>
+</script>
+
+<script type="text/x-red" data-help-name="property in hist">
+  <p>This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+      Any input message triggers a request to get the set of values.
+  </dl>
+
+  <h3>Outputs</h3>
+
+    <dl class="message-properties">
+      <dt>topic <span class="property-type">string</span></dt>
+      <dd>the message topic.</dd>
+      <dt>payload.data <span class="property-type">JSON</span></dt>
+      <dd>array of elements <p><code>{x: value_timestamp, y: value}</code></p> </dd>
+      <dd>The value format type is the property type for primitive types. Instead, for multi-value property the value is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Value example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      <dt>timestamp <span class="property-type">number</span></dt>
+      <dd>the value timestamp.</dd>
+    </dl>
+
+
+  <h3>Details</h3>
+  <h4>Node Properties</h4>
+    <code>Connection</code>
+      <p>This property allow to set up a connection to Arduino Cloud.</p>
+      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
+    <code>Thing</code>
+      <p>Choose an Arduino Thing.</p>
+    <code>Property</code>
+      <p>Choose a property of the selected Arduino Thing.</p>
+    <code>Time filter</code>
+      <p>Insert the desired period.</p>
+    <code>Name</code>
+      <p>Insert a node name. Default is the Arduino Property name.</p>
+
+</script>
+
+<script type="text/x-red" data-help-name="property in poll">
+  <p>This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.</p>
+  <h3>Outputs</h3>
+
+    <dl class="message-properties">
+      <dt>topic <span class="property-type">string</span></dt>
+      <dd>the message topic.</dd>
+      <dt>payload <span class="property-type"></span></dt>
+      <dd>the property last value.</dd>
+      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
+      <dt>timestamp <span class="property-type">number</span></dt>
+      <dd>the value timestamp.</dd>
+    </dl>
+
+
+  <h3>Details</h3>
+   <h4>Node Properties</h4>
+    <code>Connection</code>
+      <p>This property allow to set up a connection to Arduino Cloud.</p>
+      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
+    <code>Thing</code>
+      <p>Choose an Arduino Thing.</p>
+    <code>Property</code>
+      <p>Choose a property of the selected Arduino Thing.</p>
+    <code>Poll Every</code>
+      <p>Insert the polling period.</p>
+    <code>Name</code>
+      <p>Insert a node name. Default is the Arduino Property name.</p>
+</script>
+
+<script type="text/x-red" data-help-name="property in push">
+  <p>This node injects in the flow the value of an Arduino IoT Cloud Property after receiving an input event.</p>
+
+  <h3>Inputs</h3>
+    <dl class="message-properties">
+        Any input message triggers a request to get the property last value.
+    </dl>
+
+  <h3>Outputs</h3>
+
+    <dl class="message-properties">
+      <dt>topic <span class="property-type">string</span></dt>
+      <dd>the message topic.</dd>
+      <dt>payload <span class="property-type"></span></dt>
+      <dd>the property last value.</dd>
+      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
+      <dd>Examples</dd>
+      <dd>
+          <table border="1" style="border-collapse:collapse">
+              <tr>
+                <th style="min-width:100px;text-align:left">Property type</th>
+                <th style="text-align:left">Payload example</th>
+              </tr>
+              <tr>
+                <td>Boolean</td>
+                <td><code>true/false</code></td>
+              </tr>
+              <tr>
+                <td>Colored Light</td>
+                <td><code>{<br>
+                  "hue": number,<br>
+                  "sat": number,<br>
+                  "bri": number,<br>
+                  "swi": bool on/off <br>
+                }</code></td>
+              </tr>
+            </table>
+      </dd>
+      <dt>timestamp <span class="property-type">number</span></dt>
+      <dd>the value timestamp.</dd>
+    </dl>
+
+
+  <h3>Details</h3>
+   <h4>Node Properties</h4>
+    <code>Connection</code>
+      <p>This property allow to set up a connection to Arduino Cloud.</p>
+      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
+    <code>Thing</code>
+      <p>Choose an Arduino Thing.</p>
+    <code>Property</code>
+      <p>Choose a property of the selected Arduino Thing.</p>
+    <code>Name</code>
+      <p>Insert a node name. Default is the Arduino Property name.</p>
+</script>

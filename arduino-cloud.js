@@ -50,7 +50,7 @@ module.exports = function (RED) {
                 this.status({});
             },config.id);
           }else{
-            this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+            this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
           }
           this.on('close', function (done) {
             connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyVariableName,config.id).then(() => { done(); });
@@ -88,7 +88,7 @@ module.exports = function (RED) {
                   if (typeof msg.payload !== "object") {
                     s = getStatus(msg.payload);
                   }else{
-                    s="Object Sent"
+                    s="arduino-cloud.status.object-sent";
                   }
                   if (s != undefined)
                     this.status({ fill: "grey", shape: "dot", text: s });
@@ -96,14 +96,14 @@ module.exports = function (RED) {
                     this.status({});
                 } catch (err) {
                   console.log(err);
-                  this.status({ fill: "red", shape: "dot", text: "Error setting value" });
+                  this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-setting-value" });
                 }
               });
               this.on('close', function (done) {
                 connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }else{
-              this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+              this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
             }
           }
         } catch (err) {
@@ -161,11 +161,14 @@ module.exports = function (RED) {
                         }]
                       }
                     );
-                    this.status({ fill: "grey", shape: "dot", text: "Sent " + data.length + " elements" });
+                    var str = RED._("arduino-cloud.status.sent");
+                    str += data.length;
+                    str += RED._("arduino-cloud.status.elements");
+                    this.status({ fill: "grey", shape: "dot", text: str });
                   }
                 }catch (err) {
                   console.log(err);
-                  this.status({ fill: "red", shape: "dot", text: "Error getting value" });
+                  this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
                 }
               });
 
@@ -174,11 +177,11 @@ module.exports = function (RED) {
               });
             }
           }else{
-            this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+            this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
           }
         } catch (err) {
           console.log(err);
-          this.status({ fill: "red", shape: "dot", text: "Error getting value" });
+          this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
         }
       }
     }
@@ -214,7 +217,7 @@ module.exports = function (RED) {
               }
             }
           }else{
-            this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+            this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
           }
         } catch (err) {
           console.log(err);
@@ -243,7 +246,7 @@ module.exports = function (RED) {
       } catch (err) {
         console.log(err);
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
-        this.status({ fill: "red", shape: "dot", text: "Error getting value" });
+        this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
       }
     }
   }
@@ -283,19 +286,19 @@ module.exports = function (RED) {
                     this.status({});
                 } catch (err) {
                   console.log(err);
-                  this.status({ fill: "red", shape: "dot", text: "Error getting value" });
+                  this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
                 }
               });
               this.on('close', function (done) {
                 connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }else{
-              this.status({ fill: "red", shape: "ring", text: "Connection Error" });
+              this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
             }
           }
         } catch (err) {
           console.log(err);
-          this.status({ fill: "red", shape: "dot", text: "Error getting value" });
+          this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
         }
       }
     }
@@ -319,6 +322,7 @@ module.exports = function (RED) {
 
   async function getThingsOrProperties(req, res, thingsOrProperties) {
     let arduinoRestClient;
+    var str;
     try {
       if (req.query.clientid || req.query.clientsecret) {
         arduinoRestClient = await connectionManager.getClientHttp({
@@ -330,13 +334,15 @@ module.exports = function (RED) {
       } else if (req.query.connectionid) {
         const connectionConfig = RED.nodes.getNode(req.query.connectionid);
         if (!connectionConfig) {
-          console.log("No credentials available.");
-          return res.send(JSON.stringify({ error: "No credentials available." }));
+          str=RED._("arduino-cloud.connection-error.no-cred-available");
+          console.log(str);
+          return res.send(JSON.stringify({ error: str }));
         }
         arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
       } else {
-        console.log("No credentials available.");
-        return res.send(JSON.stringify({ error: "No credentials available." }));
+        str=RED._("arduino-cloud.connection-error.no-cred-available");
+        console.log(str);
+        return res.send(JSON.stringify({ error: str }));
       }
       if (thingsOrProperties === "things") {
         return res.send(JSON.stringify(await arduinoRestClient.getThings()));
@@ -344,12 +350,14 @@ module.exports = function (RED) {
         const thing_id = req.query.thing_id;
         return res.send(JSON.stringify(await arduinoRestClient.getProperties(thing_id)));
       } else {
-        console.log("Wrong parameter in getThingsOrProperties.");
-        return res.send(JSON.stringify({ error: "Wrong parameter in getThingsOrProperties." }));
+        str=RED._("arduino-cloud.connection-error.wrong-param");
+        console.log(str);
+        return res.send(JSON.stringify({ error: str }));
       }
     } catch (err) {
+      str=RED._("arduino-cloud.connection-error.wrong-cred-sys-unvail");
       console.log(`Status: ${err.status}, message: ${err.error}`);
-      return res.send(JSON.stringify({ error: "Wrong credentials or system unavailable." }));
+      return res.send(JSON.stringify({ error: str }));
     }
   }
   RED.httpAdmin.get("/things", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
@@ -368,5 +376,5 @@ function getStatus(value) {
     else
       return value;
   }
-  return "Object Injected";
+  return RED._("arduino-cloud.status.object-injected");
 }
