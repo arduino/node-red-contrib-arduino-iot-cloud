@@ -78,7 +78,7 @@ function getMqttOptions(clientId,token,RED){
       RED.nodes.eachNode((n)=>{
         if(n.type === "property in"){
           const node = RED.nodes.getNode(n.id);
-          node.status({ fill: "red", shape: "dot", text: "Connection Error" });
+          node.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.connection-error" });
         }
       });
 
@@ -90,7 +90,7 @@ function getMqttOptions(clientId,token,RED){
       RED.nodes.eachNode((n)=>{
         if(n.type === "property in"){
           const node = RED.nodes.getNode(n.id);
-          node.status({ fill: "red", shape: "dot", text: "Offline" });
+          node.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.offline" });
         }
       });
     },

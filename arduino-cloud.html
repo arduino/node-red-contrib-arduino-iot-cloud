@@ -74,16 +74,17 @@
       oneditprepare: function () {
 
         if (this.connection && this.connection !== "_ADD_") {
-          initThings(this.connection, this.thing);
-          initProperties(this.connection, this.thing, this.property, outs);
+          initThings(this.connection, this._,this.thing,);
+          initProperties(this.connection, this.thing, this.property, outs,this._);
         }
         $("select#node-input-connection").change((e) => {
+          var msg = this._("arduino-cloud.config.connection.placeholders.no-conn-selected");
 
           const connection = $("#node-input-connection").val();
           const thing_id = $("#node-input-thing").val();
           if (connection === "_ADD_") {
             $("select#node-input-thing").empty();
-            $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-thing");
+            $("<option value='" + "" + "' > "+ msg  + "</option>").appendTo("#node-input-thing");
             if (this.defaultname) {
               $("#node-input-name").val("");
             }
@@ -92,7 +93,7 @@
             if (thing_id !== "updating") {
               $("select#node-input-thing").empty();
               $("select#node-input-property").empty();
-              initThings(connection);
+              initThings(connection,this._);
             }
           }
         });
@@ -101,19 +102,21 @@
           const property_id = $("#node-input-property").val();
           const connection = $("#node-input-connection").val();
           const thing_text = $("#node-input-thing").find('option:selected').text()
-
+          var str;
           if (connection === "_ADD_") {
             $("select#node-input-property").empty();
-            $("<option value='" + "" + "'> " + "No connection selected" + "</option>").appendTo("#node-input-property");
+            str =  this._("arduino-cloud.config.connection.placeholders.no-conn-selected");
+            $("<option value='" + "" + "' > "+ str + "</option>").appendTo("#node-input-property");
             $("#node-input-property").trigger("change");
           } else if (thing_id !== "updating" && property_id !== "updating" && thing_id !== "err") {
             if (thing_id === undefined || thing_id === null || thing_id === "") {
               $("select#node-input-property").empty();
-              $("<option value='" + "" + "'> " + "No thing selected" + "</option>").appendTo("#node-input-property");
+              str = this._("arduino-cloud.config.node.placeholders.no-thing-selected");
+              $("<option value='" + "" + "' " + str+ "</option>").appendTo("#node-input-property");
               $("#node-input-property").trigger("change");
             } else {
               $("select#node-input-property").empty();
-              initProperties(connection, thing_id, undefined, outs);
+              initProperties(connection, thing_id, undefined, outs, this._);
             }
           }
         });
@@ -171,7 +174,7 @@
       return `connectionid=${connection}`;
     }
   }
-  function initThings(connection, thing_id) {
+  function initThings(connection,label_func, thing_id ) {
     const queryString = prepareQueryString(connection);
     if (!queryString || queryString === "")
       return;
@@ -179,7 +182,7 @@
     $("select#node-input-thing").empty();
     $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-thing");
     $("select#node-input-thing").val("updating");
-
+    var msg;
     $.getJSON(`things?${queryString}`, things => {
       $("select#node-input-thing").empty();
       if (things && typeof (things) == "object" && things.error) {
@@ -189,7 +192,8 @@
         $("<option value='" + "" + "'> " + things.error + "</option>").appendTo("#node-input-property");
         $("#node-input-thing").trigger("change");
       } else if (things && Array.isArray(things) && things.length !== 0) {
-        $("<option value='" + "" + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+        msg=label_func("arduino-cloud.config.node.placeholders.thing-select");
+        $("<option value='" + "" + "'> " +msg+ "</option>").appendTo("#node-input-thing");
         for (const t of things) {
           $("<option value='" + t.id + "'>" + t.name + "</option>").appendTo("#node-input-thing");
         }
@@ -199,13 +203,14 @@
         $("#node-input-thing").trigger("change");
       } else if (things && Array.isArray(things) && things.length === 0) {
         $("select#node-input-thing").empty();
-        $("<option value='" + "" + "'> " + "No things available" + "</option>").appendTo("#node-input-thing");
+        msg=label_func("arduino-cloud.config.node.placeholders.no-things-available");
+        $("<option value='" + "" + "'> "+msg + "</option>").appendTo("#node-input-thing");
         $("select#node-input-property").empty();
-        $("<option value='" + "" + "'> " + "No things available" + "</option>").appendTo("#node-input-property");
+        $("<option value='" + "" + "'> "+ msg + "</option>").appendTo("#node-input-property");
       }
     });
   }
-  function initProperties(connection, thing_id, property_id, outs) {
+  function initProperties(connection, thing_id, property_id, outs, label_func) {
     let queryString = prepareQueryString(connection);
     if (!queryString || queryString === "")
       return;
@@ -219,11 +224,13 @@
 
     $.getJSON(`properties?${queryString}`, properties => {
       $("select#node-input-property").empty();
+      var msg;
       if (properties && typeof (properties) == "object" && properties.error) {
         $("select#node-input-property").empty();
         $("<option value='" + "" + "'> " + properties.error + "</option>").appendTo("#node-input-property");
       } else if ((properties && Array.isArray(properties) && properties.length !== 0)) {
-        $("<option value='" + "" + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
+        msg= label_func("arduino-cloud.config.node.placeholders.property-select");
+        $("<option value='" + "" + "'> " + msg + "</option>").appendTo("#node-input-property");
         for (const p of properties) {
           if (outs > 0 || p.permission === "READ_WRITE")
           $("<option value='" + p.id + "' variablename='"+p.variable_name+"'>" + p.name + "</option>").appendTo("#node-input-property");
@@ -233,7 +240,8 @@
         }
         $("#node-input-property").trigger("change");
       } else if (properties && Array.isArray(properties) && properties.length === 0) {
-        $("<option value='" + "" + "'> " + "No properties available" + "</option>").appendTo("#node-input-property");
+        msg= label_func("arduino-cloud.config.node.placeholders.no-property-available");
+        $("<option value='" + "" + "' > "+ msg + "</option>").appendTo("#node-input-property");
       }
     });
   }
@@ -272,411 +280,151 @@
 </script>
 <script type="text/x-red" data-template-name="arduino-connection">
   <div class="form-row">
-    <label for="node-config-input-applicationname"><i class="fa fa-tag fa-fw"></i>Name</label>
-    <input type="text" id="node-config-input-applicationname" placeholder="Application name">
+    <label for="node-config-input-applicationname"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-cloud.config.node.name"></span></label>
+    <input type="text" id="node-config-input-applicationname" data-i18n="[placeholder]arduino-cloud.config.node.placeholders.name">
   </div>
   <div class="form-row">
-    <label for="node-config-input-clientid"><i class="fa fa-id-badge fa-fw"></i>Client ID</label>
-    <input type="password" id="node-config-input-clientid" placeholder="Client ID">
+    <label for="node-config-input-clientid" ><i class="fa fa-id-badge fa-fw"></i><span data-i18n="arduino-cloud.config.connection.client-id"></span></label>
+    <input type="password" id="node-config-input-clientid" data-i18n="[placeholder]arduino-cloud.config.connection.placeholders.client-id">
   </div>
   <div class="form-row">
-    <label for="node-config-input-clientsecret"><i class="fa fa-lock fa-fw"></i>Client secret</label>
-    <input type="password" id="node-config-input-clientsecret" placeholder="Client secret">
+    <label for="node-config-input-clientsecret"><i class="fa fa-lock fa-fw"></i><span data-i18n="arduino-cloud.config.connection.client-secret"></span></label>
+    <input type="password" id="node-config-input-clientsecret" data-i18n="[placeholder]arduino-cloud.config.connection.placeholders.client-secret">
   </div>
 </script>
-<script type="text/x-red" data-help-name="arduino-connection">
-  <p>Provides configuration options for an Arduino IoT Cloud session.</p>
-</script>
+
 
 <script type="text/x-red" data-template-name="property in">
   <div class="form-row">
-    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i><span data-i18n="arduino-cloud.config.node.connection"></span></label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i><span data-i18n="arduino-cloud.config.node.thing"></span></label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i><span data-i18n="arduino-cloud.config.node.property"></span></label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-cloud.config.node.name"></span></label>
+    <input type="text" id="node-input-name"  data-i18n="[placeholder]arduino-cloud.config.node.placeholders.name">
   </div>
 </script>
-<script type="text/x-red" data-help-name="property in">
-  <p>This node injects in the flow the changed value of a specific Arduino IoT Cloud property.</p>
 
-  <h3>Outputs</h3>
-
-
-    <dl class="message-properties">
-      <dt>topic <span class="property-type">string</span></dt>
-      <dd>the message topic.</dd>
-      <dt>payload <span class="property-type"></span></dt>
-      <dd>the property incoming value.</dd>
-      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
-      <dd>Examples</dd>
-      <dd>
-          <table border="1" style="border-collapse:collapse">
-              <tr>
-                <th style="min-width:100px;text-align:left">Property type</th>
-                <th style="text-align:left">Payload example</th>
-              </tr>
-              <tr>
-                <td>Boolean</td>
-                <td><code>true/false</code></td>
-              </tr>
-              <tr>
-                <td>Colored Light</td>
-                <td><code>{<br>
-                  "hue": number,<br>
-                  "sat": number,<br>
-                  "bri": number,<br>
-                  "swi": bool on/off <br>
-                }</code></td>
-              </tr>
-            </table>
-      </dd>
-      <dt>timestamp <span class="property-type">number</span></dt>
-      <dd>the value timestamp.</dd>
-    </dl>
-
-
-
-
-  <h3>Details</h3>
-   <h4>Node Properties</h4>
-    <code>Connection</code>
-      <p>This property allow to set up a connection to Arduino Cloud.</p>
-      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
-    <code>Thing</code>
-      <p>Choose an Arduino Thing.</p>
-    <code>Property</code>
-      <p>Choose a property of the selected Arduino Thing.</p>
-    <code>Name</code>
-      <p>Insert a node name. Default is the Arduino Property name.</p>
-
-
-</script>
 
 <script type="text/x-red" data-template-name="property out">
   <div class="form-row">
-    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i><span data-i18n="arduino-cloud.config.node.connection"></span></label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-      <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+      <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> <span data-i18n="arduino-cloud.config.node.thing"></span></label>
       <select id="node-input-thing">
       </select>
   </div>
   <div class="form-row">
-    <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+    <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> <span data-i18n="arduino-cloud.config.node.property"></span></label>
     <select id="node-input-property">
         </select>
   </div>
   <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
-      <input type="text" id="node-input-name" placeholder="Name">
+      <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-cloud.config.node.name"></span></label>
+      <input type="text" id="node-input-name" data-i18n="[placeholder]arduino-cloud.config.node.placeholders.name">
   </div>
 </script>
-<script type="text/x-red" data-help-name="property out">
-  <p>This node update a specific Arduino IoT Cloud property with the value received in input</p>
-  <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>payload<span class="property-type"></span></dt>
-        <dd> the payload of the message that update the Arduino IoT Cloud property.</dd>
-        <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
-      <dd>Examples</dd>
-      <dd>
-          <table border="1" style="border-collapse:collapse">
-              <tr>
-                <th style="min-width:100px;text-align:left">Property type</th>
-                <th style="text-align:left">Payload example</th>
-              </tr>
-              <tr>
-                <td>Boolean</td>
-                <td><code>true/false</code></td>
-              </tr>
-              <tr>
-                <td>Colored Light</td>
-                <td><code>{<br>
-                  "hue": number,<br>
-                  "sat": number,<br>
-                  "bri": number,<br>
-                  "swi": bool on/off <br>
-                }</code></td>
-              </tr>
-            </table>
-      </dd>
-    </dl>
 
-  <h3>Details</h3>
-   <h4>Node Properties</h4>
-    <code>Connection</code>
-      <p>This property allow to set up a connection to Arduino Cloud.</p>
-      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
-    <code>Thing</code>
-      <p>Choose an Arduino Thing.</p>
-    <code>Property</code>
-      <p>Choose a property of the selected Arduino Thing.</p>
-    <code>Name</code>
-      <p>Insert a node name. Default is the Arduino Property name.</p>
-</script>
 
 <script type="text/x-red" data-template-name="property in hist">
   <div class="form-row">
-    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i><span data-i18n="arduino-cloud.config.node.connection"></span></label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i><span data-i18n="arduino-cloud.config.node.thing"></span></label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> <span data-i18n="arduino-cloud.config.node.property"></span></label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row" id="time-window-show">
-    <label for="node-input-timeWindowCount"><i class="fa fa-history fa-fw"></i> Time filter</label>
-    <label for="node-input-timeWindowCount" style="width:auto">last</label>
+    <label for="node-input-timeWindowCount"><i class="fa fa-history fa-fw"></i> <span data-i18n="arduino-cloud.config.node.hist-label"></span></label>
+    <label for="node-input-timeWindowCount" style="width:auto" data-i18n="arduino-cloud.config.time.last"></label>
     <input type="text" id="node-input-timeWindowCount" style="width:50px;">
     <select id="node-input-timeWindowUnit" style="width:80px;">
-        <option value="1">seconds</option>
-        <option value="60">minutes</option>
-        <option value="3600">hours</option>
-        <option value="86400">days</option>
-        <option value="604800">weeks</option>
+        <option value="1" data-i18n="arduino-cloud.config.time.seconds"></option>
+        <option value="60" data-i18n="arduino-cloud.config.time.minutes"></option>
+        <option value="3600" data-i18n="arduino-cloud.config.time.hours"></option>
+        <option value="86400" data-i18n="arduino-cloud.config.time.days"></option>
+        <option value="604800" data-i18n="arduino-cloud.config.time.weeks"></option>
     </select>
     <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
     <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-cloud.config.node.name"></span></label>
+    <input type="text" id="node-input-name" data-i18n="[placeholder]arduino-cloud.config.node.placeholders.name">
   </div>
 </script>
-<script type="text/x-red" data-help-name="property in hist">
-  <p>This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.</p>
-  <h3>Inputs</h3>
-  <dl class="message-properties">
-      Any input message triggers a request to get the set of values.
-  </dl>
 
-  <h3>Outputs</h3>
-
-    <dl class="message-properties">
-      <dt>topic <span class="property-type">string</span></dt>
-      <dd>the message topic.</dd>
-      <dt>payload.data <span class="property-type">JSON</span></dt>
-      <dd>array of elements <p><code>{x: value_timestamp, y: value}</code></p> </dd>
-      <dd>The value format type is the property type for primitive types. Instead, for multi-value property the value is a JSON object according documented notation.</dd>
-      <dd>Examples</dd>
-      <dd>
-          <table border="1" style="border-collapse:collapse">
-              <tr>
-                <th style="min-width:100px;text-align:left">Property type</th>
-                <th style="text-align:left">Value example</th>
-              </tr>
-              <tr>
-                <td>Boolean</td>
-                <td><code>true/false</code></td>
-              </tr>
-              <tr>
-                <td>Colored Light</td>
-                <td><code>{<br>
-                  "hue": number,<br>
-                  "sat": number,<br>
-                  "bri": number,<br>
-                  "swi": bool on/off <br>
-                }</code></td>
-              </tr>
-            </table>
-      <dt>timestamp <span class="property-type">number</span></dt>
-      <dd>the value timestamp.</dd>
-    </dl>
-
-
-  <h3>Details</h3>
-  <h4>Node Properties</h4>
-    <code>Connection</code>
-      <p>This property allow to set up a connection to Arduino Cloud.</p>
-      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
-    <code>Thing</code>
-      <p>Choose an Arduino Thing.</p>
-    <code>Property</code>
-      <p>Choose a property of the selected Arduino Thing.</p>
-    <code>Time filter</code>
-      <p>Insert the desired period.</p>
-    <code>Name</code>
-      <p>Insert a node name. Default is the Arduino Property name.</p>
-
-</script>
 
 <script type="text/x-red" data-template-name="property in poll">
   <div class="form-row">
-    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i><span data-i18n="arduino-cloud.config.node.connection"></span></label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> <span data-i18n="arduino-cloud.config.node.thing"></span></label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i><span data-i18n="arduino-cloud.config.node.property"></span></label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row" id="time-window-show">
-    <label for="node-input-timeWindowCount"><i class="fa fa-repeat fa-fw"></i> Poll Every</label>
+    <label for="node-input-timeWindowCount"><i class="fa fa-repeat fa-fw"></i> <span data-i18n="arduino-cloud.config.node.poll-label"></span></label>
     <input type="text" id="node-input-timeWindowCount" style="width:50px;">
     <select id="node-input-timeWindowUnit" style="width:80px;">
-        <option value="1">seconds</option>
-        <option value="60">minutes</option>
-        <option value="3600">hours</option>
-        <option value="86400">days</option>
-        <option value="604800">weeks</option>
-    </select>
+      <option value="1" data-i18n="arduino-cloud.config.time.seconds"></option>
+      <option value="60" data-i18n="arduino-cloud.config.time.minutes"></option>
+      <option value="3600" data-i18n="arduino-cloud.config.time.hours"></option>
+      <option value="86400" data-i18n="arduino-cloud.config.time.days"></option>
+      <option value="604800" data-i18n="arduino-cloud.config.time.weeks"></option>
+  </select>
     <label for="node-input-lastPoints" style="width:auto; margin-left:10px; margin-right:10px;"></label>
     <input type="hidden" id="node-input-lastPoints" style="width:60px;" placeholder="1000">
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-cloud.config.node.name"></span></label>
+    <input type="text" id="node-input-name" data-i18n="[placeholder]arduino-cloud.config.node.placeholders.name">
   </div>
 </script>
-<script type="text/x-red" data-help-name="property in poll">
-  <p>This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.</p>
-  <h3>Outputs</h3>
-
-    <dl class="message-properties">
-      <dt>topic <span class="property-type">string</span></dt>
-      <dd>the message topic.</dd>
-      <dt>payload <span class="property-type"></span></dt>
-      <dd>the property last value.</dd>
-      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
-      <dd>Examples</dd>
-      <dd>
-          <table border="1" style="border-collapse:collapse">
-              <tr>
-                <th style="min-width:100px;text-align:left">Property type</th>
-                <th style="text-align:left">Payload example</th>
-              </tr>
-              <tr>
-                <td>Boolean</td>
-                <td><code>true/false</code></td>
-              </tr>
-              <tr>
-                <td>Colored Light</td>
-                <td><code>{<br>
-                  "hue": number,<br>
-                  "sat": number,<br>
-                  "bri": number,<br>
-                  "swi": bool on/off <br>
-                }</code></td>
-              </tr>
-            </table>
-      </dd>
-      <dt>timestamp <span class="property-type">number</span></dt>
-      <dd>the value timestamp.</dd>
-    </dl>
-
-
-  <h3>Details</h3>
-   <h4>Node Properties</h4>
-    <code>Connection</code>
-      <p>This property allow to set up a connection to Arduino Cloud.</p>
-      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
-    <code>Thing</code>
-      <p>Choose an Arduino Thing.</p>
-    <code>Property</code>
-      <p>Choose a property of the selected Arduino Thing.</p>
-    <code>Poll Every</code>
-      <p>Insert the polling period.</p>
-    <code>Name</code>
-      <p>Insert a node name. Default is the Arduino Property name.</p>
-</script>
-
 
 <script type="text/x-red" data-template-name="property in push">
   <div class="form-row">
-    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i> Connection</label>
+    <label for="node-input-connection"><i class="fa fa-random fa-fw"></i><span data-i18n="arduino-cloud.config.node.connection"></span></label>
     <input type="text" id="node-input-connection">
   </div>
   <div class="form-row">
-    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i> Thing</label>
+    <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i><span data-i18n="arduino-cloud.config.node.thing"></span></label>
     <select id="node-input-thing">
     </select>
   </div>
   <div class="form-row">
-      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i> Property</label>
+      <label for="node-input-property"><i class="fa fa-cube fa-fw"></i><span data-i18n="arduino-cloud.config.node.property"></span></label>
       <select id="node-input-property">
       </select>
   </div>
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
+    <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-cloud.config.node.name"></span></label>
+    <input type="text" id="node-input-name" data-i18n="[placeholder]arduino-cloud.config.node.placeholders.name">
   </div>
-</script>
-<script type="text/x-red" data-help-name="property in push">
-  <p>This node injects in the flow the value of an Arduino IoT Cloud Property after receiving an input event.</p>
-
-  <h3>Inputs</h3>
-    <dl class="message-properties">
-        Any input message triggers a request to get the property last value.
-    </dl>
-
-  <h3>Outputs</h3>
-
-    <dl class="message-properties">
-      <dt>topic <span class="property-type">string</span></dt>
-      <dd>the message topic.</dd>
-      <dt>payload <span class="property-type"></span></dt>
-      <dd>the property last value.</dd>
-      <dd>The payload format type is the property type for primitive types. Instead, for multi-value property the payload is a JSON object according documented notation.</dd>
-      <dd>Examples</dd>
-      <dd>
-          <table border="1" style="border-collapse:collapse">
-              <tr>
-                <th style="min-width:100px;text-align:left">Property type</th>
-                <th style="text-align:left">Payload example</th>
-              </tr>
-              <tr>
-                <td>Boolean</td>
-                <td><code>true/false</code></td>
-              </tr>
-              <tr>
-                <td>Colored Light</td>
-                <td><code>{<br>
-                  "hue": number,<br>
-                  "sat": number,<br>
-                  "bri": number,<br>
-                  "swi": bool on/off <br>
-                }</code></td>
-              </tr>
-            </table>
-      </dd>
-      <dt>timestamp <span class="property-type">number</span></dt>
-      <dd>the value timestamp.</dd>
-    </dl>
-
-
-  <h3>Details</h3>
-   <h4>Node Properties</h4>
-    <code>Connection</code>
-      <p>This property allow to set up a connection to Arduino Cloud.</p>
-      <p>Get Client ID and Client Secret from Arduino Cloud and create or select a connection.</p>
-    <code>Thing</code>
-      <p>Choose an Arduino Thing.</p>
-    <code>Property</code>
-      <p>Choose a property of the selected Arduino Thing.</p>
-    <code>Name</code>
-      <p>Insert a node name. Default is the Arduino Property name.</p>
 </script>
