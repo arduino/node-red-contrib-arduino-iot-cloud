@@ -65,7 +65,17 @@ async function getToken(connectionConfig) {
       return { token: token, expires_in: expires_in };
     }
   } catch (err) {
-    console.log(err);
+    if(err.response && err.response.res && err.response.request){
+      console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+      'statusMessage: ' + err.response.res.statusMessage + '\r' +
+      'text: ' + err.response.res.text + '\r'+
+      'HTTP method: ' + err.response.request.method + '\r' +
+      'URL request: ' + err.response.request.url
+      );
+    }else{
+      console.log(err);
+    }
+
   }
 }
 
@@ -196,7 +206,17 @@ async function getClientHttp(connectionConfig) {
     releaseMutex();
     return clientHttp;
   } catch (err) {
-    console.log(err);
+    if(err.response && err.response.res && err.response.request){
+      console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+      'statusMessage: ' + err.response.res.statusMessage + '\r' +
+      'text: ' + err.response.res.text + '\r'+
+      'HTTP method: ' + err.response.request.method + '\r' +
+      'URL request: ' + err.response.request.url
+      );
+    }else{
+      console.log(err);
+    }
+
     releaseMutex();
 
   }

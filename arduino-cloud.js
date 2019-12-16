@@ -95,7 +95,17 @@ module.exports = function (RED) {
                   else
                     this.status({});
                 } catch (err) {
-                  console.log(err);
+                  if(err.response && err.response.res && err.response.request){
+                    console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+                    'statusMessage: ' + err.response.res.statusMessage + '\r' +
+                    'text: ' + err.response.res.text + '\r'+
+                    'HTTP method: ' + err.response.request.method + '\r' +
+                    'URL request: ' + err.response.request.url
+                    );
+                  }else{
+                    console.log(err);
+                  }
+
                   this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-setting-value" });
                 }
               });
@@ -107,7 +117,17 @@ module.exports = function (RED) {
             }
           }
         } catch (err) {
-          console.log(err);
+          if(err.response && err.response.res && err.response.request){
+            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+            'statusMessage: ' + err.response.res.statusMessage + '\r' +
+            'text: ' + err.response.res.text + '\r'+
+            'HTTP method: ' + err.response.request.method + '\r' +
+            'URL request: ' + err.response.request.url
+            );
+          }else{
+            console.log(err);
+          }
+
         }
       }
     }
@@ -167,7 +187,17 @@ module.exports = function (RED) {
                     this.status({ fill: "grey", shape: "dot", text: str });
                   }
                 }catch (err) {
-                  console.log(err);
+                  if(err.response && err.response.res && err.response.request){
+                    console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+                    'statusMessage: ' + err.response.res.statusMessage + '\r' +
+                    'text: ' + err.response.res.text + '\r'+
+                    'HTTP method: ' + err.response.request.method + '\r' +
+                    'URL request: ' + err.response.request.url
+                    );
+                  }else{
+                    console.log(err);
+                  }
+
                   this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
                 }
               });
@@ -180,7 +210,17 @@ module.exports = function (RED) {
             this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
           }
         } catch (err) {
-          console.log(err);
+          if(err.response && err.response.res && err.response.request){
+            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+            'statusMessage: ' + err.response.res.statusMessage + '\r' +
+            'text: ' + err.response.res.text + '\r'+
+            'HTTP method: ' + err.response.request.method + '\r' +
+            'URL request: ' + err.response.request.url
+            );
+          }else{
+            console.log(err);
+          }
+
           this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
         }
       }
@@ -220,7 +260,17 @@ module.exports = function (RED) {
             this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
           }
         } catch (err) {
-          console.log(err);
+          if(err.response && err.response.res && err.response.request){
+            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+            'statusMessage: ' + err.response.res.statusMessage + '\r' +
+            'text: ' + err.response.res.text + '\r'+
+            'HTTP method: ' + err.response.request.method + '\r' +
+            'URL request: ' + err.response.request.url
+            );
+          }else{
+            console.log(err);
+          }
+
         }
       }
     }
@@ -244,7 +294,17 @@ module.exports = function (RED) {
           this.status({});
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
       } catch (err) {
-        console.log(err);
+        if(err.response && err.response.res && err.response.request){
+          console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+          'statusMessage: ' + err.response.res.statusMessage + '\r' +
+          'text: ' + err.response.res.text + '\r'+
+          'HTTP method: ' + err.response.request.method + '\r' +
+          'URL request: ' + err.response.request.url
+          );
+        }else{
+          console.log(err);
+        }
+
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
         this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
       }
@@ -285,7 +345,17 @@ module.exports = function (RED) {
                   else
                     this.status({});
                 } catch (err) {
-                  console.log(err);
+                  if(err.response && err.response.res && err.response.request){
+                    console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+                    'statusMessage: ' + err.response.res.statusMessage + '\r' +
+                    'text: ' + err.response.res.text + '\r'+
+                    'HTTP method: ' + err.response.request.method + '\r' +
+                    'URL request: ' + err.response.request.url
+                    );
+                  }else{
+                    console.log(err);
+                  }
+
                   this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
                 }
               });
@@ -297,7 +367,17 @@ module.exports = function (RED) {
             }
           }
         } catch (err) {
-          console.log(err);
+          if(err.response && err.response.res && err.response.request){
+            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+            'statusMessage: ' + err.response.res.statusMessage + '\r' +
+            'text: ' + err.response.res.text + '\r'+
+            'HTTP method: ' + err.response.request.method + '\r' +
+            'URL request: ' + err.response.request.url
+            );
+          }else{
+            console.log(err);
+          }
+
           this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
         }
       }
