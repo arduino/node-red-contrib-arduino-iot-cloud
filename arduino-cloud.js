@@ -96,11 +96,11 @@ module.exports = function (RED) {
                     this.status({});
                 } catch (err) {
                   if(err.response && err.response.res && err.response.request){
-                    console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-                    'statusMessage: ' + err.response.res.statusMessage + '\r' +
-                    'text: ' + err.response.res.text + '\r'+
-                    'HTTP method: ' + err.response.request.method + '\r' +
-                    'URL request: ' + err.response.request.url
+                    console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+                    'statusMessage: ' + err.response.res.statusMessage + '\n' +
+                    'text: ' + err.response.res.text + '\n'+
+                    'HTTP method: ' + err.response.request.method + '\n' +
+                    'URL request: ' + err.response.request.url + '\n'
                     );
                   }else{
                     console.log(err);
@@ -118,11 +118,11 @@ module.exports = function (RED) {
           }
         } catch (err) {
           if(err.response && err.response.res && err.response.request){
-            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-            'statusMessage: ' + err.response.res.statusMessage + '\r' +
-            'text: ' + err.response.res.text + '\r'+
-            'HTTP method: ' + err.response.request.method + '\r' +
-            'URL request: ' + err.response.request.url
+            console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+            'statusMessage: ' + err.response.res.statusMessage + '\n' +
+            'text: ' + err.response.res.text + '\n'+
+            'HTTP method: ' + err.response.request.method + '\n' +
+            'URL request: ' + err.response.request.url + '\n'
             );
           }else{
             console.log(err);
@@ -188,11 +188,11 @@ module.exports = function (RED) {
                   }
                 }catch (err) {
                   if(err.response && err.response.res && err.response.request){
-                    console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-                    'statusMessage: ' + err.response.res.statusMessage + '\r' +
-                    'text: ' + err.response.res.text + '\r'+
-                    'HTTP method: ' + err.response.request.method + '\r' +
-                    'URL request: ' + err.response.request.url
+                    console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+                    'statusMessage: ' + err.response.res.statusMessage + '\n' +
+                    'text: ' + err.response.res.text + '\n'+
+                    'HTTP method: ' + err.response.request.method + '\n' +
+                    'URL request: ' + err.response.request.url + '\n'
                     );
                   }else{
                     console.log(err);
@@ -211,11 +211,11 @@ module.exports = function (RED) {
           }
         } catch (err) {
           if(err.response && err.response.res && err.response.request){
-            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-            'statusMessage: ' + err.response.res.statusMessage + '\r' +
-            'text: ' + err.response.res.text + '\r'+
-            'HTTP method: ' + err.response.request.method + '\r' +
-            'URL request: ' + err.response.request.url
+            console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+            'statusMessage: ' + err.response.res.statusMessage + '\n' +
+            'text: ' + err.response.res.text + '\n'+
+            'HTTP method: ' + err.response.request.method + '\n' +
+            'URL request: ' + err.response.request.url + '\n'
             );
           }else{
             console.log(err);
@@ -261,11 +261,11 @@ module.exports = function (RED) {
           }
         } catch (err) {
           if(err.response && err.response.res && err.response.request){
-            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-            'statusMessage: ' + err.response.res.statusMessage + '\r' +
-            'text: ' + err.response.res.text + '\r'+
-            'HTTP method: ' + err.response.request.method + '\r' +
-            'URL request: ' + err.response.request.url
+            console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+            'statusMessage: ' + err.response.res.statusMessage + '\n' +
+            'text: ' + err.response.res.text + '\n'+
+            'HTTP method: ' + err.response.request.method + '\n' +
+            'URL request: ' + err.response.request.url + '\n'
             );
           }else{
             console.log(err);
@@ -295,11 +295,11 @@ module.exports = function (RED) {
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
       } catch (err) {
         if(err.response && err.response.res && err.response.request){
-          console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-          'statusMessage: ' + err.response.res.statusMessage + '\r' +
-          'text: ' + err.response.res.text + '\r'+
-          'HTTP method: ' + err.response.request.method + '\r' +
-          'URL request: ' + err.response.request.url
+          console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+          'statusMessage: ' + err.response.res.statusMessage + '\n' +
+          'text: ' + err.response.res.text + '\n'+
+          'HTTP method: ' + err.response.request.method + '\n' +
+          'URL request: ' + err.response.request.url + '\n'
           );
         }else{
           console.log(err);
@@ -346,11 +346,11 @@ module.exports = function (RED) {
                     this.status({});
                 } catch (err) {
                   if(err.response && err.response.res && err.response.request){
-                    console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-                    'statusMessage: ' + err.response.res.statusMessage + '\r' +
-                    'text: ' + err.response.res.text + '\r'+
-                    'HTTP method: ' + err.response.request.method + '\r' +
-                    'URL request: ' + err.response.request.url
+                    console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+                    'statusMessage: ' + err.response.res.statusMessage + '\n' +
+                    'text: ' + err.response.res.text + '\n'+
+                    'HTTP method: ' + err.response.request.method + '\n' +
+                    'URL request: ' + err.response.request.url + '\n'
                     );
                   }else{
                     console.log(err);
@@ -368,11 +368,11 @@ module.exports = function (RED) {
           }
         } catch (err) {
           if(err.response && err.response.res && err.response.request){
-            console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-            'statusMessage: ' + err.response.res.statusMessage + '\r' +
-            'text: ' + err.response.res.text + '\r'+
-            'HTTP method: ' + err.response.request.method + '\r' +
-            'URL request: ' + err.response.request.url
+            console.log('statusCode: '+ err.response.res.statusCode +'\n'+
+            'statusMessage: ' + err.response.res.statusMessage + '\n' +
+            'text: ' + err.response.res.text + '\n'+
+            'HTTP method: ' + err.response.request.method + '\n' +
+            'URL request: ' + err.response.request.url + '\n'
             );
           }else{
             console.log(err);

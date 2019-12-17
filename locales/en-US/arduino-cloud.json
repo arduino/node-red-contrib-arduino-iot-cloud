@@ -14,7 +14,8 @@
           "thing-select":"Select a thing",
           "no-things-available":"No things available",
           "property-select":"Select a property",
-          "no-property-available":"No properties available"
+          "no-property-available":"No properties available",
+          "no-property-writable-av":"No writable properties available"
         }
       },
       "time":{

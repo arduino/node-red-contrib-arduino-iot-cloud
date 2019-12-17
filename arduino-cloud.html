@@ -30,7 +30,7 @@
   }
 
   function validateTime(v) {
-    return (v !== null && v !== "" && v !== undefined && Number.isInteger(parseInt(v)) && parseInt(v) !== 0);
+    return (v !== null && v !== "" && v !== undefined && Number.isInteger(parseInt(v)) && parseInt(v) > 0);
   }
 
   function getDefaults(nodeName) {
@@ -231,9 +231,16 @@
       } else if ((properties && Array.isArray(properties) && properties.length !== 0)) {
         msg= label_func("arduino-cloud.config.node.placeholders.property-select");
         $("<option value='" + "" + "'> " + msg + "</option>").appendTo("#node-input-property");
+        var elem_added = 0;
         for (const p of properties) {
-          if (outs > 0 || p.permission === "READ_WRITE")
-          $("<option value='" + p.id + "' variablename='"+p.variable_name+"'>" + p.name + "</option>").appendTo("#node-input-property");
+          if (outs > 0 || p.permission === "READ_WRITE"){
+            elem_added++;
+            $("<option value='" + p.id + "' variablename='"+p.variable_name+"'>" + p.name + "</option>").appendTo("#node-input-property");
+          }
+        }
+        if(elem_added === 0){
+          msg = label_func("arduino-cloud.config.node.placeholders.no-property-writable-av")
+          $('#node-input-property option:contains("")').text(msg);
         }
         if (property_id !== undefined) {
           $("#node-input-property").val(property_id);
