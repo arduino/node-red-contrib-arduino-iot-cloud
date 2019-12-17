@@ -116,7 +116,7 @@
               $("#node-input-property").trigger("change");
             } else {
               $("select#node-input-property").empty();
-              initProperties(connection, thing_id, undefined, outs, this._);
+              initProperties(connection, thing_id, this.property, outs, this._);
             }
           }
         });
