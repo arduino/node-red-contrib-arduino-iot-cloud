@@ -1,10 +1,10 @@
-# node-red-contrib-arduino-cloud
+# node-red-contrib-arduino-iot-cloud
 
 This module implements node-red nodes for interacting with [Arduino IoT Cloud](https://create.arduino.cc/iot).
 Multi Arduino Accounts are allowed.
 
 ## Installation
-Install node-red-contrib-arduino-cloud with:
+Install node-red-contrib-arduino-iot-cloud with:
 
 `npm install -g https://github.com/arduino/node-red-contrib-arduino-iot-cloud.git`
 
@@ -33,14 +33,14 @@ This node injects in the flow the changed value of a specific Arduino IoT Cloud 
 This node update a specific Arduino IoT Cloud property with the value received in input
 
 ### historic
-This node injects in the flow a set of values of an Arduino Cloud Property based on the node configuration.
+This node injects in the flow a set of values of an Arduino IoT Cloud Property based on the node configuration.
 Node parameter:
 + Time Filter: defines time range for historical values
 
 ### periodic
-This node injects in the flow the value of an Arduino Cloud Property with a periodicity based on the node configuration.
+This node injects in the flow the value of an Arduino IoT Cloud Property with a periodicity based on the node configuration.
 Node parameter:
 + Poll Every: defines polling time interval (seconds, minutes, hours, days, weeks)
 
 ### inject
-This node injects in the flow the value of an Arduino Cloud Property after receiving an input event.
+This node injects in the flow the value of an Arduino IoT Cloud Property after receiving an input event.

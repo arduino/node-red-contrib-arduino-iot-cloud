@@ -1,11 +1,11 @@
 /*
 * Copyright 2019 ARDUINO SA (http://www.arduino.cc/)
-* This file is part of node-red-contrib-arduino-cloud.
+* This file is part of node-red-contrib-arduino-iot-cloud.
 * Copyright (c) 2019
 *
 * This software is released under:
 * The GNU General Public License, which covers the main part of
-* node-red-contrib-arduino-cloud
+* node-red-contrib-arduino-iot-cloud
 * The terms of this license can be found at:
 * https://www.gnu.org/licenses/gpl-3.0.en.html
 *
@@ -50,7 +50,7 @@ module.exports = function (RED) {
                 this.status({});
             },config.id);
           }else{
-            this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
+            this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
           }
           this.on('close', function (done) {
             connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyVariableName,config.id).then(() => { done(); });
@@ -88,7 +88,7 @@ module.exports = function (RED) {
                   if (typeof msg.payload !== "object") {
                     s = getStatus(msg.payload);
                   }else{
-                    s="arduino-cloud.status.object-sent";
+                    s="arduino-iot-cloud.status.object-sent";
                   }
                   if (s != undefined)
                     this.status({ fill: "grey", shape: "dot", text: s });
@@ -106,14 +106,14 @@ module.exports = function (RED) {
                     console.log(err);
                   }
 
-                  this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-setting-value" });
+                  this.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.error-setting-value" });
                 }
               });
               this.on('close', function (done) {
                 connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }else{
-              this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
+              this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
             }
           }
         } catch (err) {
@@ -181,9 +181,9 @@ module.exports = function (RED) {
                         }]
                       }
                     );
-                    var str = RED._("arduino-cloud.status.sent");
+                    var str = RED._("arduino-iot-cloud.status.sent");
                     str += data.length;
-                    str += RED._("arduino-cloud.status.elements");
+                    str += RED._("arduino-iot-cloud.status.elements");
                     this.status({ fill: "grey", shape: "dot", text: str });
                   }
                 }catch (err) {
@@ -198,7 +198,7 @@ module.exports = function (RED) {
                     console.log(err);
                   }
 
-                  this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
+                  this.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.error-getting-value" });
                 }
               });
 
@@ -207,7 +207,7 @@ module.exports = function (RED) {
               });
             }
           }else{
-            this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
+            this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
           }
         } catch (err) {
           if(err.response && err.response.res && err.response.request){
@@ -221,7 +221,7 @@ module.exports = function (RED) {
             console.log(err);
           }
 
-          this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
+          this.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.error-getting-value" });
         }
       }
     }
@@ -257,7 +257,7 @@ module.exports = function (RED) {
               }
             }
           }else{
-            this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
+            this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
           }
         } catch (err) {
           if(err.response && err.response.res && err.response.request){
@@ -306,7 +306,7 @@ module.exports = function (RED) {
         }
 
         this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
-        this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
+        this.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.error-getting-value" });
       }
     }
   }
@@ -356,14 +356,14 @@ module.exports = function (RED) {
                     console.log(err);
                   }
 
-                  this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
+                  this.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.error-getting-value" });
                 }
               });
               this.on('close', function (done) {
                 connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
               });
             }else{
-              this.status({ fill: "red", shape: "ring", text: "arduino-cloud.status.connection-error" });
+              this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
             }
           }
         } catch (err) {
@@ -378,7 +378,7 @@ module.exports = function (RED) {
             console.log(err);
           }
 
-          this.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.error-getting-value" });
+          this.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.error-getting-value" });
         }
       }
     }
@@ -414,13 +414,13 @@ module.exports = function (RED) {
       } else if (req.query.connectionid) {
         const connectionConfig = RED.nodes.getNode(req.query.connectionid);
         if (!connectionConfig) {
-          str=RED._("arduino-cloud.connection-error.no-cred-available");
+          str=RED._("arduino-iot-cloud.connection-error.no-cred-available");
           console.log(str);
           return res.send(JSON.stringify({ error: str }));
         }
         arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
       } else {
-        str=RED._("arduino-cloud.connection-error.no-cred-available");
+        str=RED._("arduino-iot-cloud.connection-error.no-cred-available");
         console.log(str);
         return res.send(JSON.stringify({ error: str }));
       }
@@ -430,12 +430,12 @@ module.exports = function (RED) {
         const thing_id = req.query.thing_id;
         return res.send(JSON.stringify(await arduinoRestClient.getProperties(thing_id)));
       } else {
-        str=RED._("arduino-cloud.connection-error.wrong-param");
+        str=RED._("arduino-iot-cloud.connection-error.wrong-param");
         console.log(str);
         return res.send(JSON.stringify({ error: str }));
       }
     } catch (err) {
-      str=RED._("arduino-cloud.connection-error.wrong-cred-sys-unvail");
+      str=RED._("arduino-iot-cloud.connection-error.wrong-cred-sys-unvail");
       console.log(`Status: ${err.status}, message: ${err.error}`);
       return res.send(JSON.stringify({ error: str }));
     }
@@ -456,5 +456,5 @@ function getStatus(value) {
     else
       return value;
   }
-  return RED._("arduino-cloud.status.object-injected");
+  return RED._("arduino-iot-cloud.status.object-injected");
 }

@@ -14,7 +14,7 @@
   "license": "MIT",
   "node-red": {
     "nodes": {
-      "Property": "arduino-cloud.js"
+      "Property": "arduino-iot-cloud.js"
     }
   },
   "dependencies": {

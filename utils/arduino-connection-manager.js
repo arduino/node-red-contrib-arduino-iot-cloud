@@ -1,11 +1,11 @@
 /*
 * Copyright 2019 ARDUINO SA (http://www.arduino.cc/)
-* This file is part of node-red-contrib-arduino-cloud.
+* This file is part of node-red-contrib-arduino-iot-cloud.
 * Copyright (c) 2019
 *
 * This software is released under:
 * The GNU General Public License, which covers the main part of
-* node-red-contrib-arduino-cloud
+* node-red-contrib-arduino-iot-cloud
 * The terms of this license can be found at:
 * https://www.gnu.org/licenses/gpl-3.0.en.html
 *
@@ -18,7 +18,7 @@
 */
 
 const request = require("async-request");
-const ArduinoClientHttp = require('./arduino-cloud-api-wrapper');
+const ArduinoClientHttp = require('./arduino-iot-cloud-api-wrapper');
 const ArduinoClientMqtt = require('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
@@ -88,7 +88,7 @@ function getMqttOptions(clientId,token,RED){
       RED.nodes.eachNode((n)=>{
         if(n.type === "property in"){
           const node = RED.nodes.getNode(n.id);
-          node.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.connection-error" });
+          node.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.connection-error" });
         }
       });
 
@@ -100,7 +100,7 @@ function getMqttOptions(clientId,token,RED){
       RED.nodes.eachNode((n)=>{
         if(n.type === "property in"){
           const node = RED.nodes.getNode(n.id);
-          node.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.offline" });
+          node.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.offline" });
         }
       });
     },

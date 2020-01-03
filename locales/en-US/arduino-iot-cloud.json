@@ -1,5 +1,5 @@
 {
-  "arduino-cloud":{
+  "arduino-iot-cloud":{
     "config":{
       "node":{
         "connection":"Connection",
