@@ -1,11 +1,11 @@
 /*
 * Copyright 2019 ARDUINO SA (http://www.arduino.cc/)
-* This file is part of node-red-contrib-arduino-cloud.
+* This file is part of node-red-contrib-arduino-iot-cloud.
 * Copyright (c) 2019
 *
 * This software is released under:
 * The GNU General Public License, which covers the main part of
-* node-red-contrib-arduino-cloud
+* node-red-contrib-arduino-iot-cloud
 * The terms of this license can be found at:
 * https://www.gnu.org/licenses/gpl-3.0.en.html
 *
@@ -18,11 +18,11 @@
 */
 
 const request = require("async-request");
-const ArduinoClientHttp = require('./arduino-cloud-api-wrapper');
+const ArduinoClientHttp = require('./arduino-iot-cloud-api-wrapper');
 const ArduinoClientMqtt = require('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://login.arduino.cc/oauth/token';
 const accessTokenAudience = process.env.NODE_RED_ACCESS_TOKEN_AUDIENCE || 'https://api2.arduino.cc/iot';
-const arduinoCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
+const arduinoIotCloudHost = process.env.NODE_RED_MQTT_HOST || 'wss.iot.arduino.cc';
 const Mutex = require('async-mutex').Mutex;
 /** Connections elem struct
  * {
@@ -81,14 +81,14 @@ async function getToken(connectionConfig) {
 
 function getMqttOptions(clientId,token,RED){
   return {
-    host: arduinoCloudHost,
+    host: arduinoIotCloudHost,
     token: token,
     onDisconnect: async () => {
       console.log(`connection lost for ${clientId}`);
       RED.nodes.eachNode((n)=>{
         if(n.type === "property in"){
           const node = RED.nodes.getNode(n.id);
-          node.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.connection-error" });
+          node.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.connection-error" });
         }
       });
 
@@ -100,7 +100,7 @@ function getMqttOptions(clientId,token,RED){
       RED.nodes.eachNode((n)=>{
         if(n.type === "property in"){
           const node = RED.nodes.getNode(n.id);
-          node.status({ fill: "red", shape: "dot", text: "arduino-cloud.status.offline" });
+          node.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.offline" });
         }
       });
     },
@@ -129,7 +129,7 @@ async function getClientMqtt(connectionConfig, RED) {
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
       const tokenInfo = await getToken(connectionConfig);
       if (tokenInfo !== undefined) {
-        const ArduinoCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,tokenInfo.token,RED)
+        const ArduinoIotCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,tokenInfo.token,RED)
         const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
         connections.push({
           clientId: connectionConfig.credentials.clientid,
@@ -140,7 +140,7 @@ async function getClientMqtt(connectionConfig, RED) {
           clientHttp: null,
           timeoutUpdateToken: timeout
         });
-        await clientMqtt.connect(ArduinoCloudOptions);
+        await clientMqtt.connect(ArduinoIotCloudOptions);
       } else {
         clientMqtt = undefined;
       }
@@ -149,9 +149,9 @@ async function getClientMqtt(connectionConfig, RED) {
         clientMqtt = connections[user].clientMqtt;
       } else {
         clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
-        const ArduinoCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,connections[user].token,RED)
+        const ArduinoIotCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,connections[user].token,RED)
         connections[user].clientMqtt = clientMqtt;
-        await clientMqtt.connect(ArduinoCloudOptions);
+        await clientMqtt.connect(ArduinoIotCloudOptions);
 
       }
     }

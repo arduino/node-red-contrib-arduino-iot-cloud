@@ -1,5 +1,5 @@
 {
-  "name": "node-red-contrib-arduino-cloud",
+  "name": "node-red-contrib-arduino-iot-cloud",
   "version": "0.9.0",
   "description": "Node-RED nodes to talk to Arduino IoT Cloud",
   "scripts": {
@@ -14,7 +14,7 @@
   "license": "MIT",
   "node-red": {
     "nodes": {
-      "Property": "arduino-cloud.js"
+      "Property": "arduino-iot-cloud.js"
     }
   },
   "dependencies": {
