@@ -11,7 +11,7 @@
     "IoT",
     "Cloud"
   ],
-  "license": "MIT",
+  "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
   "node-red": {
     "nodes": {
       "Property": "arduino-iot-cloud.js"
