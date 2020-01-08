@@ -6,7 +6,7 @@ Multi Arduino Accounts are allowed.
 ## Installation
 Install node-red-contrib-arduino-iot-cloud with:
 
-`npm install -g https://github.com/arduino/node-red-contrib-arduino-iot-cloud.git`
+`npm install -g @arduino/node-red-contrib-arduino-iot-cloud`
 
 ## Configuration 
 1. Obtain Client ID and Client Secret from the [things webpage](https://create.arduino.cc/iot/things) by clicking on *Add API*
