@@ -11,7 +11,7 @@
     "IoT",
     "Cloud"
   ],
-  "license": "MIT",
+  "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
   "node-red": {
     "nodes": {
       "Property": "arduino-iot-cloud.js"
@@ -26,5 +26,9 @@
     "moment": "^2.24.0",
     "mqtt": "^3.0.0",
     "request": "^2.88.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arduino/node-red-contrib-arduino-iot-cloud.git"
   }
 }
