@@ -447,14 +447,14 @@ module.exports = function (RED) {
   RED.httpAdmin.get("/properties", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
     return getThingsOrProperties(req, res, "properties");
   });
-}
 
-function getStatus(value) {
-  if (typeof value !== "object") {
-    if (typeof value === "number" && !(Number.isInteger(value)))
-      return value.toFixed(3);
-    else
-      return value;
+  function getStatus(value) {
+    if (typeof value !== "object") {
+      if (typeof value === "number" && !(Number.isInteger(value)))
+        return value.toFixed(3);
+      else
+        return value;
+    }
+    return RED._("arduino-iot-cloud.status.object-injected");
   }
-  return RED._("arduino-iot-cloud.status.object-injected");
 }
