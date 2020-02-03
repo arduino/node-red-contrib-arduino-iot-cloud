@@ -37,7 +37,7 @@ const Mutex = require('async-mutex').Mutex;
  */
 var connections = [];
 const getClientMutex = new Mutex();
-
+var numRetry=0;
 
 
 async function getToken(connectionConfig) {
@@ -239,13 +239,26 @@ async function updateToken(connectionConfig) {
     if (user !== -1) {
       var tokenInfo = await getToken(connectionConfig);
       if (tokenInfo !== undefined) {
+        numRetry=0;
         connections[user].token = tokenInfo.token;
         connections[user].expires_token_ts = tokenInfo.expires_in;
-        connections[user].clientMqtt.updateToken(tokenInfo.token);
-        connections[user].clientHttp.updateToken(tokenInfo.token);
+        if(connections[user].clientMqtt){
+          connections[user].clientMqtt.updateToken(tokenInfo.token);
+        }
+        if(connections[user].clientHttp){
+          connections[user].clientHttp.updateToken(tokenInfo.token);
+        }
         connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
       } else {
-        connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 1000);
+        /*Avoid too many requests addressed to server*/
+        if(numRetry < 3){
+          connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 5000);
+        }
+        else{
+          connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 60000);
+        }
+
+        numRetry++;
       }
     }
   } catch (err) {
