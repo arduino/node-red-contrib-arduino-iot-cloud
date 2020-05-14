@@ -90,7 +90,7 @@ class ArduinoClientMqtt {
         return reject(new Error('connection failed: you need to provide a valid token'));
       }
 
-      const userid = jws.decode(options.token).payload["http://arduino.cc/user_id"];
+      const userid = jws.decode(options.token).payload["http://arduino.cc/id"];
       const clientID = `${userid}:${new Date().getTime()}`;
       const connectionOpts = {
         clientId: clientID,

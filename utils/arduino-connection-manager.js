@@ -60,7 +60,7 @@ async function getToken(connectionConfig) {
     rawdata = await request(accessTokenUri, options);
     data = JSON.parse(rawdata.body);
     var token = data.access_token;
-    expires_in = data.expires_in;
+    expires_in = data.expires_in * 0.8; // needed to change the token before it expires
     if (token !== undefined) {
       return { token: token, expires_in: expires_in };
     }
