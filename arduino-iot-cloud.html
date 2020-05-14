@@ -216,7 +216,7 @@
         let queryString = prepareQueryString(connection);
         if (!queryString || queryString === "")
             return;
-        if (!thing_id || thing_id === "" || thing_id === "0")
+        if (!thing_id || thing_id === "" || thing_id === "0" || thing_id === "updating")
             return;
         queryString = `${queryString}&thing_id=${thing_id}`;
 
