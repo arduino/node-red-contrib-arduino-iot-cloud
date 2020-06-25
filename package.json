@@ -1,6 +1,6 @@
 {
   "name": "@arduino/node-red-contrib-arduino-iot-cloud",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Node-RED nodes to talk to Arduino IoT Cloud",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "@arduino/arduino-iot-client": "^1.0.1",
+    "@arduino/arduino-iot-client": "^1.3.3",
     "@arduino/cbor-js": "github:arduino/cbor-js",
     "async-mutex": "^0.1.4",
     "async-request": "^1.2.0",
