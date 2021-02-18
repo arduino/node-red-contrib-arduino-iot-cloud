@@ -8,6 +8,8 @@ Install node-red-contrib-arduino-iot-cloud with:
 
 `npm install @arduino/node-red-contrib-arduino-iot-cloud`
 
+into your $HOME/.node-red directory or via node-red palette manager
+
 ## Configuration 
 1. Obtain Client ID and Client Secret from the [things webpage](https://create.arduino.cc/iot/things) by clicking on *Add API*
 2. Go to NodeRED web page

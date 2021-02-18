@@ -17,7 +17,7 @@
 *
 */
 
-const request = require("async-request");
+const superagent = require('superagent');
 const ArduinoClientHttp = require('./arduino-iot-cloud-api-wrapper');
 const ArduinoClientMqtt = require('../arduino-iot-client-mqtt/arduino-iot-client-mqtt');
 const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://api2.arduino.cc/iot/v1/clients/token';
@@ -41,26 +41,22 @@ var numRetry=0;
 
 
 async function getToken(connectionConfig) {
-  var options = {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    data: {
+  const dataToSend = {
       grant_type: 'client_credentials',
       client_id: connectionConfig.credentials.clientid,
       client_secret: connectionConfig.credentials.clientsecret,
       audience: accessTokenAudience
-    }
   };
 
   try {
 
-    var rawdata;
-    var data;
-    var expires_in;
-    rawdata = await request(accessTokenUri, options);
-    data = JSON.parse(rawdata.body);
-    var token = data.access_token;
-    expires_in = data.expires_in * 0.8; // needed to change the token before it expires
+    var res = await superagent
+              .post(accessTokenUri)
+              .set('content-type', 'application/x-www-form-urlencoded')
+              .set('accept', 'json')
+              .send(dataToSend);
+    var token = res.body.access_token;
+    var expires_in = res.body.expires_in * 0.8; // needed to change the token before it expires
     if (token !== undefined) {
       return { token: token, expires_in: expires_in };
     }
