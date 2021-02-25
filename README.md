@@ -1,19 +1,30 @@
 # node-red-contrib-arduino-iot-cloud
 
-This module implements node-red nodes for interacting with [Arduino IoT Cloud](https://create.arduino.cc/iot).
+This module implements Node-RED nodes for interacting with [Arduino IoT Cloud](https://create.arduino.cc/iot).
 Multi Arduino Accounts are allowed.
 
+## Docker and Node-RED installation
+The easiest way to install Docker on a linux system is to use [the convenience script](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script):
+```shell
+curl -sSL https://get.docker.com/ | sh
+```
+To install Node-RED you can use the [official docker container](https://hub.docker.com/r/nodered/node-red):
+```shell
+docker run -it -p 1880:1880 -v myNodeREDdata:/data --name mynodered nodered/node-red
+```
+
+
 ## Installation
-Install node-red-contrib-arduino-iot-cloud with:
+Just search *node-red-contrib-arduino-iot-cloud* in the Node-RED palette manager and click on install
+
+Or you can install the plugin by using `npm` in your `$HOME/.node-red` directory:
 
 `npm install @arduino/node-red-contrib-arduino-iot-cloud`
 
-into your $HOME/.node-red directory or via node-red palette manager
-
 ## Configuration 
-1. Obtain Client ID and Client Secret from the [things webpage](https://create.arduino.cc/iot/things) by clicking on *Add API*
-2. Go to NodeRED web page
-3. Select one Arduino node from the pallete and drag to a flow
+1. Obtain Client ID and Client Secret from the [integrations webpage](https://create.arduino.cc/iot/integrations) by clicking on *Create API key*
+2. Go to Node-RED web page
+3. Select one Arduino nodes from the pallete and drag to a flow
 4. Double click on the node
     * set a new connection
       + select 'Add new arduino-connection...' in the field 'Connection'
