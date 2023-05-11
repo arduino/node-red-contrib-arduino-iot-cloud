@@ -425,10 +425,20 @@ module.exports = function (RED) {
         return res.send(JSON.stringify({ error: str }));
       }
       if (thingsOrProperties === "things") {
-        return res.send(JSON.stringify(await arduinoRestClient.getThings()));
+        const organization = req.headers.organization;
+        const opts = {}
+        if (organization) {
+          opts.xOrganization = organization;
+        }
+        return res.send(JSON.stringify(await arduinoRestClient.getThings(opts)));
       } else if (thingsOrProperties === "properties") {
         const thing_id = req.query.thing_id;
-        return res.send(JSON.stringify(await arduinoRestClient.getProperties(thing_id)));
+        const organization = req.headers.organization;
+        const opts = {}
+        if (organization) {
+          opts.xOrganization = organization;
+        }
+        return res.send(JSON.stringify(await arduinoRestClient.getProperties(thing_id, opts)));
       } else {
         str=RED._("arduino-iot-cloud.connection-error.wrong-param");
         console.log(str);
