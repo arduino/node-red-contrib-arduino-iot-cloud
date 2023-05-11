@@ -97,10 +97,24 @@
                         }
                     }
                 });
+                $("#node-input-organization").focusout(() => {
+                    const connection = $("#node-input-connection").val();
+                    const organization = $("#node-input-organization").val();
+                    if (connection === "_ADD_") {
+                        $("#node-input-organization").empty();
+                        str = this._("arduino-iot-cloud.config.connection.placeholders.no-conn-selected");
+                        $("<option value='" + "" + "' > " + str + "</option>").appendTo("#node-input-thing");
+                        $("#node-input-thing").trigger("change");
+                    } else {
+                        $("select#node-input-thing").empty();
+                        initThings(connection, this._, null, organization);
+                    }
+                });
                 $("#node-input-thing").change(() => {
                     const thing_id = $("#node-input-thing").val();
                     const property_id = $("#node-input-property").val();
                     const connection = $("#node-input-connection").val();
+                    const organization = $("#node-input-organization").val();
                     const thing_text = $("#node-input-thing").find('option:selected').text()
                     var str;
                     if (connection === "_ADD_") {
@@ -116,7 +130,7 @@
                             $("#node-input-property").trigger("change");
                         } else {
                             $("select#node-input-property").empty();
-                            initProperties(connection, thing_id, this.property, outs, this._);
+                            initProperties(connection, thing_id, organization, this.property, outs, this._);
                         }
                     }
                 });
@@ -175,7 +189,7 @@
         }
     }
 
-    function initThings(connection, label_func, thing_id) {
+    function initThings(connection, label_func, thing_id, organization_id) {
         const queryString = prepareQueryString(connection);
         if (!queryString || queryString === "")
             return;
@@ -184,6 +198,7 @@
         $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-thing");
         $("select#node-input-thing").val("updating");
         var msg;
+        setupOrganization(organization_id);
         $.getJSON(`things?${queryString}`, things => {
             $("select#node-input-thing").empty();
             if (things && typeof (things) == "object" && things.error) {
@@ -212,7 +227,19 @@
         });
     }
 
-    function initProperties(connection, thing_id, property_id, outs, label_func) {
+    function setupOrganization(organization_id) {
+        if (organization_id) {
+            $.ajaxSetup({
+                headers: {
+                    organization: organization_id
+                }
+            });
+        } else if ($.ajaxSettings.headers) {
+            delete $.ajaxSettings.headers.organization
+        }
+    }
+
+    function initProperties(connection, thing_id, organization_id, property_id, outs, label_func) {
         let queryString = prepareQueryString(connection);
         if (!queryString || queryString === "")
             return;
@@ -224,6 +251,7 @@
         $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-property");
         $("select#node-input-property").val("updating");
 
+        setupOrganization(organization_id);
         $.getJSON(`properties?${queryString}`, properties => {
             $("select#node-input-property").empty();
             var msg;
@@ -308,6 +336,10 @@
   <div class="form-row">
     <label for="node-input-connection"><i class="fa fa-random fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.connection"></span></label>
     <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+    <label for="node-input-organization"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.organization"></span></label>
+    <input type="text" id="node-input-organization" data-i18n="[placeholder]arduino-iot-cloud.config.node.placeholders.organization">
   </div>
   <div class="form-row">
     <label for="node-input-thing"><i class="fa fa-cubes fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.thing"></span></label>
