@@ -74,8 +74,11 @@
             oneditprepare: function () {
 
                 if (this.connection && this.connection !== "_ADD_") {
-                    initThings(this.connection, this._, this.thing,);
-                    initProperties(this.connection, this.thing, this.property, outs, this._);
+                    if (this.organization) {
+                        $("#node-input-organization").val(this.organization);
+                    }
+                    initThings(this.connection, this._, this.thing, this.organization);
+                    initProperties(this.connection, this.thing, this.organization, this.property, outs, this._);
                 }
                 $("select#node-input-connection").change((e) => {
                     var msg = this._("arduino-iot-cloud.config.connection.placeholders.no-conn-selected");
@@ -97,9 +100,10 @@
                         }
                     }
                 });
-                $("#node-input-organization").focusout(() => {
+                $("#node-input-organization").change(() => {
                     const connection = $("#node-input-connection").val();
                     const organization = $("#node-input-organization").val();
+                    this.organization = organization;
                     if (connection === "_ADD_") {
                         $("#node-input-organization").empty();
                         str = this._("arduino-iot-cloud.config.connection.placeholders.no-conn-selected");
