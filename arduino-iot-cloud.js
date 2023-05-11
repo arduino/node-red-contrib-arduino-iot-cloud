@@ -26,9 +26,9 @@ module.exports = function (RED) {
       const connectionConfig = RED.nodes.getNode(config.connection);
       this.status({});
       this.lastValue = undefined;
+      this.organization = config.organization;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-
           this.thing = config.thing;
           this.propertyId = config.property;
           this.propertyName = config.propname;
@@ -78,6 +78,7 @@ module.exports = function (RED) {
             this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
             if (this.arduinoRestClient){
               this.arduinoRestClient.openConnections++;
+              this.organization = config.organization;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
@@ -149,6 +150,7 @@ module.exports = function (RED) {
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
+              this.organization = config.organization;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
@@ -242,6 +244,7 @@ module.exports = function (RED) {
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
+              this.organization = config.organization;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
@@ -326,6 +329,7 @@ module.exports = function (RED) {
             this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
             if (this.arduinoRestClient){
               this.arduinoRestClient.openConnections++;
+              this.organization = config.organization;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
