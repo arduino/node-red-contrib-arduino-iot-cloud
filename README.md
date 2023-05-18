@@ -21,7 +21,14 @@ Or you can install the plugin by using `npm` in your `$HOME/.node-red` directory
 
 `npm install @arduino/node-red-contrib-arduino-iot-cloud`
 
-## Configuration 
+### Update
+If you're using a service hosting your node-red instance and you want to be sure that you're using the latest version of *node-red-contrib-arduino-iot-cloud* published on npm, you might need to force require an update.
+
+You can use either one of these methods:
+  - Go to [https://flows.nodered.org/add/node](https://flows.nodered.org/add/node) and write `node-red-contrib-arduino-iot-cloud` in the input field
+  - If you are logged in, you should see a `check for update` on the right side of the [module's page](https://flows.nodered.org/node/@arduino/node-red-contrib-arduino-iot-cloud)
+
+## Configuration
 1. Obtain Client ID and Client Secret from the [integrations webpage](https://create.arduino.cc/iot/integrations) by clicking on *Create API key*
 2. Go to Node-RED web page
 3. Select one Arduino nodes from the pallete and drag to a flow
