@@ -82,9 +82,25 @@ module.exports = function (RED) {
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
+              this.sendasdevice = config.sendasdevice;
+
+              if (this.sendasdevice) {
+                try {
+                  const opts = {}
+                  if (this.organization) {
+                    opts.xOrganization = this.organization;
+                  }
+                  ret = await this.arduinoRestClient.getThing(this.thing, opts);
+                  this.device_id = ret.device_id;
+                } catch (error) {
+                  // Handle API call error
+                  console.error('Error making API call:', error.message);
+                }
+              }
+              
               this.on('input', async function (msg) {
                 try {
-                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload, this.sendasdevice ? this.device_id : undefined);
                   var s;
                   if (typeof msg.payload !== "object") {
                     s = getStatus(msg.payload);

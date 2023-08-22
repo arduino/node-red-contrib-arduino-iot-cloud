@@ -9,6 +9,7 @@
         "organization": "Space ID",
         "hist-label":"Time filter",
         "poll-label":"Poll Every",
+        "send-mode":"Send as device",
         "placeholders":{
           "name":"Name",
           "no-thing-selected":"No thing selected",
