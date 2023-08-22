@@ -52,6 +52,10 @@
             ret['variableName'] = {value: ""};
         }
 
+        if (nodeName === "property out") {
+            ret['sendasdevice'] = {value: false};
+        }
+
         return ret;
     }
 
@@ -99,6 +103,10 @@
                             initThings(connection, this._);
                         }
                     }
+                });
+                $("#node-input-sendasdevice").change(() => {
+                    sendasdevice = $("#node-input-sendasdevice").val();
+                    this.sendasdevice = sendasdevice;
                 });
                 $("#node-input-organization").change(() => {
                     const connection = $("#node-input-connection").val();
@@ -381,6 +389,10 @@
   <div class="form-row">
       <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.name"></span></label>
       <input type="text" id="node-input-name" data-i18n="[placeholder]arduino-iot-cloud.config.node.placeholders.name">
+  </div>
+    <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.send-mode"></span></label>
+      <input type="checkbox" id="node-input-sendasdevice">
   </div>
 
 </script>
