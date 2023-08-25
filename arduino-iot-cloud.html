@@ -54,6 +54,7 @@
 
         if (nodeName === "property out") {
             ret['sendasdevice'] = {value: false};
+            ret["device"] = {value: ""};
         }
 
         return ret;
@@ -83,6 +84,7 @@
                     }
                     initThings(this.connection, this._, this.thing, this.organization);
                     initProperties(this.connection, this.thing, this.organization, this.property, outs, this._);
+                    initDevice(this.connection, this.thing.id, this.organization, this._);
                 }
                 $("select#node-input-connection").change((e) => {
                     var msg = this._("arduino-iot-cloud.config.connection.placeholders.no-conn-selected");
@@ -105,8 +107,16 @@
                     }
                 });
                 $("#node-input-sendasdevice").change(() => {
-                    sendasdevice = $("#node-input-sendasdevice").val();
-                    this.sendasdevice = sendasdevice;
+                    if ($("#node-input-sendasdevice").is(":checked")) {
+                        const connection = $("#node-input-connection").val();
+                        const thing_id = $("#node-input-thing").val();
+                        const organization = $("#node-input-organization").val();
+                        initDevice(connection, thing_id, organization, this._);
+                        $("#node-input-device-line").show()
+                    } else {
+                        $("#node-input-device-line").hide()
+                        $("#node-input-device").val("");
+                    }
                 });
                 $("#node-input-organization").change(() => {
                     const connection = $("#node-input-connection").val();
@@ -143,6 +153,7 @@
                         } else {
                             $("select#node-input-property").empty();
                             initProperties(connection, thing_id, organization, this.property, outs, this._);
+                            initDevice(connection, thing_id, organization, this._);
                         }
                     }
                 });
@@ -249,6 +260,30 @@
         } else if ($.ajaxSettings.headers) {
             delete $.ajaxSettings.headers.organization
         }
+    }
+
+    function initDevice(connection, thing_id, organization_id, label_func) {
+        let queryString = prepareQueryString(connection);
+        if (!queryString || queryString === "")
+            return;
+        if (!thing_id || thing_id === "" || thing_id === "0" || thing_id === "updating")
+            return;
+        queryString = `${queryString}&thing_id=${thing_id}`;
+
+        $("select#node-input-device").empty();
+        $("<option value='" + "updating" + "'> " + "" + "</option>").appendTo("#node-input-device");
+        $("select#node-input-device").val("updating");
+
+        setupOrganization(organization_id);
+        $.getJSON(`thing?${queryString}`, thing => {
+            $("select#node-input-device").empty();
+            msg = label_func("arduino-iot-cloud.config.node.placeholders.device-select");
+            $("<option value='" + "" + "'> " + msg + "</option>").appendTo("#node-input-device");
+            if(thing){
+                $("<option value='" + thing.device_id + "'>" + thing.device_name + "</option>").appendTo("#node-input-device");
+                $("select#node-input-device").val(thing.device_id);
+            }
+        });
     }
 
     function initProperties(connection, thing_id, organization_id, property_id, outs, label_func) {
@@ -394,7 +429,11 @@
       <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.send-mode"></span></label>
       <input type="checkbox" id="node-input-sendasdevice">
   </div>
-
+  <div class="form-row" id="node-input-device-line">
+    <label for="node-input-device"><i class="fa fa-cube fa-fw"></i> <span data-i18n="arduino-iot-cloud.config.node.device-id"></span></label>
+    <select id="node-input-device" type="hidden" data-i18n="[placeholder]arduino-iot-cloud.config.node.placeholders.device-select">
+    </select>
+  </div>
 </script>
 
 
