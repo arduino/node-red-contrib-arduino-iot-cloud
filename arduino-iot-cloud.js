@@ -87,8 +87,6 @@ module.exports = function (RED) {
               
               this.on('input', async function (msg) {
                 try {
-                  console.log("dev_id", this.device);
-                  console.log("send_device", this.sendasdevice);
                   await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload, this.sendasdevice ? this.device : undefined);
                   var s;
                   if (typeof msg.payload !== "object") {

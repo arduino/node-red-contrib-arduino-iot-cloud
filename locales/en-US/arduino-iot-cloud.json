@@ -20,7 +20,7 @@
           "property-select":"Select a property",
           "no-property-available":"No properties available",
           "no-property-writable-av":"No writable properties available",
-          "device-select":"No device associated"
+          "no-device-select":"No device associated"
         }
       },
       "time":{
