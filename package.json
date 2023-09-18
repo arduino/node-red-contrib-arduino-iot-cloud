@@ -1,6 +1,6 @@
 {
   "name": "@arduino/node-red-contrib-arduino-iot-cloud",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Node-RED nodes to talk to Arduino IoT Cloud",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
