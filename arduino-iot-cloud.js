@@ -82,9 +82,12 @@ module.exports = function (RED) {
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
+              this.sendasdevice = config.sendasdevice;
+              this.device = config.device
+              
               this.on('input', async function (msg) {
                 try {
-                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload);
+                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload, this.sendasdevice ? this.device : undefined);
                   var s;
                   if (typeof msg.payload !== "object") {
                     s = getStatus(msg.payload);
@@ -443,7 +446,15 @@ module.exports = function (RED) {
           opts.xOrganization = organization;
         }
         return res.send(JSON.stringify(await arduinoRestClient.getProperties(thing_id, opts)));
-      } else {
+      } else if (thingsOrProperties === "device") {
+        const thing_id = req.query.thing_id;
+        const organization = req.headers.organization;
+        const opts = {}
+        if (organization) {
+          opts.xOrganization = organization;
+        }
+        return res.send(JSON.stringify(await arduinoRestClient.getThing(thing_id, opts)));
+      }else {
         str=RED._("arduino-iot-cloud.connection-error.wrong-param");
         console.log(str);
         return res.send(JSON.stringify({ error: str }));
@@ -460,6 +471,10 @@ module.exports = function (RED) {
 
   RED.httpAdmin.get("/properties", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
     return getThingsOrProperties(req, res, "properties");
+  });
+
+  RED.httpAdmin.get("/thing", RED.auth.needsPermission('Property-in.read'), async function (req, res) {
+    return getThingsOrProperties(req, res, "device");
   });
 
   function getStatus(value) {

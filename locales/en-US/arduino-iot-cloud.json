@@ -9,6 +9,8 @@
         "organization": "Space ID",
         "hist-label":"Time filter",
         "poll-label":"Poll Every",
+        "device-id": "Device",
+        "send-mode":"Send as device",
         "placeholders":{
           "name":"Name",
           "no-thing-selected":"No thing selected",
@@ -17,7 +19,8 @@
           "no-things-available":"No things available",
           "property-select":"Select a property",
           "no-property-available":"No properties available",
-          "no-property-writable-av":"No writable properties available"
+          "no-property-writable-av":"No writable properties available",
+          "no-device-select":"No device associated"
         }
       },
       "time":{

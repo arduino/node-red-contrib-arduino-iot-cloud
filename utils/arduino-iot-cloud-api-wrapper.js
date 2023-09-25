@@ -40,9 +40,10 @@ class ArduinoClientHttp {
   updateToken(token) {
     this.token = token;
   }
-  setProperty(thing_id, property_id, value) {
+  setProperty(thing_id, property_id, value, device_id = undefined) {
     const body = JSON.stringify({
-      value: value
+      value: value,
+      device_id : device_id
     });
     oauth2.accessToken = this.token;
     return apiProperties.propertiesV2Publish(thing_id, property_id, body);
@@ -50,6 +51,11 @@ class ArduinoClientHttp {
   getThings(opts) {
     oauth2.accessToken = this.token;
     return apiThings.thingsV2List(opts);
+  }
+  getThing(thingId, opts) {
+    oauth2.accessToken = this.token;
+    opts.showDeleted = false;
+    return apiThings.thingsV2Show(thingId, opts);
   }
   getProperties(thingId, opts) {
     oauth2.accessToken = this.token;
