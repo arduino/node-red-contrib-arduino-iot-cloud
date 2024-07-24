@@ -347,9 +347,13 @@ module.exports = function (RED) {
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
+              const opts = {}
+              if (this.organization) {
+                opts.xOrganization = this.organization;
+              }  
               node.on('input', async function () {
                 try{
-                  const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+                  const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId, opts);
                   this.send(
                     {
                       topic: property.name,
