@@ -84,10 +84,13 @@ module.exports = function (RED) {
               this.propertyName = config.name;
               this.sendasdevice = config.sendasdevice;
               this.device = config.device
-              
+              const opts = {}
+              if (this.organization) {
+                opts.xOrganization = this.organization;
+              }            
               this.on('input', async function (msg) {
                 try {
-                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload, this.sendasdevice ? this.device : undefined);
+                  await this.arduinoRestClient.setProperty(this.thing, this.propertyId, msg.payload, opts, this.sendasdevice ? this.device : undefined);
                   var s;
                   if (typeof msg.payload !== "object") {
                     s = getStatus(msg.payload);
@@ -157,6 +160,10 @@ module.exports = function (RED) {
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
+              const opts = {}
+              if (this.organization) {
+                opts.xOrganization = this.organization;
+              }  
               node.on('input', async function () {
                 try{
                   const now = moment();
@@ -165,7 +172,7 @@ module.exports = function (RED) {
                   if (count !== null && count !== "" && count !== undefined && Number.isInteger(parseInt(count)) && parseInt(count) !== 0) {
                     const start = now.subtract(count * this.timeWindowUnit, 'second').format();
 
-                    const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end);
+                    const result = await this.arduinoRestClient.getSeries(this.thing, this.propertyId, start, end, opts);
                     const times = result.responses[0].times;
                     const values = result.responses[0].values;
                     let data = [];
@@ -241,19 +248,19 @@ module.exports = function (RED) {
       this.status({});
       this.timeWindowCount = config.timeWindowCount;
       this.timeWindowUnit = config.timeWindowUnit;
+      this.organization = config.organization;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
           this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
-              this.organization = config.organization;
               this.thing = config.thing;
               this.propertyId = config.property;
               this.propertyName = config.name;
               const pollTime = this.timeWindowCount * this.timeWindowUnit;
               if (pollTime !== null && pollTime !== "" && pollTime !== undefined && Number.isInteger(parseInt(pollTime)) && parseInt(pollTime) !== 0) {
-                this.poll(connectionConfig, pollTime);
+                this.poll(connectionConfig, pollTime, this.organization);
                 this.on('close', function (done) {
                   connectionManager.deleteClientHttp(connectionConfig.credentials.clientid).then(() => { done(); });
                   if (this.pollTimeoutPoll)
@@ -283,9 +290,13 @@ module.exports = function (RED) {
     realConstructor.apply(this, [config]);
   }
   ArduinoIotInputPoll.prototype = {
-    poll: async function (connectionConfig, pollTime) {
+    poll: async function (connectionConfig, pollTime, organization) {
       try {
-        const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId);
+        const opts = {}
+        if (organization) {
+          opts.xOrganization = organization;
+        }  
+        const property = await this.arduinoRestClient.getProperty(this.thing, this.propertyId, opts);
         this.send(
           {
             topic: property.name,
@@ -298,7 +309,7 @@ module.exports = function (RED) {
           this.status({ fill: "grey", shape: "dot", text: s });
         else
           this.status({});
-        this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime) }, pollTime * 1000);
+        this.pollTimeoutPoll = setTimeout(() => { this.poll(connectionConfig, pollTime, organization) }, pollTime * 1000);
       } catch (err) {
         if(err.response && err.response.res && err.response.request){
           console.log('statusCode: '+ err.response.res.statusCode +'\n'+

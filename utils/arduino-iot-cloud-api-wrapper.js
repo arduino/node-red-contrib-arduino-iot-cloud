@@ -40,13 +40,13 @@ class ArduinoClientHttp {
   updateToken(token) {
     this.token = token;
   }
-  setProperty(thing_id, property_id, value, device_id = undefined) {
+  setProperty(thing_id, property_id, value, opts, device_id = undefined) {
     const body = JSON.stringify({
       value: value,
       device_id : device_id
     });
     oauth2.accessToken = this.token;
-    return apiProperties.propertiesV2Publish(thing_id, property_id, body);
+    return apiProperties.propertiesV2Publish(thing_id, property_id, body, opts);
   }
   getThings(opts) {
     oauth2.accessToken = this.token;
@@ -63,11 +63,11 @@ class ArduinoClientHttp {
     const thing = apiThings.thingsV2Show(thingId, opts);
     return thing.then(({properties}) => properties);
   }
-  getProperty(thingId, propertyId) {
+  getProperty(thingId, propertyId, opts) {
     oauth2.accessToken = this.token;
-    return apiProperties.propertiesV2Show(thingId, propertyId);
+    return apiProperties.propertiesV2Show(thingId, propertyId, opts);
   }
-  getSeries(thingId, propertyId, start, end) {
+  getSeries(thingId, propertyId, start, end, opts) {
 
     const body =  JSON.stringify({
       requests: [{
@@ -80,7 +80,7 @@ class ArduinoClientHttp {
       resp_version: 1
     });
     oauth2.accessToken = this.token;
-    return apiSeries.seriesV2BatchQueryRaw(body);
+    return apiSeries.seriesV2BatchQueryRaw(body, opts);
   }
 }
 exports.ArduinoClientHttp = ArduinoClientHttp;
