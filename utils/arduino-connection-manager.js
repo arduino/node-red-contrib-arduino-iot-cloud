@@ -115,7 +115,7 @@ function getMqttOptions(clientId,token,RED){
 async function getClientMqtt(connectionConfig, RED) {
 
   if (!connectionConfig || !connectionConfig.credentials) {
-    throw new Error("Cannot find cooonection config or credentials.");
+    throw new Error("Cannot find connection config or credentials.");
   }
   const releaseMutex = await getClientMutex.acquire();
   try {
