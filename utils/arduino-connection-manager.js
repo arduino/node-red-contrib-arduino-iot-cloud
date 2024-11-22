@@ -29,57 +29,33 @@ const Mutex = require('async-mutex').Mutex;
  *  clientId: clientId,
  *  connectionConfig: connectionConfig,
  *  token: token,
- *  expires_token_ts: ts,
  *  clientMqtt: clientMqttobj,
  *  clientHttp: clientHttpobj,
- *  timeoutUpdateToken: timeout
+ *  intervalUpdateToken: interval 
  * }
  */
 var connections = [];
 const getClientMutex = new Mutex();
-var numRetry=0;
 
-
-async function getToken(connectionConfig, organizationID) {
-  const dataToSend = {
-      grant_type: 'client_credentials',
-      client_id: connectionConfig.credentials.clientid,
-      client_secret: connectionConfig.credentials.clientsecret,
-      audience: accessTokenAudience
-  };
-
-  try {
-    var req = superagent
+function getMqttOptions(clientId,token,RED){
+   async function reconnect() {
+    const releaseMutex = await getClientMutex.acquire();
+    let user = findUser(clientId);
+    if (user !== -1) {
+      let token = await getToken(connections[user].connectionConfig);
+      var req = superagent
       .post(accessTokenUri)
       .set('content-type', 'application/x-www-form-urlencoded')
       .set('accept', 'json')
 
-    if (organizationID) {
-      req.set('X-Organization', organizationID)
-    }
-
     var res = await req.send(dataToSend);
     var token = res.body.access_token;
-    var expires_in = res.body.expires_in * 0.8; // needed to change the token before it expires
-    if (token !== undefined) {
-      return { token: token, expires_in: expires_in };
+    var expires_in = res.body.expires_in * 0.8; // needed to change the token before it expiress[user].token = token.token;
+      await connections[user].clientMqtt.updateToken(token.token);
     }
-  } catch (err) {
-    if(err.response && err.response.res && err.response.request){
-      console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-      'statusMessage: ' + err.response.res.statusMessage + '\r' +
-      'text: ' + err.response.res.text + '\r'+
-      'HTTP method: ' + err.response.request.method + '\r' +
-      'URL request: ' + err.response.request.url
-      );
-    }else{
-      console.log(err);
-    }
-
+    releaseMutex();
   }
-}
 
-function getMqttOptions(clientId,token,RED){
   return {
     host: arduinoIotCloudHost,
     token: token,
@@ -92,8 +68,7 @@ function getMqttOptions(clientId,token,RED){
         }
       });
 
-      await reconnectMqtt(clientId);
-
+      await reconnect();
     },
     onOffline: async () => {
       console.log(`connection lost for ${clientId}`);
@@ -103,6 +78,8 @@ function getMqttOptions(clientId,token,RED){
           node.status({ fill: "red", shape: "dot", text: "arduino-iot-cloud.status.offline" });
         }
       });
+
+      await reconnect();
     },
     onConnected: () =>{
       RED.nodes.eachNode((n)=>{
@@ -117,42 +94,35 @@ function getMqttOptions(clientId,token,RED){
 }
 
 async function getClientMqtt(connectionConfig, RED) {
-
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find connection config or credentials.");
   }
   const releaseMutex = await getClientMutex.acquire();
   try {
-    let user = findUser(connectionConfig.credentials.clientid);
     let clientMqtt;
+    let user = findUser(connectionConfig.credentials.clientid);
     if (user === -1) {
+      let token = await getToken(connectionConfig);
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
-      const tokenInfo = await getToken(connectionConfig);
-      if (tokenInfo !== undefined) {
-        const ArduinoIotCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,tokenInfo.token,RED)
-        const timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
-        connections.push({
-          clientId: connectionConfig.credentials.clientid,
-          connectionConfig: connectionConfig,
-          token: tokenInfo.token,
-          expires_token_ts: tokenInfo.expires_in,
-          clientMqtt: clientMqtt,
-          clientHttp: null,
-          timeoutUpdateToken: timeout
-        });
-        await clientMqtt.connect(ArduinoIotCloudOptions);
-      } else {
-        clientMqtt = undefined;
-      }
+      connections.push({
+        clientId: connectionConfig.credentials.clientid,
+        connectionConfig: connectionConfig,
+        clientMqtt: clientMqtt,
+        token: token.token,
+        clientHttp: null,
+      });
+      await clientMqtt.connect(
+        getMqttOptions(connectionConfig.credentials.clientid, token.token, RED),
+      ); 
     } else {
       if (connections[user].clientMqtt !== null) {
         clientMqtt = connections[user].clientMqtt;
       } else {
         clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
-        const ArduinoIotCloudOptions = getMqttOptions(connectionConfig.credentials.clientid,connections[user].token,RED)
         connections[user].clientMqtt = clientMqtt;
-        await clientMqtt.connect(ArduinoIotCloudOptions);
-
+        await clientMqtt.connect(
+          getMqttOptions(connectionConfig.credentials.clientid, connections[user].token, RED)
+        );
       }
     }
     releaseMutex();
@@ -162,11 +132,9 @@ async function getClientMqtt(connectionConfig, RED) {
     console.log(err);
     releaseMutex();
   }
-
 }
 
 async function getClientHttp(connectionConfig, organizationID) {
-
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
   }
@@ -180,19 +148,21 @@ async function getClientHttp(connectionConfig, organizationID) {
       if (tokenInfo !== undefined) {
         clientHttp = new ArduinoClientHttp.ArduinoClientHttp(tokenInfo.token);
 
-        var timeout = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
+        var interval = setInterval(async () => { 
+          let id = findUser(connectionConfig.credentials.clientid);
+          if (id !== -1) {
+            connections[id].token = await getToken(connectionConfig, organizationID);
+          }
+        }, tokenInfo.expires_in * 1000);
         connections.push({
           clientId: connectionConfig.credentials.clientid,
           connectionConfig: connectionConfig,
           token: tokenInfo.token,
-          expires_token_ts: tokenInfo.expires_in,
           clientMqtt: null,
           clientHttp: clientHttp,
-          timeoutUpdateToken: timeout
+          intervalUpdateToken: interval 
         });
-
       }
-
     } else {
       if (connections[user].clientHttp !== null) {
         clientHttp = connections[user].clientHttp;
@@ -216,11 +186,8 @@ async function getClientHttp(connectionConfig, organizationID) {
     }else{
       console.log(err);
     }
-
     releaseMutex();
-
   }
-
 }
 
 function findUser(clientId) {
@@ -230,39 +197,56 @@ function findUser(clientId) {
     }
   }
   return -1;
-
 }
 
-async function updateToken(connectionConfig) {
-  try {
-    var user = findUser(connectionConfig.credentials.clientid);
-    if (user !== -1) {
-      var tokenInfo = await getToken(connectionConfig);
-      if (tokenInfo !== undefined) {
-        numRetry=0;
-        connections[user].token = tokenInfo.token;
-        connections[user].expires_token_ts = tokenInfo.expires_in;
-        if(connections[user].clientMqtt){
-          connections[user].clientMqtt.updateToken(tokenInfo.token);
-        }
-        if(connections[user].clientHttp){
-          connections[user].clientHttp.updateToken(tokenInfo.token);
-        }
-        connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, tokenInfo.expires_in * 1000);
-      } else {
-        /*Avoid too many requests addressed to server*/
-        if(numRetry < 3){
-          connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 5000);
-        }
-        else{
-          connections[user].timeoutUpdateToken = setTimeout(() => { updateToken(connectionConfig) }, 60000);
-        }
+async function getToken(connectionConfig, organizationID) {
+  let token;
+  let delay = 200;
+  while (true) {
+    token = await _get();
+    if (token) {
+      return token;
+    }
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    delay = Math.min(delay * 2, 5000);
+  }
 
-        numRetry++;
+  async function _get() {
+    const dataToSend = {
+        grant_type: 'client_credentials',
+        client_id: connectionConfig.credentials.clientid,
+        client_secret: connectionConfig.credentials.clientsecret,
+        audience: accessTokenAudience
+    };
+
+    try {
+      var req = superagent
+      .post(accessTokenUri)
+      .set('content-type', 'application/x-www-form-urlencoded')
+      .set('accept', 'json')
+
+      if (organizationID) {
+        req.set('X-Organization', organizationID)
+      }
+
+      var res = await req.send(dataToSend);
+      var token = res.body.access_token;
+      var expires_in = res.body.expires_in * 0.8; // needed to change the token before it expires
+      if (token !== undefined) {
+        return { token: token, expires_in: expires_in };
+      }
+    } catch (err) {
+      if(err.response && err.response.res && err.response.request){
+        console.log('statusCode: '+ err.response.res.statusCode +'\r'+
+        'statusMessage: ' + err.response.res.statusMessage + '\r' +
+        'text: ' + err.response.res.text + '\r'+
+        'HTTP method: ' + err.response.request.method + '\r' +
+        'URL request: ' + err.response.request.url
+        );
+      }else{
+        console.log(err);
       }
     }
-  } catch (err) {
-    console.log(err);
   }
 }
 
@@ -277,11 +261,7 @@ async function deleteClientMqtt(clientId, thing, propertyName, nodeId) {
         await connections[user].clientMqtt.disconnect();
         delete connections[user].clientMqtt;
         connections[user].clientMqtt = null;
-        if (connections[user].clientHttp === null) {
-          if (connections[user].timeoutUpdateToken)
-            clearTimeout(connections[user].timeoutUpdateToken);
-          connections.splice(user, 1);
-        }
+        connections.splice(user, 1);
       }
     }
   }
@@ -299,21 +279,12 @@ async function deleteClientHttp(clientId) {
       }
     }
     if (connections[user].clientMqtt === null) {
-      if (connections[user].timeoutUpdateToken)
-        clearTimeout(connections[user].timeoutUpdateToken);
+      if (connections[user].intervalUpdateToken)
+        clearInterval(connections[user].intervalUpdateToken);
       connections.splice(user, 1);
     }
   }
   releaseMutex();
-}
-
-async function reconnectMqtt(clientId) {
-  var user = findUser(clientId);
-  if (user !== -1) {
-    if(connections[user].clientMqtt){
-      await connections[user].clientMqtt.reconnect();
-    }
-  }
 }
 
 exports.getClientMqtt = getClientMqtt;

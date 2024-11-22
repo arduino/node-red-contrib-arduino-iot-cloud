@@ -75,7 +75,7 @@ module.exports = function (RED) {
         try {
 
           if (config.thing !== "" && config.property !== "") {
-            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
+            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, config.organization);
             if (this.arduinoRestClient){
               this.arduinoRestClient.openConnections++;
               this.organization = config.organization;
@@ -152,7 +152,7 @@ module.exports = function (RED) {
       this.timeWindowUnit = config.timeWindowUnit;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
+          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, config.organization);
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
@@ -251,7 +251,7 @@ module.exports = function (RED) {
       this.organization = config.organization;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
+          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, config.organization);
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
@@ -340,7 +340,7 @@ module.exports = function (RED) {
         try {
 
           if (config.thing !== "" && config.property !== "") {
-            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
+            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, config.organization);
             if (this.arduinoRestClient){
               this.arduinoRestClient.openConnections++;
               this.organization = config.organization;
