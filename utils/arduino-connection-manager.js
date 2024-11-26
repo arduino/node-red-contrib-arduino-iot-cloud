@@ -46,6 +46,7 @@ var httpConnections = [];
 
 function getMqttOptions(clientId, token, RED){
    async function reconnect() {
+    console.log('Reconnecting to MQTT');
     const releaseMutex = await mqttMutex.acquire();
     let id = findUser(mqttConnections, clientId);
     if (id !== -1) {
@@ -66,6 +67,8 @@ function getMqttOptions(clientId, token, RED){
         }
       });
 
+      console.log('Disconnected from MQTT');
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await reconnect();
     },
@@ -77,6 +80,8 @@ function getMqttOptions(clientId, token, RED){
         }
       });
 
+      console.log('Offline from MQTT');
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await reconnect();
     },
@@ -87,6 +92,8 @@ function getMqttOptions(clientId, token, RED){
           node.status({});
         }
       });
+
+      console.log('Connected to MQTT'); 
     },
     useCloudProtocolV2: true
   };
@@ -114,11 +121,10 @@ async function getClientMqtt(connectionConfig, RED) {
     } else {
       clientMqtt = mqttConnections[id].clientMqtt;
     }
-    releaseMutex();
-
     return clientMqtt;
   } catch (err) {
     console.log(err);
+  } finally {
     releaseMutex();
   }
 }
@@ -141,20 +147,10 @@ async function getClientHttp(connectionConfig, organizationID) {
     } else {
       clientHttp = httpConnections[id].clientHttp;
     }
-    releaseMutex();
-
     return clientHttp;
   } catch (err) {
-    if(err.response && err.response.res && err.response.request){
-      console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-      'statusMessage: ' + err.response.res.statusMessage + '\r' +
-      'text: ' + err.response.res.text + '\r'+
-      'HTTP method: ' + err.response.request.method + '\r' +
-      'URL request: ' + err.response.request.url
-      );
-    }else{
-      console.log(err);
-    }
+    console.log(err);
+  } finally {
     releaseMutex();
   }
 }
