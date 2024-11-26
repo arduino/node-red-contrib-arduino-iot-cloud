@@ -627,6 +627,9 @@ class ArduinoClientMqtt {
       node=nodeId;
     }
     const propOutputTopic = `/a/t/${thingId}/e/o`;
+    if (!this.propertyCallback[propOutputTopic] || !this.propertyCallback[propOutputTopic][name]) {
+      return Promise.resolve(this.numSubscriptions);
+    }
     var pos=-1;
     for(var i=0; i<this.propertyCallback[propOutputTopic][name].length; i++){
       var cbObject=this.propertyCallback[propOutputTopic][name][i];

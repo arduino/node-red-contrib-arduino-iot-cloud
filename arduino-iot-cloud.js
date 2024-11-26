@@ -476,7 +476,7 @@ module.exports = function (RED) {
       }
     } catch (err) {
       str=RED._("arduino-iot-cloud.connection-error.wrong-cred-sys-unvail");
-      console.log(`Status: ${err.status}, message: ${err.error}`);
+      console.log(`getThingsOrProperties status: ${err.status}, message: ${err.error} (error: ${err})`);
       return res.send(JSON.stringify({ error: str }));
     }
   }

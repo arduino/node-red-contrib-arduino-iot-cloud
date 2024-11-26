@@ -47,7 +47,7 @@ var httpConnections = [];
 function getMqttOptions(clientId, token, RED){
    async function reconnect() {
     const releaseMutex = await mqttMutex.acquire();
-    let id = findUser(clientId);
+    let id = findUser(mqttConnections, clientId);
     if (id !== -1) {
       let token = await getToken(mqttConnections[id].connectionConfig);
       await mqttConnections[id].clientMqtt.updateToken(token);
@@ -99,7 +99,7 @@ async function getClientMqtt(connectionConfig, RED) {
   const releaseMutex = await mqttMutex.acquire();
   try {
     let clientMqtt;
-    let id = findUser(connectionConfig.credentials.clientid);
+    let id = findUser(mqttConnections, connectionConfig.credentials.clientid);
     if (id === -1) {
       let token = await getToken(connectionConfig);
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
@@ -129,7 +129,7 @@ async function getClientHttp(connectionConfig, organizationID) {
   }
   const releaseMutex = await httpMutex.acquire();
   try {
-    var id = findUser(connectionConfig.credentials.clientid);
+    var id = findUser(httpConnections, connectionConfig.credentials.clientid);
     var clientHttp;
     if (id === -1) {
       clientHttp = new ArduinoClientHttp.ArduinoClientHttp(async () => await getToken(connectionConfig, organizationID));
@@ -139,7 +139,7 @@ async function getClientHttp(connectionConfig, organizationID) {
         clientHttp: clientHttp,
       });
     } else {
-      clientHttp = httpConnections[id].clientHttp = clientHttp;
+      clientHttp = httpConnections[id].clientHttp;
     }
     releaseMutex();
 
@@ -161,16 +161,14 @@ async function getClientHttp(connectionConfig, organizationID) {
 
 async function deleteClientMqtt(clientId, thing, propertyName, nodeId) {
   const releaseMutex = await mqttMutex.acquire();
-  var id = findUser(clientId);
+  var id = findUser(mqttConnections, clientId);
   if (id !== -1) {
-    if (mqttConnections[id].clientMqtt !== null) {
-      var ret = await mqttConnections[id].clientMqtt.removePropertyValueCallback(thing, propertyName,nodeId);
-      if (ret === 0) {
-        await mqttConnections[id].clientMqtt.disconnect();
-        delete mqttConnections[id].clientMqtt;
-        mqttConnections[id].clientMqtt = null;
-        mqttConnections.splice(id, 1);
-      }
+    var ret = await mqttConnections[id].clientMqtt.removePropertyValueCallback(thing, propertyName, nodeId);
+    if (ret === 0) {
+      await mqttConnections[id].clientMqtt.disconnect();
+      delete mqttConnections[id].clientMqtt;
+      mqttConnections[id].clientMqtt = null;
+      mqttConnections.splice(id, 1);
     }
   }
   releaseMutex();
@@ -178,7 +176,7 @@ async function deleteClientMqtt(clientId, thing, propertyName, nodeId) {
 
 async function deleteClientHttp(clientId) {
   const releaseMutex = await httpMutex.acquire();
-  var id = findUser(clientId);
+  var id = findUser(httpConnections, clientId);
   if (id !== -1) {
     if (httpConnections[id].clientHttp !== null) {
       httpConnections[id].clientHttp.openConnections--;
@@ -190,9 +188,9 @@ async function deleteClientHttp(clientId) {
   releaseMutex();
 }
 
-function findUser(clientId) {
-  for (var i = 0; i < httpConnections.length; i++) {
-    if (httpConnections[i].clientId === clientId) {
+function findUser(connections, clientId) {
+  for (var i = 0; i < connections.length; i++) {
+    if (connections[i].clientId === clientId) {
       return i;
     }
   }
