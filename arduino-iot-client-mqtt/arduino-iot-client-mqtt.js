@@ -230,7 +230,7 @@ class ArduinoClientMqtt {
   }
 
   async reconnect() {
-    await this.connection.reconnect();
+    this.connection.reconnect();
   };
 
   async updateToken(token) {
@@ -241,7 +241,7 @@ class ArduinoClientMqtt {
       try {
         if (this.connection) {
           // Disconnect to the connection that is using the old token
-          await this.connection.end();
+          this.connection.end();
 
           // Remove the connection
           this.connection = null;
