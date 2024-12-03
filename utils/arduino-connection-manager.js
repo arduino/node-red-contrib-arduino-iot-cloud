@@ -198,7 +198,7 @@ async function waitForToken(connectionConfig, organizationID) {
   while (true) {
     let token = await getToken(connectionConfig);
     if (token) {
-      return token.token;
+      return token;
     }
     await new Promise((resolve) => setTimeout(resolve, delay));
     delay = Math.min(delay * 2, 5000);
@@ -225,9 +225,8 @@ async function getToken(connectionConfig) {
 
     var res = await req.send(dataToSend);
     var token = res.body.access_token;
-    var expires_in = res.body.expires_in;
     if (token !== undefined) {
-      return { token: token, expires_in: expires_in };
+      return token;
     }
   } catch (err) {
     if(err.response && err.response.res){
