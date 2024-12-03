@@ -40,19 +40,16 @@ class ArduinoClientHttp {
     // Wrap the functions with refresh token logic 
     function withTokenRefresh(fn) {
       return async (...args) => {
-        let delay = 0;
-        for (;;) {
-          try {
-            return await fn(...args);
-          } catch (e) {
-            if (e.status === 401) {
-              oauth2.accessToken = await getToken();
-              await new Promise((resolve) => setTimeout(resolve, delay));
-              delay = delay===0 ? 200 : Math.min(delay*2, 5000);
-              continue;
+        try {
+          return await fn(...args);
+        } catch (e) {
+          if (e.status === 401) {
+            oauth2.accessToken = await getToken();
+            if (oauth2.accessToken) {
+              return await fn(...args);
             }
-            throw e;
           }
+          throw e;
         }
       };
     }

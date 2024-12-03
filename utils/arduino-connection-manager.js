@@ -50,7 +50,7 @@ function getMqttOptions(clientId, token, RED){
     const releaseMutex = await mqttMutex.acquire();
     let id = findUser(mqttConnections, clientId);
     if (id !== -1) {
-      let token = await getToken(mqttConnections[id].connectionConfig);
+      let token = await waitForToken(mqttConnections[id].connectionConfig);
       await mqttConnections[id].clientMqtt.updateToken(token);
     }
     releaseMutex();
@@ -108,7 +108,7 @@ async function getClientMqtt(connectionConfig, RED) {
     let clientMqtt;
     let id = findUser(mqttConnections, connectionConfig.credentials.clientid);
     if (id === -1) {
-      let token = await getToken(connectionConfig);
+      let token = await waitForToken(connectionConfig);
       clientMqtt = new ArduinoClientMqtt.ArduinoClientMqtt();
       mqttConnections.push({
         clientId: connectionConfig.credentials.clientid,
@@ -193,55 +193,51 @@ function findUser(connections, clientId) {
   return -1;
 }
 
-async function getToken(connectionConfig, organizationID) {
+async function waitForToken(connectionConfig, organizationID) {
   let delay = 200;
   while (true) {
-    let token = await _get();
+    let token = await getToken(connectionConfig);
     if (token) {
       return token.token;
     }
     await new Promise((resolve) => setTimeout(resolve, delay));
     delay = Math.min(delay * 2, 5000);
   }
+}
 
-  async function _get() {
-    const dataToSend = {
-        grant_type: 'client_credentials',
-        client_id: connectionConfig.credentials.clientid,
-        client_secret: connectionConfig.credentials.clientsecret,
-        audience: accessTokenAudience
-    };
+async function getToken(connectionConfig) {
+  const dataToSend = {
+      grant_type: 'client_credentials',
+      client_id: connectionConfig.credentials.clientid,
+      client_secret: connectionConfig.credentials.clientsecret,
+      audience: accessTokenAudience
+  };
 
-    try {
-      var req = superagent
-      .post(accessTokenUri)
-      .set('content-type', 'application/x-www-form-urlencoded')
-      .set('accept', 'json')
+  try {
+    var req = superagent
+    .post(accessTokenUri)
+    .set('content-type', 'application/x-www-form-urlencoded')
+    .set('accept', 'json')
 
-      if (organizationID) {
-        req.set('X-Organization', organizationID)
-      }
+    if (organizationID) {
+      req.set('X-Organization', organizationID)
+    }
 
-      var res = await req.send(dataToSend);
-      var token = res.body.access_token;
-      var expires_in = res.body.expires_in * 0.8; // needed to change the token before it expires
-      if (token !== undefined) {
-        return { token: token, expires_in: expires_in };
-      }
-    } catch (err) {
-      if(err.response && err.response.res && err.response.request){
-        console.log('statusCode: '+ err.response.res.statusCode +'\r'+
-        'statusMessage: ' + err.response.res.statusMessage + '\r' +
-        'text: ' + err.response.res.text + '\r'+
-        'HTTP method: ' + err.response.request.method + '\r' +
-        'URL request: ' + err.response.request.url
-        );
-      }else{
-        console.log(err);
-      }
+    var res = await req.send(dataToSend);
+    var token = res.body.access_token;
+    var expires_in = res.body.expires_in;
+    if (token !== undefined) {
+      return { token: token, expires_in: expires_in };
+    }
+  } catch (err) {
+    if(err.response && err.response.res){
+      console.log("cannot get token: " + err.response.res.statusCode + ' ' + err.response.res.statusMessage);
+    }else{
+      console.log(err);
     }
   }
 }
+ 
 exports.getClientMqtt = getClientMqtt;
 exports.getClientHttp = getClientHttp;
 exports.deleteClientMqtt = deleteClientMqtt;
