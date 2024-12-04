@@ -1,0 +1,22 @@
+name: Format Check
+
+on: [push, pull_request]
+
+jobs:
+  fmt-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "23"
+
+      - name: Install dev dependencies
+        run: npm install --only=dev
+
+      - name: Run format check
+        run: npm run fmt-check

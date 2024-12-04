@@ -1,63 +1,61 @@
 {
-  "arduino-iot-cloud":{
-    "config":{
-      "node":{
-        "connection":"Connection",
-        "thing":"Thing",
+  "arduino-iot-cloud": {
+    "config": {
+      "node": {
+        "connection": "Connection",
+        "thing": "Thing",
         "property": "Property",
-        "name":"Name",
+        "name": "Name",
         "organization": "Space ID",
-        "hist-label":"Time filter",
-        "poll-label":"Poll Every",
+        "hist-label": "Time filter",
+        "poll-label": "Poll Every",
         "device-id": "Device",
-        "send-mode":"Send as device",
-        "placeholders":{
-          "name":"Name",
-          "no-thing-selected":"No thing selected",
-          "thing-select":"Select a thing",
+        "send-mode": "Send as device",
+        "placeholders": {
+          "name": "Name",
+          "no-thing-selected": "No thing selected",
+          "thing-select": "Select a thing",
           "organization": "The Space ID (for maker / pro things)",
-          "no-things-available":"No things available",
-          "property-select":"Select a property",
-          "no-property-available":"No properties available",
-          "no-property-writable-av":"No writable properties available",
-          "no-device-select":"No device associated"
+          "no-things-available": "No things available",
+          "property-select": "Select a property",
+          "no-property-available": "No properties available",
+          "no-property-writable-av": "No writable properties available",
+          "no-device-select": "No device associated"
         }
       },
-      "time":{
-        "last":"last",
-        "seconds":"seconds",
-        "minutes":"minutes",
-        "hours":"hours",
-        "days":"days",
-        "weeks":"weeks"
-
+      "time": {
+        "last": "last",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks"
       },
-      "connection":{
-        "client-id":"Client ID",
-        "client-secret":"Client secret",
-        "placeholders":{
-          "name":"Application name",
-          "client-id":"Client ID",
-          "client-secret":"Client secret",
-          "no-conn-selected":"No connection selected"
+      "connection": {
+        "client-id": "Client ID",
+        "client-secret": "Client secret",
+        "placeholders": {
+          "name": "Application name",
+          "client-id": "Client ID",
+          "client-secret": "Client secret",
+          "no-conn-selected": "No connection selected"
         }
       }
-
     },
-    "status":{
-      "connection-error":"Connection Error",
-      "offline":"Offline",
-      "error-setting-value":"Error setting value",
-      "error-getting-value":"Error getting value",
-      "sent":"Sent ",
-      "elements":" elements",
-      "object-injected":"Object Injected",
-      "object-sent":"Object Sent"
+    "status": {
+      "connection-error": "Connection Error",
+      "offline": "Offline",
+      "error-setting-value": "Error setting value",
+      "error-getting-value": "Error getting value",
+      "sent": "Sent ",
+      "elements": " elements",
+      "object-injected": "Object Injected",
+      "object-sent": "Object Sent"
     },
-    "connection-error":{
-      "no-cred-available":"No credentials available.",
-      "wrong-param":"Wrong parameter in getThingsOrProperties.",
-      "wrong-cred-sys-unvail":"Wrong credentials or system unavailable."
+    "connection-error": {
+      "no-cred-available": "No credentials available.",
+      "wrong-param": "Wrong parameter in getThingsOrProperties.",
+      "wrong-cred-sys-unvail": "Wrong credentials or system unavailable."
     }
   }
 }
