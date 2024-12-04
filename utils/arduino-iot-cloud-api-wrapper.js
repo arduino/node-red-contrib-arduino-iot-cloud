@@ -37,14 +37,27 @@ class ArduinoClientHttp {
       client.basePath = process.env.API_BASE_PATH;
     }
     
-    // Wrap the functions with refresh token logic 
+    // wrap the functions with refresh token logic 
+    let refreshingToken = null;
     function withTokenRefresh(fn) {
       return async (...args) => {
         try {
           return await fn(...args);
         } catch (e) {
           if (e.status === 401) {
-            oauth2.accessToken = await getToken();
+            // make sure only one refresh token is in progress
+            if (!refreshingToken) {
+              refreshingToken = (async () => {
+                try {
+                  oauth2.accessToken = await getToken();
+                } finally {
+                  refreshingToken = null;
+                }
+              })();
+            }
+            await refreshingToken;
+
+            // eagerly retry the request
             if (oauth2.accessToken) {
               return await fn(...args);
             }
