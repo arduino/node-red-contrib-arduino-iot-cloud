@@ -40,7 +40,7 @@ const getClientMutex = new Mutex();
 var numRetry=0;
 
 
-async function getToken(connectionConfig) {
+async function getToken(connectionConfig, organizationID) {
   const dataToSend = {
       grant_type: 'client_credentials',
       client_id: connectionConfig.credentials.clientid,
@@ -49,12 +49,16 @@ async function getToken(connectionConfig) {
   };
 
   try {
+    var req = superagentsuperagent
+      .post(accessTokenUri)
+      .set('content-type', 'application/x-www-form-urlencoded')
+      .set('accept', 'json')
 
-    var res = await superagent
-              .post(accessTokenUri)
-              .set('content-type', 'application/x-www-form-urlencoded')
-              .set('accept', 'json')
-              .send(dataToSend);
+    if (organizationID) {
+      req.set('X-Organization', organizationID)
+    }
+
+    var res = await req.send(dataToSend);
     var token = res.body.access_token;
     var expires_in = res.body.expires_in * 0.8; // needed to change the token before it expires
     if (token !== undefined) {
@@ -161,7 +165,7 @@ async function getClientMqtt(connectionConfig, RED) {
 
 }
 
-async function getClientHttp(connectionConfig) {
+async function getClientHttp(connectionConfig, organizationID) {
 
   if (!connectionConfig || !connectionConfig.credentials) {
     throw new Error("Cannot find cooonection config or credentials.");
@@ -172,7 +176,7 @@ async function getClientHttp(connectionConfig) {
     var clientHttp;
     if (user === -1) {
 
-      var tokenInfo = await getToken(connectionConfig);
+      var tokenInfo = await getToken(connectionConfig, organizationID);
       if (tokenInfo !== undefined) {
         clientHttp = new ArduinoClientHttp.ArduinoClientHttp(tokenInfo.token);
 
