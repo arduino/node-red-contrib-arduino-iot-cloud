@@ -196,7 +196,7 @@ function findUser(connections, clientId) {
 async function waitForToken(connectionConfig, organizationID) {
   let delay = 200;
   while (true) {
-    let token = await getToken(connectionConfig);
+    let token = await getToken(connectionConfig, organizationID);
     if (token) {
       return token;
     }
@@ -205,7 +205,7 @@ async function waitForToken(connectionConfig, organizationID) {
   }
 }
 
-async function getToken(connectionConfig) {
+async function getToken(connectionConfig, organizationID) {
   const dataToSend = {
       grant_type: 'client_credentials',
       client_id: connectionConfig.credentials.clientid,
