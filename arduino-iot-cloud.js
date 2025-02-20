@@ -75,7 +75,7 @@ module.exports = function (RED) {
         try {
 
           if (config.thing !== "" && config.property !== "") {
-            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
+            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
             if (this.arduinoRestClient){
               this.arduinoRestClient.openConnections++;
               this.organization = config.organization;
@@ -152,7 +152,7 @@ module.exports = function (RED) {
       this.timeWindowUnit = config.timeWindowUnit;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
+          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
@@ -251,7 +251,7 @@ module.exports = function (RED) {
       this.organization = config.organization;
       if (connectionConfig && config.thing !== "" && config.thing !== "0" && config.property !== "" && config.property !== "0") {
         try {
-          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
+          this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
           if (this.arduinoRestClient){
             this.arduinoRestClient.openConnections++;
             if (config.thing !== "" && config.property !== "") {
@@ -340,7 +340,7 @@ module.exports = function (RED) {
         try {
 
           if (config.thing !== "" && config.property !== "") {
-            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
+            this.arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
             if (this.arduinoRestClient){
               this.arduinoRestClient.openConnections++;
               this.organization = config.organization;
@@ -432,7 +432,7 @@ module.exports = function (RED) {
             clientid: req.query.clientid,
             clientsecret: req.query.clientsecret
           }
-        });
+        }, this.organization);
       } else if (req.query.connectionid) {
         const connectionConfig = RED.nodes.getNode(req.query.connectionid);
         if (!connectionConfig) {
@@ -440,7 +440,7 @@ module.exports = function (RED) {
           console.log(str);
           return res.send(JSON.stringify({ error: str }));
         }
-        arduinoRestClient = await connectionManager.getClientHttp(connectionConfig);
+        arduinoRestClient = await connectionManager.getClientHttp(connectionConfig, this.organization);
       } else {
         str=RED._("arduino-iot-cloud.connection-error.no-cred-available");
         console.log(str);
