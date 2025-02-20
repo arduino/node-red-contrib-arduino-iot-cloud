@@ -128,13 +128,15 @@
                 $("#node-input-organization").change(() => {
                     const connection = $("#node-input-connection").val();
                     const organization = $("#node-input-organization").val();
-                    this.organization = organization;
+                    
                     if (connection === "_ADD_") {
                         $("#node-input-organization").empty();
                         str = this._("arduino-iot-cloud.config.connection.placeholders.no-conn-selected");
                         $("<option value='" + "" + "' > " + str + "</option>").appendTo("#node-input-thing");
                         $("#node-input-thing").trigger("change");
-                    } else {
+                    } 
+                    if (this.organization != organization) {
+                        this.organization = organization;
                         $("select#node-input-thing").empty();
                         initThings(connection, this._, null, organization);
                     }
