@@ -49,7 +49,7 @@ async function getToken(connectionConfig, organizationID) {
   };
 
   try {
-    var req = superagentsuperagent
+    var req = superagent
       .post(accessTokenUri)
       .set('content-type', 'application/x-www-form-urlencoded')
       .set('accept', 'json')
