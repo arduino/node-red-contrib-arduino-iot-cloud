@@ -30,46 +30,79 @@ const apiSeries = new ArduinoIotClient.SeriesV2Api(client);
 const apiThings = new ArduinoIotClient.ThingsV2Api(client);
 
 class ArduinoClientHttp {
-  constructor(token) {
-    this.token = token;
+  constructor(getToken) {
     this.openConnections=0;
+    oauth2.accessToken = "";
     if(process.env.API_BASE_PATH){
       client.basePath = process.env.API_BASE_PATH;
     }
+    
+    // wrap the functions with refresh token logic 
+    let refreshingToken = null;
+    function withTokenRefresh(fn) {
+      return async (...args) => {
+        try {
+          return await fn(...args);
+        } catch (e) {
+          if (e.status === 401) {
+            // make sure only one refresh token is in progress
+            if (!refreshingToken) {
+              refreshingToken = (async () => {
+                try {
+                  oauth2.accessToken = await getToken();
+                } finally {
+                  refreshingToken = null;
+                }
+              })();
+            }
+            await refreshingToken;
+
+            // eagerly retry the request
+            if (oauth2.accessToken) {
+              return await fn(...args);
+            }
+          }
+          throw e;
+        }
+      };
+    }
+    this.wrappedPropertiesV2Publish = withTokenRefresh(apiProperties.propertiesV2Publish.bind(apiProperties));
+    this.wrappedThingsV2List = withTokenRefresh(apiThings.thingsV2List.bind(apiThings));
+    this.wrappedThingsV2Show = withTokenRefresh(apiThings.thingsV2Show.bind(apiThings));
+    this.wrappedPropertiesV2Show = withTokenRefresh(apiProperties.propertiesV2Show.bind(apiProperties));
+    this.wrappedSeriesV2BatchQueryRaw = withTokenRefresh(apiSeries.seriesV2BatchQueryRaw.bind(apiSeries));
   }
-  updateToken(token) {
-    this.token = token;
-  }
-  setProperty(thing_id, property_id, value, opts, device_id = undefined) {
+
+
+  async setProperty(thing_id, property_id, value, opts = {}, device_id = undefined) {
     const body = JSON.stringify({
       value: value,
-      device_id : device_id
+      device_id: device_id
     });
-    oauth2.accessToken = this.token;
-    return apiProperties.propertiesV2Publish(thing_id, property_id, body, opts);
+    return await this.wrappedPropertiesV2Publish(thing_id, property_id, body, opts);
   }
-  getThings(opts) {
-    oauth2.accessToken = this.token;
-    return apiThings.thingsV2List(opts);
-  }
-  getThing(thingId, opts) {
-    oauth2.accessToken = this.token;
-    opts.showDeleted = false;
-    return apiThings.thingsV2Show(thingId, opts);
-  }
-  getProperties(thingId, opts) {
-    oauth2.accessToken = this.token;
-    opts.showProperties = true;
-    const thing = apiThings.thingsV2Show(thingId, opts);
-    return thing.then(({properties}) => properties);
-  }
-  getProperty(thingId, propertyId, opts) {
-    oauth2.accessToken = this.token;
-    return apiProperties.propertiesV2Show(thingId, propertyId, opts);
-  }
-  getSeries(thingId, propertyId, start, end, opts) {
 
-    const body =  JSON.stringify({
+  async getThings(opts = {}) {
+    return await this.wrappedThingsV2List(opts);
+  }
+
+  async getThing(thingId, opts = {}) {
+    opts.showDeleted = false;
+    return await this.wrappedThingsV2Show(thingId, opts);
+  }
+
+  async getProperties(thingId, opts = {}) {
+    opts.showProperties = true;
+    const { properties } = await this.wrappedThingsV2Show(thingId, opts);
+    return properties;
+  }
+
+  async getProperty(thingId, propertyId, opts = {}) {
+    return await this.wrappedPropertiesV2Show(thingId, propertyId, opts);
+  }
+
+  async getSeries(_thingId, propertyId, start, end, opts = {}) {
+    const body = JSON.stringify({
       requests: [{
         q: "property." + propertyId,
         from: start,
@@ -79,8 +112,8 @@ class ArduinoClientHttp {
       }],
       resp_version: 1
     });
-    oauth2.accessToken = this.token;
-    return apiSeries.seriesV2BatchQueryRaw(body, opts);
+    return await this.wrappedSeriesV2BatchQueryRaw(body, opts);
   }
 }
+
 exports.ArduinoClientHttp = ArduinoClientHttp;

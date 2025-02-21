@@ -230,7 +230,7 @@ class ArduinoClientMqtt {
   }
 
   async reconnect() {
-    await this.connection.reconnect();
+    this.connection.reconnect();
   };
 
   async updateToken(token) {
@@ -241,7 +241,7 @@ class ArduinoClientMqtt {
       try {
         if (this.connection) {
           // Disconnect to the connection that is using the old token
-          await this.connection.end();
+          this.connection.end();
 
           // Remove the connection
           this.connection = null;
@@ -627,6 +627,9 @@ class ArduinoClientMqtt {
       node=nodeId;
     }
     const propOutputTopic = `/a/t/${thingId}/e/o`;
+    if (!this.propertyCallback[propOutputTopic] || !this.propertyCallback[propOutputTopic][name]) {
+      return Promise.resolve(this.numSubscriptions);
+    }
     var pos=-1;
     for(var i=0; i<this.propertyCallback[propOutputTopic][name].length; i++){
       var cbObject=this.propertyCallback[propOutputTopic][name][i];
