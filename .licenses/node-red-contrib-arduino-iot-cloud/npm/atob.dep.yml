@@ -4,7 +4,11 @@ version: 2.1.2
 type: npm
 summary: atob for Node.JS and Linux / Mac / Windows CLI (it's a one-liner)
 homepage: https://git.coolaj86.com/coolaj86/atob.js.git
-license: mit, apache-2.0
+# LICENSE offers a choice between MIT and Apache-2.0 ("at your option").
+# LICENSE.DOCS (CC-BY-3.0) covers documentation only, not the code.
+# Keeping Apache-2.0 as it is compatible with the project's AGPL-3.0 license
+# and provides an explicit patent grant that MIT does not offer.
+license: apache-2.0
 licenses:
 - sources: LICENSE
   text: |
