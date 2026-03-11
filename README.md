@@ -64,3 +64,21 @@ Node parameter:
 
 ### inject
 This node injects in the flow the value of an Arduino IoT Cloud Property after receiving an input event.
+
+## How to update the license of the dependencies
+The license of the dependencies can be updated by running the following commands:
+
+- Create a virtual environment and install the dependencies:
+
+```sh
+npm install
+```
+
+- Install the licensed tool: https://github.com/licensee/licensed?tab=readme-ov-file#installation
+
+- Run the licensed tool to update the licenses files:
+
+```sh
+    licensed cache
+    licensed status
+```
