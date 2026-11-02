@@ -1,6 +1,6 @@
 ---
 name: "@arduino/cbor-js"
-version: 0.1.2
+version: 0.1.5
 type: npm
 summary: The Concise Binary Object Representation (CBOR) data format (RFC7049) implemented
   in pure JavaScript.
