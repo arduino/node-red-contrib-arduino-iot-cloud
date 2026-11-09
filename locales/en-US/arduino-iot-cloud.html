@@ -54,6 +54,11 @@
       <p>Choose a property of the selected Arduino Thing.</p>
     <code>Name</code>
       <p>Insert a node name. Default is the Arduino Property name.</p>
+    <code>No device</code>
+      <p>By default the node fires when the device connected to the Thing publishes a new value.</p>
+      <p>Enable this option when no real device connects to Arduino IoT Cloud, for example when the Thing
+        (with a manual device) is driven only from Node-RED: the node then fires when the property is changed
+        from the Cloud side, such as a dashboard widget or the API.</p>
 
 
 </script>
@@ -100,6 +105,9 @@
       <p>Choose a property of the selected Arduino Thing.</p>
     <code>Name</code>
       <p>Insert a node name. Default is the Arduino Property name.</p>
+    <code>Send as device</code>
+      <p>Tags the value update with the ID of the device associated to the Thing. This does not open a device connection:
+        the device keeps showing as offline in Arduino IoT Cloud.</p>
 </script>
 
 <script type="text/x-red" data-help-name="property in hist">
