@@ -56,6 +56,7 @@
 
         if (nodeName === "property in") {
             ret['variableName'] = {value: ""};
+            ret['nodevice'] = {value: false};
         }
 
         if (nodeName === "property out") {
@@ -417,6 +418,11 @@
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.name"></span></label>
     <input type="text" id="node-input-name"  data-i18n="[placeholder]arduino-iot-cloud.config.node.placeholders.name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-nodevice"><i class="fa fa-chain-broken fa-fw"></i><span data-i18n="arduino-iot-cloud.config.node.no-device"></span></label>
+    <input type="checkbox" id="node-input-nodevice" style="display:inline-block; width:auto; vertical-align:top;">
+    <label for="node-input-nodevice" style="width:70%;" data-i18n="arduino-iot-cloud.config.node.no-device-desc"></label>
   </div>
 
 </script>
