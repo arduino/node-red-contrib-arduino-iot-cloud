@@ -59,6 +59,10 @@
       <p>Enable this option when no real device connects to Arduino IoT Cloud, for example when the Thing
         (with a manual device) is driven only from Node-RED: the node then fires when the property is changed
         from the Cloud side, such as a dashboard widget or the API.</p>
+      <p><b>Warning:</b> with this option enabled the node also fires on the values written by a
+        <code>property out</code> node, because they are API writes too. A flow that goes from this node to a
+        <code>property out</code> node on the same property of the same Thing loops forever. To break the loop,
+        put a <code>filter</code> node (<i>block unless value changes</i>) in between, or write to a different property.</p>
 
 
 </script>

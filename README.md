@@ -50,7 +50,8 @@ You can use either one of these methods:
 This node injects in the flow the changed value of a specific Arduino IoT Cloud property.
 By default the node fires when the device connected to the Thing publishes a new value.
 Node parameter:
-+ No device: enable it when no real device connects to Arduino IoT Cloud (e.g. a Thing with a manual device driven only from Node-RED). The node then fires when the property is changed from the Cloud side, such as a dashboard widget or the API
++ No device: enable it when no real device connects to Arduino IoT Cloud (e.g. a Thing with a manual device driven only from Node-RED). The node then fires when the property is changed from the Cloud side, such as a dashboard widget or the API.
+  **Warning:** the node also fires on values written by a property (Out) node, since they are API writes too. A flow from property (In) to property (Out) on the same property of the same Thing loops forever: put a `filter` node (*block unless value changes*) in between, or write to a different property
 
 ### property (Out)
 This node update a specific Arduino IoT Cloud property with the value received in input
