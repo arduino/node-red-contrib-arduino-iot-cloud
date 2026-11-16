@@ -11,6 +11,8 @@
         "poll-label":"Poll Every",
         "device-id": "Device",
         "send-mode":"Send as device",
+        "no-device":"No device",
+        "no-device-desc":"No device connected to Arduino IoT Cloud: receive dashboard/API changes",
         "placeholders":{
           "name":"Name",
           "no-thing-selected":"No thing selected",

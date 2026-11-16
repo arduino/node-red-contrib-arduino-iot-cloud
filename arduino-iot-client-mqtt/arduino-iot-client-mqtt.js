@@ -134,6 +134,9 @@ class ArduinoClientMqtt {
           //   bufView[i] = msg.payloadBytes[i];
           // }
 
+          if (!this.propertyCallback[topic]) {
+            return;
+          }
           const propertyValue = CBOR.decode(toArrayBuffer(msg));
           const propertyNameId = 0;
           const attributeNameId = 1;
@@ -569,7 +572,10 @@ class ArduinoClientMqtt {
     return arrayBufferToBase64(cborEncoded);
   };
 
-  onPropertyValue(thingId, name, cb,nodeId) {
+  // direction selects the thing topic to listen on:
+  //  - 'o' (default): /a/t/<thing>/e/o, values published by the device
+  //  - 'i': /a/t/<thing>/e/i, values written from the Cloud (dashboard, API) towards the device
+  onPropertyValue(thingId, name, cb, nodeId, direction = 'o') {
     if (!name) {
       throw new Error('Invalid property name');
     }
@@ -582,9 +588,9 @@ class ArduinoClientMqtt {
     }else{
       node=nodeId;
     }
-    const propOutputTopic = `/a/t/${thingId}/e/o`;
+    const propOutputTopic = getThingPropertyTopic(thingId, direction);
 
-    this.subscribedTopics[thingId] = {
+    this.subscribedTopics[propOutputTopic] = {
       topic: propOutputTopic,
       cb,
     };
@@ -616,7 +622,7 @@ class ArduinoClientMqtt {
   };
 
 
-  removePropertyValueCallback(thingId, name, nodeId) {
+  removePropertyValueCallback(thingId, name, nodeId, direction = 'o') {
     if (!name) {
       throw new Error('Invalid property name');
     }
@@ -626,7 +632,7 @@ class ArduinoClientMqtt {
     }else{
       node=nodeId;
     }
-    const propOutputTopic = `/a/t/${thingId}/e/o`;
+    const propOutputTopic = getThingPropertyTopic(thingId, direction);
     if (!this.propertyCallback[propOutputTopic] || !this.propertyCallback[propOutputTopic][name]) {
       return Promise.resolve(this.numSubscriptions);
     }
@@ -648,6 +654,13 @@ class ArduinoClientMqtt {
 
     return Promise.resolve(this.numSubscriptions);
   };
+}
+
+function getThingPropertyTopic(thingId, direction) {
+  if (direction !== 'o' && direction !== 'i') {
+    throw new Error('Invalid topic direction');
+  }
+  return `/a/t/${thingId}/e/${direction}`;
 }
 
 function toArrayBuffer(buf) {

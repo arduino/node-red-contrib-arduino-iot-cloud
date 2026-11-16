@@ -33,9 +33,15 @@ module.exports = function (RED) {
           this.propertyId = config.property;
           this.propertyName = config.propname;
           this.propertyVariableName = config.variableName;
+          // By default the node receives the values published by the device (/e/o).
+          // When no device is connected to Arduino IoT Cloud (e.g. the Thing is driven only
+          // from Node-RED), listen instead to the values written from the Cloud side,
+          // such as dashboard or API changes (/e/i).
+          this.nodevice = config.nodevice === true;
+          const directions = [this.nodevice ? 'i' : 'o'];
           this.arduinoClient = await connectionManager.getClientMqtt(connectionConfig, RED);
-          if (this.arduinoClient && this.arduinoClient.connection.connected) {
-            await this.arduinoClient.onPropertyValue(this.thing, this.propertyVariableName,(msg) => {
+          if (this.arduinoClient && this.arduinoClient.connection && this.arduinoClient.connection.connected) {
+            const onValue = (msg) => {
               this.send(
                 {
                   topic: this.propertyName,
@@ -48,17 +54,28 @@ module.exports = function (RED) {
                 this.status({ fill: "grey", shape: "dot", text: s });
               else
                 this.status({});
-            },config.id);
+            };
+            for (const direction of directions) {
+              await this.arduinoClient.onPropertyValue(this.thing, this.propertyVariableName, onValue, config.id, direction);
+            }
           }else{
             this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
           }
-          this.on('close', function (done) {
-            connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyVariableName,config.id).then(() => { done(); });
+          this.on('close', async function (done) {
+            try {
+              for (const direction of directions) {
+                await connectionManager.deleteClientMqtt(connectionConfig.credentials.clientid, this.thing, this.propertyVariableName, config.id, direction);
+              }
+            } catch (err) {
+              console.log(err);
+            }
+            done();
           });
 
           //this.poll(connectionConfig);
         } catch (err) {
           console.log(err);
+          this.status({ fill: "red", shape: "ring", text: "arduino-iot-cloud.status.connection-error" });
         }
       }
     }

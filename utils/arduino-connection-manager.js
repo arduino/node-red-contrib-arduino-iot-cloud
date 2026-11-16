@@ -155,11 +155,11 @@ async function getClientHttp(connectionConfig, organizationID) {
   }
 }
 
-async function deleteClientMqtt(clientId, thing, propertyName, nodeId) {
+async function deleteClientMqtt(clientId, thing, propertyName, nodeId, direction = 'o') {
   const releaseMutex = await mqttMutex.acquire();
   var id = findUser(mqttConnections, clientId);
   if (id !== -1) {
-    var ret = await mqttConnections[id].clientMqtt.removePropertyValueCallback(thing, propertyName, nodeId);
+    var ret = await mqttConnections[id].clientMqtt.removePropertyValueCallback(thing, propertyName, nodeId, direction);
     if (ret === 0) {
       await mqttConnections[id].clientMqtt.disconnect();
       delete mqttConnections[id].clientMqtt;
